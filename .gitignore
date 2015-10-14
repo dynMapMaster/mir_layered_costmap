@@ -1,3 +1,4 @@
+build/
 bin/
 lib/
 msg_gen/
@@ -7,7 +8,7 @@ docs/
 *.user
 
 *.cfgc
-cfg/cpp/
 cfg/*.py
 msg/*.py
-src/layered_costmap_2d
+layered_costmap_2d/src/layered_costmap_2d
+layered_costmap_2d/cfg/cpp/
