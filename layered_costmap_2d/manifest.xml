@@ -1,0 +1,38 @@
+<package>
+  <description brief="layered_costmap_2d">
+
+     layered_costmap_2d
+
+  </description>
+  <author>Anders Birkehøj Jensen</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/layered_costmap_2d</url>
+  <depend package="rosconsole"/>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="laser_geometry"/>
+  <depend package="tf"/>
+  <depend package="voxel_grid"/>
+  <depend package="nav_msgs"/>
+  <depend package="visualization_msgs"/>
+  <depend package="rosbag"/>
+  <depend package="map_server"/>
+  <depend package="pcl"/>
+  <depend package="pcl_ros"/>
+  <depend package="dynamic_reconfigure"/>
+  <depend package="common_rosdeps"/>
+  <depend package="map_msgs" />
+  <rosdep name="eigen" />
+  <!-- http://docs.ros.org/independent/api/rospkg/html/manifest_xml.html#export-cpp -->
+  <export>
+      <cpp cflags="-I${prefix}/cfg/cpp -I${prefix}/include `rosboost-cfg --cflags`" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib `rosboost-cfg --lflags thread` -llayered_costmap_2d"/>
+  </export>
+  <!-- Plugin --> 
+  <export>
+    <layered_costmap_2d plugin="${prefix}/costmap_plugins.xml" />
+  </export>
+
+</package>

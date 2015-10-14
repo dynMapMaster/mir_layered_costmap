@@ -1,0 +1,16 @@
+<!-- -->
+<launch>
+  <env name="ROSCONSOLE_CONFIG_FILE" value="$(find layered_costmap_2d)/config/rosconsole.conf"/>
+ <param name="use_sim_time" value="true" />
+  
+  <node pkg="mir_stage" type="mir_stageros" name="stage_ros" args="-m $(find layered_costmap_2d)/world/tek-mir.world"/>
+  <node name="static_map_publisher" pkg="map_server" type="map_server" args="$(find layered_costmap_2d)/world/tek-map.yaml" />
+    <node pkg="tf" type="static_transform_publisher" name="initial_pose_link_broadcaster" args="11. 10. 0 0 0 0 map odom 100" /> 
+  <node name="costmap" pkg="layered_costmap_2d" type="costmap_2d_node" output="screen">
+    <rosparam file="$(find layered_costmap_2d)/launch/pre_hydro_costmap.yaml" command="load" ns="costmap" />
+<!-- 
+    <rosparam file="$(find layered_costmap_2d)/launch/simple_params.yaml" command="load" ns="costmap" />
+ -->
+  </node>
+   <node name="visulizer" pkg="rviz" type="rviz" args="-d $(find layered_costmap_2d)/config/test_costmap_2d.rviz"/>
+</launch>
