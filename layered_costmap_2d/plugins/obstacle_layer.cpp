@@ -498,8 +498,10 @@ bool ObstacleLayer::getClearingObservations(std::vector<Observation>& clearing_o
 void ObstacleLayer::raytraceFreespace(const Observation& clearing_observation, double* min_x, double* min_y,
                                               double* max_x, double* max_y)
 {
+
   double ox = clearing_observation.origin_.x;
   double oy = clearing_observation.origin_.y;
+  
   pcl::PointCloud < pcl::PointXYZ > cloud = *(clearing_observation.cloud_);
 
   // get the map coordinates of the origin of the sensor
@@ -569,6 +571,7 @@ void ObstacleLayer::raytraceFreespace(const Observation& clearing_observation, d
     unsigned int cell_raytrace_range = cellDistance(clearing_observation.raytrace_range_);
     MarkCell marker(costmap_, FREE_SPACE);
     // and finally... we can execute our trace to clear obstacles along that line
+    // ROS_INFO("Ray trace from (%f, %f) to (%f, %f)",x0, y0, x1, y1);
     raytraceLine(marker, x0, y0, x1, y1, cell_raytrace_range);
 
     updateRaytraceBounds(ox, oy, wx, wy, clearing_observation.raytrace_range_, min_x, min_y, max_x, max_y);

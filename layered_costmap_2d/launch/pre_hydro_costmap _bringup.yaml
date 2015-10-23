@@ -1,12 +1,11 @@
 
 # Costmap params
 global_frame: /map
-robot_base_frame: base_link
+robot_base_frame: /base_link
 update_frequency: 5.0
 publish_frequency: 2.0
-rolling_window: false
-static_map: true
-sim_time: 1
+rolling_window: true
+static_map: false
 
 # costmap grid specific parameters
 map_type: costmap # voxel is 3D view
@@ -47,11 +46,10 @@ footprint:  [
 footprint_padding: 0.01
 
 
-
 observation_sources: base_scan0 base_scan1
 base_scan0: {
     data_type: LaserScan,
-    sensor_frame: base_laser_link0,
+    sensor_frame: /base_laser_link0,
     topic: /base_scan0,
     expected_update_rate: .8,
     observation_persistence: 0.0,
@@ -62,7 +60,7 @@ base_scan0: {
 }
 base_scan1: {
     data_type: LaserScan,
-    sensor_frame: base_laser_link1,
+    sensor_frame: /base_laser_link1,
     topic: /base_scan1,
     expected_update_rate: .8,
     observation_persistence: 0.0,

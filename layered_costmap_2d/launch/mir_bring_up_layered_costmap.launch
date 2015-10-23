@@ -1,0 +1,8 @@
+<!-- -->
+<launch>
+  <node name="costmap" pkg="layered_costmap_2d" type="costmap_2d_node" output="screen">
+    <rosparam file="$(find layered_costmap_2d)/launch/default_costmap2d.yaml" command="load" ns="costmap" />
+  </node>
+
+  <node name="visulizer" pkg="rviz" type="rviz" args="-d $(find layered_costmap_2d)/config/test_costmap_2d.rviz"/>
+</launch>

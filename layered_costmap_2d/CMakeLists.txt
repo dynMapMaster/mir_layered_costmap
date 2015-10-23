@@ -10,6 +10,15 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
+
+rosbuild_add_library(layers
+  plugins/inflation_layer.cpp
+  plugins/obstacle_layer.cpp
+  plugins/static_layer.cpp
+  # plugins/voxel_layer.cpp # todo fix conversion to old stile
+  src/observation_buffer.cpp
+)
+
 rosbuild_add_library(layered_costmap_2d   
   src/array_parser.cpp
   src/costmap_2d.cpp
@@ -23,13 +32,6 @@ rosbuild_add_library(layered_costmap_2d
   src/costmap_layer.cpp
 )
 
-rosbuild_add_library(layers
-  plugins/inflation_layer.cpp
-  plugins/obstacle_layer.cpp
-  plugins/static_layer.cpp
-  # plugins/voxel_layer.cpp # todo fix conversion to old stile
-  src/observation_buffer.cpp
-)
 target_link_libraries(layers layered_costmap_2d )
 rosbuild_link_boost(layered_costmap_2d system)
 
@@ -43,7 +45,7 @@ include_directories(${EIGEN_INCLUDE_DIRS})
 add_definitions(${EIGEN_DEFINITIONS})
 
 rosbuild_add_executable(costmap_2d_markers src/costmap_2d_markers.cpp)
-target_link_libraries(costmap_2d_markers layered_costmap_2d )
+target_link_libraries(costmap_2d_markers layered_costmap_2d)
 rosbuild_add_executable(costmap_2d_cloud src/costmap_2d_cloud.cpp)
 target_link_libraries(costmap_2d_cloud layered_costmap_2d )
 rosbuild_add_executable(costmap_2d_node src/costmap_2d_node.cpp)

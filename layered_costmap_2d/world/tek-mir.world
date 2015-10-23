@@ -41,8 +41,8 @@ define mir position
   #localization "odom"
   #odom_error [0.01 0.01 0.00 0.05]
 
-  topsick(pose [  0.3250  0.270 0.0  45.0 ] ctrl "lasernoise_1")
-  botsick(pose [ -0.3250 -0.270 0.0 -135.0 ] ctrl "lasernoise_1")
+  topsick(pose [  0.3250  0.270 0.0  45.0 ] )#ctrl "lasernoise_1")
+  botsick(pose [ -0.3250 -0.270 0.0 -135.0 ] )#ctrl "lasernoise_1")
 )
 
 define floorplan model
@@ -80,7 +80,7 @@ window
 # throw in a robot
 #mir( pose [ -25.4 10.5 0 0.0 ] name "mir" color "blue")
 mir( pose [ 11 10 0 0.0 ] name "mir" color "blue")
-#block( pose [ 0.0 0.0 0 0.0 ] color "red")
+block( pose [ 13.0 10.0 0 0.0 ] color "red")
 
 # load an environment bitmap
 floorplan

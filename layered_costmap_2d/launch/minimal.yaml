@@ -1,6 +1,0 @@
-plugins: # [] # use no plugins
-- {name: inflation_map,       type: "layered_costmap_2d/inflation_layer"}
-- {name: static_map,       type: "layered_costmap_2d/static_layer"}
-
-publish_frequency: 1.0
-footprint: [[-0.325, -0.325], [-0.325, 0.325], [0.325, 0.325], [0.46, 0.0], [0.325, -0.325]]
