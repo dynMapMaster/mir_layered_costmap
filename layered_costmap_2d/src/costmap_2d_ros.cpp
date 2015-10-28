@@ -118,7 +118,6 @@ Costmap2DROS::Costmap2DROS(std::string name, tf::TransformListener& tf) :
       private_nh.getParam("plugins", my_list);
       for (int32_t i = 0; i < my_list.size(); ++i)
       {
-        
         std::string pname = static_cast<std::string>(my_list[i]["name"]);
         std::string type = static_cast<std::string>(my_list[i]["type"]);        
         boost::shared_ptr<layered_costmap_2d::Layer> plugin = plugin_loader_.createInstance(type); // type

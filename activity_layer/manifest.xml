@@ -15,7 +15,6 @@
 	<depend package="sensor_msgs"/>
 	<depend package="laser_geometry"/>
 	<depend package="tf"/>
-	<depend package="voxel_grid"/>
 	<depend package="nav_msgs"/>
 	<depend package="visualization_msgs"/>
 	<depend package="rosbag"/>
@@ -26,6 +25,11 @@
 	<depend package="common_rosdeps"/>
 	<depend package="map_msgs" />
 	<depend package="layered_costmap_2d" />
+  <depend package="pluginlib" />
+
+<export>
+  <layered_costmap_2d plugin="${prefix}/activity_layer_plugin.xml" />
+</export>
 
 </package>
 

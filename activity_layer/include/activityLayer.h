@@ -16,7 +16,7 @@
 #include <layered_costmap_2d/layered_costmap.h>
 #include <layered_costmap_2d/observation_buffer.h>
 #include <layered_costmap_2d/costmap_2d.h>
-
+// #include <activityLayer/ActivityPluginConfig.h>
 #include <cstdlib>
 
 namespace activity_layer

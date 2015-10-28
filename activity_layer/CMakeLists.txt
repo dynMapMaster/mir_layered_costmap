@@ -23,9 +23,10 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
-rosbuild_add_library(${PROJECT_NAME} src/activityLayer.cpp src/activityMap.cpp src/activityMap.cpp src/activityMapComponent.cpp)
+rosbuild_add_library(${PROJECT_NAME} src/activityLayer.cpp src/activityMap.cpp src/activityMapComponent.cpp)
 include_directories(${layered_costmap_2d})
 target_link_libraries(${layered_costmap_2d} layered_costmap_2d)
+
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)

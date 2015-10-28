@@ -1,12 +1,13 @@
 #include <activityLayer.h>
+#include <pluginlib/class_list_macros.h>
+PLUGINLIB_DECLARE_CLASS(activity_layer, activityLayer, activity_layer::activityLayer, layered_costmap_2d::Layer)
 
 using namespace activity_layer;
 using namespace layered_costmap_2d;
 
-
-
 activityLayer::activityLayer():Layer()
 {
+    ROS_INFO("creating activity layer");
     _map = NULL;
 }
 
@@ -21,6 +22,13 @@ activityLayer::activityLayer():Layer()
 void activityLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x, double* min_y,
                           double* max_x, double* max_y)
 {
+    int map_size = 2;
+    *min_x = robot_x - map_size;
+    *min_y = robot_y - map_size;
+    *max_x = robot_x + map_size;
+    *max_y = robot_y + map_size;
+    ROS_INFO("Updating bound from activity layer");
+/*
     int layerMinX, layerMaxX, layerMinY, layerMaxY;
     if(_map->getEditLimits(layerMinX,layerMaxX,layerMinY,layerMaxY))
     {
@@ -33,6 +41,7 @@ void activityLayer::updateBounds(double robot_x, double robot_y, double robot_ya
         *min_y = (min_yTemp < *min_y) ? min_yTemp : *min_y;
         *max_y = (max_yTemp > *max_y) ? max_yTemp : *max_y;
     }
+    */
 }
 
 /**
@@ -41,6 +50,7 @@ void activityLayer::updateBounds(double robot_x, double robot_y, double robot_ya
  */
 void activityLayer::updateCosts(Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
 {
+    ROS_INFO("Updating cost from activity layer");
     unsigned char* master_array = master_grid.getCharMap();
     unsigned int val = 0;
     int spanSize = _map->getXSize();
@@ -51,12 +61,12 @@ void activityLayer::updateCosts(Costmap2D& master_grid, int min_i, int min_j, in
         for (int i = min_i; i < max_i; i++)
         {
             if (!_map->getCellValue(i,j,lastKnownObservation,val)){
-            continue;
+            //continue;
             }
 
           unsigned char old_cost = master_array[it];
-          if (old_cost == NO_INFORMATION || old_cost < val)
-            master_array[it] = val;
+          //if (old_cost == NO_INFORMATION || old_cost < val)
+            master_array[it] = LETHAL_OBSTACLE;//val;
         }
     }
 }
@@ -65,7 +75,9 @@ void activityLayer::updateCosts(Costmap2D& master_grid, int min_i, int min_j, in
 
 void activityLayer::onInitialize()
 {
+    ROS_INFO("Initializing activity layer");
     // Subscribe to topics -> see obstacle layer
+    /*
     ros::NodeHandle nh("~/" + name_), g_nh;
 
     // subscribe to laser scan topics
@@ -192,7 +204,7 @@ void activityLayer::onInitialize()
 
     }
 
-
+    */
 
 }
 

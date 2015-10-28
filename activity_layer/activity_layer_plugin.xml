@@ -1,0 +1,8 @@
+<!-- -->
+<class_libraries>
+  <library path="lib/libactivity_layer">
+    <class name="layered_costmap_2d/activityLayer" type="activity_layer::activityLayer"  base_class_type="layered_costmap_2d::Layer">
+      <description>Updates map with dynamic obstacles</description>
+    </class>
+  </library>
+</class_libraries>
