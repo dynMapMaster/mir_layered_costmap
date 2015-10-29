@@ -81,6 +81,8 @@ ROS_INFO("creating activity layer");
   virtual void deactivate();
   virtual void reset();
 
+  void matchSize();
+
   /**
    * @brief  A callback to handle buffering LaserScan messages
    * @param message The message returned from a message notifier
@@ -142,8 +144,7 @@ protected:
    * @param max_x
    * @param max_y
    */
-  virtual void raytraceFreespace(const layered_costmap_2d::Observation& clearing_observation, double* min_x, double* min_y,
-                                 double* max_x, double* max_y);
+  virtual void raytrace(const layered_costmap_2d::Observation& observation);
 
   void updateRaytraceBounds(double ox, double oy, double wx, double wy, double range, double* min_x, double* min_y,
                             double* max_x, double* max_y);
@@ -156,19 +157,25 @@ protected:
  
   double max_obstacle_height_;  ///< @brief Max Obstacle Height
 
-  laser_geometry::LaserProjection projector_;  ///< @brief Used to project laser scans into point clouds
+
 
   bool rolling_window_;
   dynamic_reconfigure::Server<layered_costmap_2d::ObstaclePluginConfig> *dsrv_;
 
   int combination_method_;
 
+protected:
+  laser_geometry::LaserProjection projector_;  ///< @brief Used to project laser scans into point clouds
+  std::vector<boost::shared_ptr<message_filters::SubscriberBase> > observation_subscribers_;  ///< @brief Used for the observation message filters
+  std::vector<boost::shared_ptr<tf::MessageFilterBase> > observation_notifiers_;  ///< @brief Used to make sure that transforms are available for each sensor
+  std::vector<boost::shared_ptr<layered_costmap_2d::ObservationBuffer> > observation_buffers_;  ///< @brief Used to store observations from various sensors
+
 private:
     void reconfigureCB(layered_costmap_2d::ObstaclePluginConfig &config, uint32_t level);    
     activityMap* _map;
     activityMap* _tempMap;
     int _xSize, _ySize;
-    double _cellsPerMeter;
+    double _resolution;
 
     std::string _global_frame;
 };

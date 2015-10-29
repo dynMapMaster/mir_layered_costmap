@@ -12,3 +12,4 @@ cfg/*.py
 msg/*.py
 layered_costmap_2d/src/layered_costmap_2d
 layered_costmap_2d/cfg/cpp/
+*.autosave

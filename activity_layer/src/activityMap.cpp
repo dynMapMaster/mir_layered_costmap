@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 #include <iostream>
+#include <cmath>
+#include <limits>
 
 using namespace std;
 
@@ -12,6 +14,7 @@ activityMap::activityMap(int sizeX, int sizeY, bool useOverlay)
     _useOverlay = useOverlay;
     if(useOverlay)
     {
+        ROS_INFO("Using overlay");
         int stdDivisor = 30;
         int xDivisor = stdDivisor;
         for(int i = xDivisor; i < xDivisor+50;i++){
@@ -58,6 +61,7 @@ activityMap::activityMap(int sizeX, int sizeY, bool useOverlay)
     }
     else
     {
+        ROS_INFO("No Overlay SIze x=%i  y=%i",sizeX, sizeY);
         _map = new activityMapComponent*[sizeX * sizeY];
         // initialize pointers to null
         for(int i = 0; i < _sizeX * _sizeY ; i++){
@@ -65,6 +69,7 @@ activityMap::activityMap(int sizeX, int sizeY, bool useOverlay)
         }
     }
     this->resetEditLimits();
+    ROS_INFO("QT CHANGE!");
 }
 
 
@@ -149,7 +154,7 @@ void activityMap::addObservationMap(activityMap& newMap, collapsingMethod method
 bool activityMap::getEditLimits(int &minX, int &maxX, int &minY, int &maxY)
 {
     bool newLimits = false;
-
+    ROS_INFO("EDIT LIMITS: %i %i %i %i", _editMinX, _editMaxX, _editMinY, _editMaxY);
     if(_editMinX >= 0 && _editMaxX >= 0 && _editMinY >= 0 && _editMaxY >= 0)
     {
         minX = _editMinX;
@@ -219,9 +224,77 @@ int activityMap::getYSize()
 bool activityMap::getCellValue(int x, int y, costmapGenerationMethods method, unsigned int& cellValueOutput)
 {
     cellValueOutput = 0;
-    return false;
+    return pointContainsData(x,y);
 }
 
+
+void activityMap::traceLine(int x0, int y0, int x1, int y1)
+{
+   bresenham2D(x0,y0,x1,y1);
+   pointObservedOccupied(x1,y1,0);
+}
+
+inline void activityMap::bresenham2D(int x1, int y1, const int x2, const int y2)
+{
+    int delta_x(x2 - x1);
+    // if x1 == x2, then it does not matter what we set here
+    signed char const ix((delta_x > 0) - (delta_x < 0));
+    delta_x = std::abs(delta_x) *2;
+
+    int delta_y(y2 - y1);
+    // if y1 == y2, then it does not matter what we set here
+    signed char const iy((delta_y > 0) - (delta_y < 0));
+    delta_y = std::abs(delta_y) * 2;
+
+    if (delta_x >= delta_y)
+    {
+        // error may go below zero
+        int error(delta_y - (delta_x >> 1));
+
+        while (x1 != x2)
+        {
+            //ROS_INFO("Clearing point (%i,%i)",x1,y1);
+            pointObservedFree(x1,y1,0);
+            if ((error >= 0) && (error || (ix > 0)))
+            {
+                error -= delta_x;
+                y1 += iy;
+            }
+            // else do nothing
+
+            error += delta_y;
+            x1 += ix;
+
+
+        }
+    }
+    else
+    {
+        // error may go below zero
+        int error(delta_x - (delta_y >> 1));
+
+        while (y1 != y2)
+        {
+            //ROS_INFO("Clearing point (%i,%i)",x1,y1);
+            pointObservedFree(x1,y1,0);
+            if ((error >= 0) && (error || (iy > 0)))
+            {
+                error -= delta_y;
+                x1 += ix;
+            }
+            // else do nothing
+
+            error += delta_x;
+            y1 += iy;
+
+
+        }
+    }
+}
+
+
+
+// internal data fidling
 bool activityMap::pointContainsData(int x, int y)
 {
     if(_useOverlay)
@@ -244,6 +317,7 @@ bool activityMap::pointContainsData(int x, int y)
     }
     else
     {
+        //ROS_INFO("Checking non overlay: %i", _map[y*_sizeX+x]);
         if(_map[y*_sizeX+x] != NULL)
             return true;
     }
@@ -254,6 +328,14 @@ bool activityMap::pointContainsData(int x, int y)
 
 activityMapComponent* activityMap::getDataPointer(int x, int y)
 {
+    if(x > _sizeX || y > _sizeY )
+        throw "Attempt to access non-existting map component in activity map";
+
+    if(_sizeX <= 0 || _sizeY <= 0)
+    {
+        throw "ERROR: the size of the activity map is: ";
+    }
+
     this->checkValidityOfCell(x,y);
     if(_useOverlay)
     {
@@ -265,6 +347,7 @@ activityMapComponent* activityMap::getDataPointer(int x, int y)
     }
     else
     {
+        //ROS_INFO("returning non overlay pointer");
         return _map[y * _sizeX + x];
     }
 
@@ -274,8 +357,10 @@ activityMapComponent* activityMap::getDataPointer(int x, int y)
 
 void activityMap::checkValidityOfCell(int x, int y)
 {
+    //ROS_DEBUG("Checking validity");
     if(!pointContainsData(x,y))
     {
+       // ROS_DEBUG"Need to create cell");
         if(_useOverlay)
         {
             int patchPointerY = y/_mapPatchYSize;
@@ -297,6 +382,7 @@ void activityMap::checkValidityOfCell(int x, int y)
         }
         else
         {
+            //ROS_DEBUG("Creating non overlay");
             _map[y * _sizeX + x] = new activityMapComponent();
         }
     }
