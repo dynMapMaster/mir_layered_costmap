@@ -1,0 +1,32 @@
+<package>
+  <description brief="activity_layer">
+
+     activity_layer
+
+  </description>
+  <author>martin</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/activity_layer</url>
+	<depend package="rosconsole"/>
+	<depend package="roscpp"/>
+	<depend package="std_msgs"/>
+	<depend package="geometry_msgs"/>
+	<depend package="sensor_msgs"/>
+	<depend package="laser_geometry"/>
+	<depend package="tf"/>
+	<depend package="voxel_grid"/>
+	<depend package="nav_msgs"/>
+	<depend package="visualization_msgs"/>
+	<depend package="rosbag"/>
+	<depend package="map_server"/>
+	<depend package="pcl"/>
+	<depend package="pcl_ros"/>
+	<depend package="dynamic_reconfigure"/>
+	<depend package="common_rosdeps"/>
+	<depend package="map_msgs" />
+	<depend package="layered_costmap_2d" />
+
+</package>
+
+
