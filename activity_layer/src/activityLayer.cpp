@@ -1,8 +1,8 @@
 #include <activityLayer.h>
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_DECLARE_CLASS(activity_layer, activityLayer, activity_layer::activityLayer, layered_costmap_2d::Layer)
+PLUGINLIB_DECLARE_CLASS(activity_layer, activityLayer, layered_costmap_2d::activityLayer, layered_costmap_2d::Layer)
 
-using namespace activity_layer;
+//using namespace activity_layer;
 using namespace layered_costmap_2d;
 
 activityLayer::activityLayer():Layer()
@@ -257,4 +257,19 @@ void activityLayer::activate()
 void activityLayer::deactivate()
 {
     enabled_ = false;
+}
+
+void activityLayer::matchSize()
+{
+
+}
+
+void activityLayer::reset()
+{
+
+}
+
+void activityLayer::onFootprintChanged()
+{
+
 }

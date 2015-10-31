@@ -19,7 +19,7 @@
 // #include <activityLayer/ActivityPluginConfig.h>
 #include <cstdlib>
 
-namespace activity_layer
+namespace layered_costmap_2d
 {
 class activityLayer : public layered_costmap_2d::Layer
 {
@@ -56,6 +56,9 @@ public:
      * changes (via LayeredCostmap::setFootprint()).  Override to be
      * notified of changes to the robot's footprint. */
     void onFootprintChanged();
+
+    void matchSize();
+
 
 protected:
     void onInitialize();
