@@ -15,7 +15,7 @@ class activityMapComponent
 {
 public:
     activityMapComponent();
-    activityMapComponent(bool useforgetFactor, double forgetFactor);
+    activityMapComponent(bool useforgetFactor, double forgetFactor, double max_val);
     ~activityMapComponent();
 
     // Time in s
@@ -43,6 +43,7 @@ public:
 
     std::pair<double, double> getLongTermProb();
 
+    void setForgetting(bool on, double forgettingFactor, double maxValue);
 
 
     void printValues();
@@ -52,7 +53,7 @@ protected:
     unsigned long _timestamp;
     activityState _lastObservedState;
     bool _useForgetFactor;
-    double _forgetFactor;
+    double _forgetFactor, _maxValue;
 
 
     // Time in ms

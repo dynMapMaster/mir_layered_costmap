@@ -52,6 +52,8 @@ using namespace std;
 namespace dynamic_map
 {
 
+
+
 void ActivityLayer::onInitialize()
 {
     ROS_INFO("Initializing activity map");
@@ -186,6 +188,12 @@ ActivityLayer::~ActivityLayer()
     if (dsrv_)
         delete dsrv_;
 
+    if(_map)
+        delete _map;
+
+    if(_tempMap)
+        delete _tempMap;
+
 }
 void ActivityLayer::reconfigureCB(layered_costmap_2d::ObstaclePluginConfig &config, uint32_t level)
 {
@@ -216,6 +224,7 @@ void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& mess
     buffer->lock();
     buffer->bufferCloud(cloud);
     buffer->unlock();
+    ROS_INFO("CB End");
 }
 
 void ActivityLayer::laserScanValidInfCallback(const sensor_msgs::LaserScanConstPtr& raw_message,
@@ -276,7 +285,9 @@ void ActivityLayer::updateBounds(double robot_x, double robot_y, double robot_ya
     {
         ROS_INFO("Sensor: %i", i);
         vector<Observation> buffer;
+        observation_buffers_[i]->lock();
         observation_buffers_[i]->getObservations(buffer);
+        observation_buffers_[i]->unlock();
         for(int o = 0; o < buffer.size(); o++)
         {
             //ROS_INFO("observation: %i",o);
@@ -285,13 +296,14 @@ void ActivityLayer::updateBounds(double robot_x, double robot_y, double robot_ya
     }
 
     //ROS_INFO("Updating bound from activity layer");
-    int layerMinX, layerMaxX, layerMinY, layerMaxY;
+    unsigned int layerMinX, layerMaxX, layerMinY, layerMaxY;
     if(_map->getEditLimits(layerMinX,layerMaxX,layerMinY,layerMaxY))
     {
-        double min_xTemp = layerMinX * _resolution;
-        double max_xTemp = layerMaxX * _resolution;
-        double min_yTemp = layerMinY * _resolution;
-        double max_yTemp = layerMaxY * _resolution;
+        Costmap2D* master = layered_costmap_->getCostmap();
+        double min_xTemp, max_xTemp, min_yTemp, max_yTemp ;
+        master->mapToWorld(layerMinX,layerMinY,min_xTemp,min_yTemp);
+        master->mapToWorld(layerMaxX,layerMaxY,max_xTemp,max_yTemp);
+
         *min_x = (min_xTemp < *min_x) ? min_xTemp : *min_x;
         *max_x = (max_xTemp > *max_x) ? max_xTemp : *max_x;
         *min_y = (min_yTemp < *min_y) ? min_yTemp : *min_y;
@@ -317,19 +329,22 @@ void ActivityLayer::updateCosts(layered_costmap_2d::Costmap2D& master_grid, int 
     unsigned int span = master_grid.getSizeInCellsX();
     for (int j = min_j; j < max_j; j++)
     {
+        //ROS_INFO("j=%i",j);
         unsigned int it = j * span + min_i;
         for (int i = min_i; i < max_i; i++)
         {
+            //ROS_INFO("i=%i",i);
             if (!_map->getCellValue(i,j,lastKnownObservation,val)){
                 continue;
             }
-          //ROS_INFO_ONCE("master_array[%i]=%i",it, master_array[it]);
+          ROS_INFO_ONCE("activity map has data");
           unsigned char old_cost = master_array[it];
-         // if (old_cost == NO_INFORMATION || old_cost < val)
-            master_array[it] = FREE_SPACE;//val;
+         //if (old_cost == NO_INFORMATION || old_cost < val)
+            master_array[it] =  val;
           it++;
         }
     }
+    _map->resetEditLimits();
 }
 
 void ActivityLayer::addStaticObservation(layered_costmap_2d::Observation& obs, bool marking, bool clearing)
@@ -361,9 +376,16 @@ bool ActivityLayer::getClearingObservations(std::vector<Observation>& clearing_o
 
 void ActivityLayer::raytrace(const Observation& observation)
 {
+    Costmap2D* master = layered_costmap_->getCostmap();
     for(int i = 0; i < observation.cloud_->size();i++){
         //ROS_INFO("Point: %i", i);
-        _map->traceLine(observation.origin_.x,observation.origin_.y,observation.cloud_->points[i].x, observation.cloud_->points[i].y);
+
+        int x0,y0, x1, y1;
+        master->worldToMapEnforceBounds(observation.origin_.x,observation.origin_.y,x0,y0);
+        master->worldToMapEnforceBounds(observation.cloud_->points[i].x,observation.cloud_->points[i].y,x1,y1);
+
+
+        _map->traceLine(x0,y0,x1,y1);
     }
 }
 
@@ -385,14 +407,23 @@ void ActivityLayer::updateRaytraceBounds(double ox, double oy, double wx, double
 
 void ActivityLayer::matchSize()
 {
-    ROS_INFO("Match size called");
+    ROS_ERROR("***********************************Match size called***************************************************");
     Costmap2D* master = layered_costmap_->getCostmap();
 
+    if(_map)
+        delete _map;
+    ROS_INFO("tempmap");
+    if(_tempMap)
+        delete _tempMap;
+    ROS_INFO("tempmap done");
     _xSize = master->getSizeInCellsX();
     _ySize = master->getSizeInCellsY();
-    _resolution = maroscster->getResolution();
-
-    _map = new activityMap(_xSize,_ySize,false);
+    _resolution = master->getResolution();
+    ROS_INFO("Resolution: %f", _resolution);
+    int originX = master->getOriginX() /_resolution;
+    int originY = master->getOriginY() / _resolution;
+    _map = new activityMap(_xSize,_ySize, false);
+    //_map->useForgetting(0.2,20);
     _tempMap = new activityMap(_xSize, _ySize,false);
 
 }

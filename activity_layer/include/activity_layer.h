@@ -61,14 +61,14 @@
 namespace dynamic_map
 {
 
-class ActivityLayer : public layered_costmap_2d::CostmapLayer
+class ActivityLayer : public layered_costmap_2d::Layer
 {
 public:
   ActivityLayer()
   {
 ROS_INFO("creating activity layer");
-    costmap_ = NULL;  // this is the unsigned char* member of parent class Costmap2D.
-
+    _map = NULL;  // this is the unsigned char* member of parent class Costmap2D.
+    _tempMap = NULL;
   }
 
   virtual ~ActivityLayer();
@@ -178,6 +178,7 @@ private:
     double _resolution;
 
     std::string _global_frame;
+
 };
 
 }  // namespace layered_costmap_2d

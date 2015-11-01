@@ -13,9 +13,11 @@ activityMapComponent::activityMapComponent()
     _occupyEvents = 0;
     _releaseEvents = 0;
     _timestamp = 0;
+
+
 }
 
-activityMapComponent::activityMapComponent(bool useforgetFactor, double forgetFactor)
+activityMapComponent::activityMapComponent(bool useforgetFactor, double forgetFactor, double max_val)
 {
     _lastObservedState = unseen;
     _noOfFreeObservations = 0;
@@ -25,6 +27,7 @@ activityMapComponent::activityMapComponent(bool useforgetFactor, double forgetFa
     _timestamp = 0;
     this->_useForgetFactor = useforgetFactor;
     this->_forgetFactor = forgetFactor;
+    this->_maxValue = max_val;
 }
 
 
@@ -50,12 +53,36 @@ void activityMapComponent::observedFree(unsigned long time)
 
 void activityMapComponent::_observedFree(unsigned long time)
 {
-    _noOfFreeObservations++;
-    if(_lastObservedState == occupied){
-        _releaseEvents++;
+    if(_useForgetFactor)
+    {
+        _noOfFreeObservations++;
+        if(_lastObservedState == occupied){
+            _releaseEvents++;
+
+        }
+        _releaseEvents *= _maxValue/_noOfFreeObservations;
+        _noOfFreeObservations = _maxValue;
+
+        // Adjust inactive state
+        _noOfOccupiedObservations = 1 + (_noOfOccupiedObservations-1) * _forgetFactor;
+        _occupyEvents = 1 + (_occupyEvents-1) *_forgetFactor;
     }
-    _lastObservedState = freeState;
+    else
+    {
+        _noOfFreeObservations++;
+        if(_lastObservedState == occupied){
+            _releaseEvents++;
+        }
+        _lastObservedState = freeState;
+    }
     _timestamp = time;
+}
+
+void activityMapComponent::setForgetting(bool on, double forgettingFactor, double maxValue)
+{
+    _forgetFactor = forgettingFactor;
+    _useForgetFactor = on;
+    _maxValue = maxValue;
 }
 
 
@@ -77,23 +104,39 @@ void activityMapComponent::observedOccupied(unsigned long time)
 }
 void activityMapComponent::_observedOccupied(unsigned long time)
 {
-    _noOfOccupiedObservations++;
-    if(_lastObservedState == freeState){
-        _occupyEvents++;
+    if(_useForgetFactor)
+    {
+        _noOfOccupiedObservations++;
+        if(_lastObservedState == freeState){
+            _occupyEvents++;
+        }
+        _occupyEvents *= _maxValue/_noOfOccupiedObservations;
+        _noOfOccupiedObservations = _maxValue;
+
+        // Adjust inactive state
+        _noOfFreeObservations = 1 + (_noOfFreeObservations-1) * _forgetFactor;
+        _releaseEvents = 1 + (_releaseEvents-1) *_forgetFactor;
     }
-    _lastObservedState = occupied;
-    _timestamp = time;
+    else
+    {
+        _noOfOccupiedObservations++;
+        if(_lastObservedState == freeState){
+            _occupyEvents++;
+        }
+        _lastObservedState = occupied;
+    }
+     _timestamp = time;
 }
 
 double activityMapComponent::getProbOfOccupy()
 {
-    cout << _occupyEvents << "+1 / " << _noOfFreeObservations << " + 1" << endl;
+    //cout << _occupyEvents << "+1 / " << _noOfFreeObservations << " + 1" << endl;
     return (_occupyEvents+1) / ((double)_noOfFreeObservations+1);
 }
 
 double activityMapComponent::getProbOfRelease()
 {
-    cout << _releaseEvents << "+1 / " << _noOfOccupiedObservations << " + 1" << endl;
+    //cout << _releaseEvents << "+1 / " << _noOfOccupiedObservations << " + 1" << endl;
     return (_releaseEvents+1) / ((double)_noOfOccupiedObservations+1);
 }
 

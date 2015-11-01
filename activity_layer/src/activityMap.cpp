@@ -7,7 +7,7 @@
 
 using namespace std;
 
-activityMap::activityMap(int sizeX, int sizeY, bool useOverlay)
+activityMap::activityMap(int sizeX=2,int sizeY =2, bool useOverlay = false)
 {
     _sizeX = sizeX;
     _sizeY = sizeY;
@@ -61,7 +61,7 @@ activityMap::activityMap(int sizeX, int sizeY, bool useOverlay)
     }
     else
     {
-        ROS_INFO("No Overlay SIze x=%i  y=%i",sizeX, sizeY);
+        ROS_INFO("No Overlay Size x=%i  y=%i",sizeX, sizeY);
         _map = new activityMapComponent*[sizeX * sizeY];
         // initialize pointers to null
         for(int i = 0; i < _sizeX * _sizeY ; i++){
@@ -136,6 +136,8 @@ void activityMap::updateEditLimits(int x, int y)
 
     if(_editMaxY < y || _editMaxY < 0)
         _editMaxY = y;
+
+
 }
 
 void activityMap::addObservationMap(activityMap& newMap, collapsingMethod method)
@@ -151,7 +153,7 @@ void activityMap::addObservationMap(activityMap& newMap, collapsingMethod method
     }
 }
 
-bool activityMap::getEditLimits(int &minX, int &maxX, int &minY, int &maxY)
+bool activityMap::getEditLimits(unsigned int &minX,unsigned int &maxX, unsigned int &minY,unsigned int &maxY)
 {
     bool newLimits = false;
     ROS_INFO("EDIT LIMITS: %i %i %i %i", _editMinX, _editMaxX, _editMinY, _editMaxY);
@@ -161,6 +163,7 @@ bool activityMap::getEditLimits(int &minX, int &maxX, int &minY, int &maxY)
         maxX = _editMaxX;
         minY = _editMinY;
         maxY = _editMaxY;
+        newLimits = true;
     }
 
     return newLimits;
@@ -221,15 +224,28 @@ int activityMap::getYSize()
     return _sizeY;
 }
 
+void activityMap::useForgetting(double forgettingFactor, double maxValue)
+{
+    _useForgetting = true;
+    _forgetFactor = forgettingFactor;
+    _maxValue = maxValue;
+}
+
 bool activityMap::getCellValue(int x, int y, costmapGenerationMethods method, unsigned int& cellValueOutput)
 {
-    cellValueOutput = 0;
-    return pointContainsData(x,y);
+    bool data = pointContainsData(x,y);
+    if(data)
+    {
+        pair<double, double> cellVal = getDataPointer(x,y)->getLongTermProb();
+        cellValueOutput = cellVal.second * 200;
+    }
+    return data;
 }
 
 
 void activityMap::traceLine(int x0, int y0, int x1, int y1)
 {
+   //ROS_INFO("Tracing line from (%i,%i) to (%i,%i)",x0,y0,x1,y1);
    bresenham2D(x0,y0,x1,y1);
    pointObservedOccupied(x1,y1,0);
 }
@@ -299,6 +315,7 @@ bool activityMap::pointContainsData(int x, int y)
 {
     if(_useOverlay)
     {
+
         int patchPointerY = y/_mapPatchYSize;
         int patchPointerX = x/_mapPatchXSize;
 
@@ -317,6 +334,7 @@ bool activityMap::pointContainsData(int x, int y)
     }
     else
     {
+
         //ROS_INFO("Checking non overlay: %i", _map[y*_sizeX+x]);
         if(_map[y*_sizeX+x] != NULL)
             return true;
@@ -328,17 +346,24 @@ bool activityMap::pointContainsData(int x, int y)
 
 activityMapComponent* activityMap::getDataPointer(int x, int y)
 {
-    if(x > _sizeX || y > _sizeY )
-        throw "Attempt to access non-existting map component in activity map";
+
 
     if(_sizeX <= 0 || _sizeY <= 0)
     {
         throw "ERROR: the size of the activity map is: ";
     }
 
+
+
     this->checkValidityOfCell(x,y);
     if(_useOverlay)
     {
+
+        if(x > _sizeX || y > _sizeY || x < 0  || y < 0)
+        {
+            ROS_ERROR("Attempt to access non-existting map component in activity map x=%i  y=%i", x,y);
+            throw "Attempt to access non-existting map component in activity map";
+        }
         int patchPointerY = y/_mapPatchYSize;
         int patchPointerX = x/_mapPatchXSize;
         int internalY = y % _mapPatchYSize;
@@ -347,6 +372,12 @@ activityMapComponent* activityMap::getDataPointer(int x, int y)
     }
     else
     {
+
+        if(x > _sizeX || y > _sizeY || x < 0  || y < 0)
+        {
+            ROS_ERROR("Attempt to access non-existting map component in activity map x=%i  y=%i", x,y);
+            throw "Attempt to access non-existting map component in activity map";
+        }
         //ROS_INFO("returning non overlay pointer");
         return _map[y * _sizeX + x];
     }
@@ -360,6 +391,7 @@ void activityMap::checkValidityOfCell(int x, int y)
     //ROS_DEBUG("Checking validity");
     if(!pointContainsData(x,y))
     {
+
        // ROS_DEBUG"Need to create cell");
         if(_useOverlay)
         {
@@ -383,7 +415,10 @@ void activityMap::checkValidityOfCell(int x, int y)
         else
         {
             //ROS_DEBUG("Creating non overlay");
-            _map[y * _sizeX + x] = new activityMapComponent();
+            if(_useForgetting)
+                _map[y * _sizeX + x] = new activityMapComponent(_useForgetting,_forgetFactor,_maxValue);
+            else
+                _map[y * _sizeX + x] = new activityMapComponent();
         }
     }
 }
