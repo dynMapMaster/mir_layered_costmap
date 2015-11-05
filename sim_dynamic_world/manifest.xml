@@ -1,0 +1,18 @@
+<package>
+  <description brief="sim_dynamic_world">
+
+     sim_dynamic_world
+
+  </description>
+  <author>Anders Birkehøj Jensen</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/sim_dynamic_world</url>
+  <depend package="roscpp"/>
+  <depend package="geometry_msgs"/>
+  <depend package="nav_msgs" />
+  <depend package="tf" />
+
+</package>
+
+
