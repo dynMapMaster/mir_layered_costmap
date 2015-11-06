@@ -1,6 +1,6 @@
 # Costmap parameters
 global_frame: /map
-robot_base_frame: base_link
+robot_base_frame: /base_link
 transform_tolerance: 0.2
 rolling_window: false
 track_unknown_space: true

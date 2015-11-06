@@ -23,6 +23,7 @@
   <node name="robot_2" pkg="sim_dynamic_world" type="dynamic_obsacle_control" output="screen">
     <rosparam file="$(find sim_dynamic_world)/launch/slow_dynamic_obstacle.yaml" command="load"/> 
   </node>
+  <node name="occupancy_publisher" pkg="occupancy_image_publish" type="occupancy_image_publish_node" />
 
   <node name="visulizer" pkg="rviz" type="rviz" args="-d $(find activity_layer)/config/sim_activity_layer.vcg"/>
   

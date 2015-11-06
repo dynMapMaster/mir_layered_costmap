@@ -60,10 +60,6 @@ void ActivityLayer::onInitialize()
     ros::NodeHandle nh("~/" + name_), g_nh;
 
     // subscribe to laser scan topics
-
-
-
-
     _global_frame = layered_costmap_->getGlobalFrameID();
     double transform_tolerance;
     nh.param("transform_tolerance", transform_tolerance, 0.2);
@@ -139,7 +135,6 @@ void ActivityLayer::onInitialize()
         "Created an observation buffer for source %s, topic %s, global frame: %s, "
         "expected update rate: %.2f, observation persistence: %.2f",
         source.c_str(), topic.c_str(), _global_frame.c_str(), expected_update_rate, observation_keep_time);
-        ROS_ERROR("HALLOOOOOOO");
         // create a callback for the topic
         if (data_type == "LaserScan")
         {
@@ -203,7 +198,6 @@ void ActivityLayer::reconfigureCB(layered_costmap_2d::ObstaclePluginConfig &conf
 void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& message,
                                       const boost::shared_ptr<ObservationBuffer>& buffer)
 {
-    ROS_INFO("Laser scan cb no inf");
     // project the laser into a point cloud
     sensor_msgs::PointCloud2 cloud;
     cloud.header = message->header;
@@ -224,13 +218,11 @@ void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& mess
     buffer->lock();
     buffer->bufferCloud(cloud);
     buffer->unlock();
-    ROS_INFO("CB End");
 }
 
 void ActivityLayer::laserScanValidInfCallback(const sensor_msgs::LaserScanConstPtr& raw_message,
                                               const boost::shared_ptr<ObservationBuffer>& buffer)
 {
-    ROS_INFO("Laser scan cb with inf");
     // Filter positive infinities ("Inf"s) to max_range.
     float epsilon = 0.0001;  // a tenth of a millimeter
     sensor_msgs::LaserScan message = *raw_message;
@@ -280,10 +272,8 @@ void ActivityLayer::pointCloud2Callback(const sensor_msgs::PointCloud2ConstPtr& 
 void ActivityLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x,
                                           double* min_y, double* max_x, double* max_y)
 {
-    ROS_INFO("Updating bounds..");
     for(int i = 0; i < observation_buffers_.size(); i++)
     {
-        ROS_INFO("Sensor: %i", i);
         vector<Observation> buffer;
         observation_buffers_[i]->lock();
         observation_buffers_[i]->getObservations(buffer);
@@ -308,9 +298,9 @@ void ActivityLayer::updateBounds(double robot_x, double robot_y, double robot_ya
         *max_x = (max_xTemp > *max_x) ? max_xTemp : *max_x;
         *min_y = (min_yTemp < *min_y) ? min_yTemp : *min_y;
         *max_y = (max_yTemp > *max_y) ? max_yTemp : *max_y;
-        ROS_INFO("Bounds: %f %f %f %f %f",min_xTemp,max_xTemp, min_yTemp, max_yTemp, _resolution);
+        //ROS_INFO("Bounds: %f %f %f %f %f",min_xTemp,max_xTemp, min_yTemp, max_yTemp, _resolution);
     }    
-    ROS_INFO("Bounds: %f %f %f %f %f",*min_x,*max_x, *min_y, *max_y, _resolution);
+    //ROS_INFO("Bounds: %f %f %f %f %f",*min_x,*max_x, *min_y, *max_y, _resolution);
 
 }
 
@@ -322,7 +312,7 @@ void ActivityLayer::updateFootprint(double robot_x, double robot_y, double robot
 
 void ActivityLayer::updateCosts(layered_costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
 {
-    ROS_INFO("Updating cost from activity layer %i, %i, %i, %i",min_i, min_j, max_i, max_j);
+    //ROS_INFO("Updating cost from activity layer %i, %i, %i, %i",min_i, min_j, max_i, max_j);
     unsigned char* master_array = master_grid.getCharMap();
     unsigned int val = 0;
     int spanSize = _map->getXSize();
@@ -337,7 +327,7 @@ void ActivityLayer::updateCosts(layered_costmap_2d::Costmap2D& master_grid, int 
             if (!_map->getCellValue(i,j,lastKnownObservation,val)){
                 continue;
             }
-          ROS_INFO_ONCE("activity map has data");
+          //ROS_INFO("activity map has data");
           unsigned char old_cost = master_array[it];
          //if (old_cost == NO_INFORMATION || old_cost < val)
             master_array[it] =  val;
@@ -406,8 +396,7 @@ void ActivityLayer::updateRaytraceBounds(double ox, double oy, double wx, double
 }
 
 void ActivityLayer::matchSize()
-{
-    ROS_ERROR("***********************************Match size called***************************************************");
+{    
     Costmap2D* master = layered_costmap_->getCostmap();
 
     if(_map)

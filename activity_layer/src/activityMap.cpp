@@ -8,6 +8,7 @@
 using namespace std;
 
 activityMap::activityMap(int sizeX=2,int sizeY =2, bool useOverlay = false)
+    : _useForgetting(false)
 {
     _sizeX = sizeX;
     _sizeY = sizeY;
@@ -61,7 +62,7 @@ activityMap::activityMap(int sizeX=2,int sizeY =2, bool useOverlay = false)
     }
     else
     {
-        ROS_INFO("No Overlay Size x=%i  y=%i",sizeX, sizeY);
+        //ROS_INFO("No Overlay Size x=%i  y=%i",sizeX, sizeY);
         _map = new activityMapComponent*[sizeX * sizeY];
         // initialize pointers to null
         for(int i = 0; i < _sizeX * _sizeY ; i++){
@@ -69,7 +70,6 @@ activityMap::activityMap(int sizeX=2,int sizeY =2, bool useOverlay = false)
         }
     }
     this->resetEditLimits();
-    ROS_INFO("QT CHANGE!");
 }
 
 
@@ -156,7 +156,7 @@ void activityMap::addObservationMap(activityMap& newMap, collapsingMethod method
 bool activityMap::getEditLimits(unsigned int &minX,unsigned int &maxX, unsigned int &minY,unsigned int &maxY)
 {
     bool newLimits = false;
-    ROS_INFO("EDIT LIMITS: %i %i %i %i", _editMinX, _editMaxX, _editMinY, _editMaxY);
+    // ROS_INFO("EDIT LIMITS: %i %i %i %i", _editMinX, _editMaxX, _editMinY, _editMaxY);
     if(_editMinX >= 0 && _editMaxX >= 0 && _editMinY >= 0 && _editMaxY >= 0)
     {
         minX = _editMinX;
@@ -231,13 +231,73 @@ void activityMap::useForgetting(double forgettingFactor, double maxValue)
     _maxValue = maxValue;
 }
 
+enum ProbabilityState
+{
+    VERY_LOW,
+    LOW,
+    HIGH
+};
+
+ProbabilityState evaluateProbToState(double p)
+{
+    double very_low_threshold=0.01, low_threshold=0.3, high_threshold=1;
+    if(p < very_low_threshold)
+            return VERY_LOW;
+    else if(p < low_threshold)
+        return LOW;
+    else
+        return HIGH;
+}
+
 bool activityMap::getCellValue(int x, int y, costmapGenerationMethods method, unsigned int& cellValueOutput)
 {
-    bool data = pointContainsData(x,y);
+    bool data = pointContainsData(x,y);    
     if(data)
     {
-        pair<double, double> cellVal = getDataPointer(x,y)->getLongTermProb();
-        cellValueOutput = cellVal.second * 200;
+        //ROS_INFO("Data is true");
+        //pair<double, double> cellVal = getDataPointer(x,y)->getLongTermProb();
+        double cellVal = getDataPointer(x,y)->getProbOfOccupy();
+        ProbabilityState occupyState = evaluateProbToState(getDataPointer(x,y)->getProbOfOccupy());
+        ProbabilityState releaseState = evaluateProbToState(getDataPointer(x,y)->getProbOfRelease());
+
+        if( releaseState==VERY_LOW && occupyState==HIGH)
+        {
+            //Static occupied
+            return false;
+        }
+        else if( releaseState==HIGH && occupyState == VERY_LOW)
+        {
+            // STatic free
+            cellVal = 0;
+        }
+        else if( releaseState == LOW && occupyState == LOW)
+        {
+            // semi static
+            cellVal = 0.9;
+        }
+        else if( releaseState == HIGH && occupyState == LOW)
+        {
+            // Dynamic
+            cellVal = 0.3;
+        }
+        else if( releaseState == LOW && occupyState == HIGH)
+        {
+            // semi static occupied
+            cellVal = 0.5;
+        }
+        else
+        {
+            ROS_ERROR("Undefined probability state with probability: %f, %f",getDataPointer(x,y)->getProbOfOccupy(), getDataPointer(x,y)->getProbOfRelease());
+            return false;
+        }
+        cellValueOutput = cellVal * 250;
+        if(y==_sizeY/2 - 40 && x == _sizeX/2 + 40) {
+            getDataPointer(x,y)->printValues(); std::cout << " " << getDataPointer(x,y)->getProbOfOccupy();
+            std::cout << " " << getDataPointer(x,y)->getProbOfRelease();
+            std::cout << std::endl;
+        }
+        //ROS_INFO_COND(y==_sizeY/2 && x == _sizeX/2 + 20, "cell(%i, %i)= %f", x, y, cellVal);
+        //cellValueOutput = cellVal.first * 200;
     }
     return data;
 }
