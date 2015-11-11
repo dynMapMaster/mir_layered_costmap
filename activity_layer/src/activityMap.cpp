@@ -321,7 +321,7 @@ bool activityMap::getCellValue(int x, int y, costmapGenerationMethods method, un
                 return false;
             }
             cellValueOutput = cellVal * 250;
-            if(y==_sizeY/2 - 40 && x == _sizeX/2 + 40) {
+            if(y==_sizeY/2 - 11 && x == _sizeX/2 + 19) {
                 getDataPointer(x,y)->printValues(); std::cout << " " << getDataPointer(x,y)->getProbOfOccupy();
                 std::cout << " " << getDataPointer(x,y)->getProbOfRelease();
                 std::cout << std::endl;
