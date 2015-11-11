@@ -68,17 +68,14 @@ window
 )
 
 # throw in a robot
-#mir( pose [ -25.4 10.5 0 0.0 ] name "mir" color "blue")
 object( name "mir100"
   color "blue"
   size [0.75 0.55 0.35]
   origin [-0.05 0 0 0]
   gui_nose 1
   drive "diff"
-
-  localization "odom"
+  #localization "odom"
   #odom_error [0.01 0.01 0.00 0.05]
-
   topsick(pose [  0.3250  0.270 0.0  45.0 ] )#ctrl "lasernoise_1")
   botsick(pose [ -0.3250 -0.270 0.0 -135.0 ] )#ctrl "lasernoise_1")
   pose [ 0 0 0 0.0 ]  
