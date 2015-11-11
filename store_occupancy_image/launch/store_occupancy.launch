@@ -1,0 +1,6 @@
+<launch>
+  <node name="storer" pkg="store_occupancy_image" type="store_color">
+    <param name="path" value="/home/anders/occupancy_test" />
+  </node>
+
+</launch>
