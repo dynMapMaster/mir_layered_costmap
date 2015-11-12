@@ -16,7 +16,7 @@ void poseCb(const nav_msgs::Odometry msg);
 ros::Publisher cmd_pub;
 unsigned waypoint_i = 0;
 std::vector<Point2D> waypoints;
-double speed, goal_tolerance;
+double speed, goal_tolerance, time_at_waypoints;
 
 int main(int argc, char** argv)
 {
@@ -33,7 +33,12 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "dynamic_obstacle");
     ros::NodeHandle n("~");
     n.param<double>("translational_speed", speed, 0.5);
+    if(speed < 0.0)
+    {
+        speed = DBL_MAX;
+    }
     n.param<double>("goal_tolerance", goal_tolerance, 0.001);
+    n.param<double>("time_at_waypoints", time_at_waypoints,0.5);
     {
         /*
         XmlRpc::XmlRpcValue my_list;
@@ -53,7 +58,6 @@ int main(int argc, char** argv)
         XmlRpc::XmlRpcValue my_list;
         n.getParam("waypoints", my_list);
         ROS_ASSERT(my_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
-        ROS_DEBUG("no of waypoints: %i", my_list.size());
         for (int32_t i = 0; i < my_list.size(); ++i)
         {
             ROS_ASSERT(my_list[i].getType() == XmlRpc::XmlRpcValue::TypeArray);
@@ -84,15 +88,22 @@ void poseCb(const nav_msgs::Odometry msg)
         waypoint_i++;
         waypoint_i %= waypoints.size();
         vx = 0; vy = 0;
+        geometry_msgs::Twist cmd_vel_msg;
+        cmd_vel_msg.linear.x = vx;
+        cmd_vel_msg.linear.y = vy;
+        cmd_pub.publish(cmd_vel_msg);
+        ros::Duration d(time_at_waypoints);
+        d.sleep();
     }
     else
     {
         double dir_angle = atan2(dy,dx);
         vx = cos(dir_angle) * speed;
         vy = sin(dir_angle) * speed;
+        geometry_msgs::Twist cmd_vel_msg;
+        cmd_vel_msg.linear.x = vx;
+        cmd_vel_msg.linear.y = vy;
+        cmd_pub.publish(cmd_vel_msg);
     }
-    geometry_msgs::Twist cmd_vel_msg;
-    cmd_vel_msg.linear.x = vx;
-    cmd_vel_msg.linear.y = vy;
-    cmd_pub.publish(cmd_vel_msg);
+
 }

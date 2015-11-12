@@ -1,10 +1,7 @@
-translational_speed: 0.1
+translational_speed: 2.5
 goal_tolerance: 0.00001
-#my_list: [
-#  1.0, 2.0, 3.0, 4.0
-#]
-
+time_at_waypoints: 11.0
 waypoints: [
-  [1.5, 0.5],
-  [1.5, 0.0]
+  [-1.5, 1.5],
+  [-0.5, 1.5]
 ]

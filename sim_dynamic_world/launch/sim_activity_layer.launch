@@ -8,13 +8,19 @@
 
   <node pkg="stage" type="mir_stageros" name="stage_ros" args="-m $(find sim_dynamic_world)/world/sim_activity_layer.world"/> 
 
-  <node pkg="tf" type="static_transform_publisher" name="initial_pose_link_broadcaster" args="0. 0. 0 0 0 0 /map /robot_0/odom 20" /> 
+  <node pkg="tf" type="static_transform_publisher" name="initial_pose_link_broadcaster" args="0. 0. 0 0 0 0 /map /robot_0/odom 20" />  
 
   <group ns="robot_0" >
     <node name="costmap" pkg="layered_costmap_2d" type="costmap_2d_node" output="screen">
       <rosparam file="$(find sim_dynamic_world)/launch/sim_activity_layer.yaml" command="load" ns="costmap"/> 
     </node>
   </group>
+
+  <!-- Mir simple controller -->
+  <node name="robot_0" pkg="sim_dynamic_world" type="dynamic_obsacle_control" output="screen">
+    <rosparam file="$(find sim_dynamic_world)/launch/mir_simple_dynamics.yaml" command="load"/> 
+  </node> 
+  
   <!-- Fast dynamic obstacle -->
   <node name="robot_1" pkg="sim_dynamic_world" type="dynamic_obsacle_control" output="screen">
     <rosparam file="$(find sim_dynamic_world)/launch/fast_dynamic_obstacle.yaml" command="load"/> 
@@ -25,6 +31,8 @@
   </node>
   <node name="occupancy_publisher" pkg="occupancy_image_publish" type="occupancy_image_publish_node" />
 
-  <node name="visulizer" pkg="rviz" type="rviz" args="-d $(find activity_layer)/config/sim_activity_layer.vcg"/>
+  <!-- <node name="visulizer" pkg="rviz" type="rviz" args="-d $(find activity_layer)/config/sim_activity_layer.vcg"/> -->
   
+  <node name="occupancy_im_shower" pkg="rqt_image_view" type="rqt_image_view" />
+
 </launch>

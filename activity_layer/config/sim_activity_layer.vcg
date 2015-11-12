@@ -1,7 +1,7 @@
 Background\ ColorB=0.498039
 Background\ ColorG=0.498039
 Background\ ColorR=0.498039
-Camera\ Config=51.7229 -3.66393 -3.98886 0
+Camera\ Config=309.844 1.07425 -0.185116 0
 Camera\ Type=rviz::FixedOrientationOrthoViewController
 Fixed\ Frame=/map
 Grid.Alpha=0.5
@@ -20,7 +20,7 @@ Grid.Plane=0
 Grid.Plane\ Cell\ Count=10
 Grid.Reference\ Frame=/robot_0/odom
 Image.Enabled=1
-Image.Image\ Topic=/occupancy_image
+Image.Image\ Topic=/occupancy_image_color
 Image.Queue\ Size=2
 Image.Transport\ Hint=raw
 LaserScan..AxisColorAutocompute\ Value\ Bounds=1

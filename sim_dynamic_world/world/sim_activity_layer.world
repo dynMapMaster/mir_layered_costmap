@@ -1,6 +1,6 @@
 define block model
 (
-  size [0.5 0.5 0.5]
+  size [3.5 0.1 0.5]
   gui_nose 0
 )
 
@@ -71,38 +71,39 @@ window
 object( name "mir100"
   color "blue"
   size [0.75 0.55 0.35]
-  origin [-0.05 0 0 0]
-  gui_nose 1
-  drive "diff"
+  origin [-0.05 0 0 0] 
+  drive "omni"
   #localization "odom"
   #odom_error [0.01 0.01 0.00 0.05]
   topsick(pose [  0.3250  0.270 0.0  45.0 ] )#ctrl "lasernoise_1")
   botsick(pose [ -0.3250 -0.270 0.0 -135.0 ] )#ctrl "lasernoise_1")
-  pose [ 0 0 0 0.0 ]  
+  pose [ 0 0 0 0 ]  
 )
 object(name "slow_dynamic_block"
   color "red"
-  size [1.0 1.0 1.0]
+  size [1.0 0.1 1.0]
   gui_nose 1
   gui_move 1
   drive "omni"
   laser_return 1
   localization "odom"
-  pose [ -1.5 -1.5 0 0.0 ]  
+  pose [ 1.5 -1.5 0 0.0 ]  
 )
 
 object(name "fast_dynamic_block"
   color "red"
-  size [1.0 1.0 1.0]
+  size [1.0 0.1 1.0]
   gui_nose 1
   gui_move 1
   drive "omni"
   laser_return 1
   localization "odom"
-  pose [ 1.5 0.0 0 0.0 ]  
+  pose [ -1.5 1.5 0 0.0 ]  
 )
 
-block( pose [ 3.0 -2.0 0 0.0 ] name "static_block" color "green")
+
+block( pose [ 0.75 0.5 0 0.0 ] name "static_block" color "green")
+block( pose [ -0.75 -0.5 0 0.0 ] name "static_block" color "green")
 
 # load an environment bitmap
 floorplan
