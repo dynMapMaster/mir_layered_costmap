@@ -4,6 +4,8 @@
 #include <iostream>
 #include <cmath>
 #include <limits>
+#include <ostream>
+#include <fstream>
 
 using namespace std;
 
@@ -214,6 +216,30 @@ void activityMap::printDebugInfo()
     cout <<"\n\nLimits:\nX: " << _editMinX << " -> " << _editMaxX << "\nY: " << _editMinY << " -> " << _editMaxY << endl;
 }
 
+void activityMap::writeToImage(std::string path)
+{
+   // cout << "Width: " << _sizeX << "  Height: " << _sizeY<< endl;
+
+    std::ofstream outFile;
+    outFile.open(path.c_str());
+    outFile << "P2\n" << _sizeX << " " << _sizeY <<"\n100\n";
+
+    for(int y = 0; y < _sizeY;y++){
+        for(int x = 0; x < _sizeX;x++){
+            char val = 128;
+            if(this->pointContainsData(x,y))
+            {
+                activityMapComponent* cellPtr = getDataPointer(x,y);
+                val = cellPtr->getLastKnownObservation()*250;
+            }
+            outFile << (unsigned) val << " ";
+        }
+    }
+
+    outFile.close();
+    return;
+}
+
 int activityMap::getXSize()
 {
     return _sizeX;
@@ -254,60 +280,77 @@ bool activityMap::getCellValue(int x, int y, costmapGenerationMethods method, un
     bool data = pointContainsData(x,y);    
     if(data)
     {
-        //ROS_INFO("Data is true");
-        //pair<double, double> cellVal = getDataPointer(x,y)->getLongTermProb();
-        double cellVal = getDataPointer(x,y)->getProbOfOccupy();
-        ProbabilityState occupyState = evaluateProbToState(getDataPointer(x,y)->getProbOfOccupy());
-        ProbabilityState releaseState = evaluateProbToState(getDataPointer(x,y)->getProbOfRelease());
+        switch(method)
+        {
+        case probabilityClassification:
+        {
+            //ROS_INFO("Data is true");
+            //pair<double, double> cellVal = getDataPointer(x,y)->getLongTermProb();
+            double cellVal = getDataPointer(x,y)->getProbOfOccupy();
+            ProbabilityState occupyState = evaluateProbToState(getDataPointer(x,y)->getProbOfOccupy());
+            ProbabilityState releaseState = evaluateProbToState(getDataPointer(x,y)->getProbOfRelease());
 
-        if( releaseState==VERY_LOW && occupyState==HIGH)
+            if( releaseState==VERY_LOW && occupyState==HIGH)
+            {
+                //Static occupied
+                return false;
+            }
+            else if( releaseState==HIGH && occupyState == VERY_LOW)
+            {
+                // STatic free
+                cellVal = 0;
+            }
+            else if( releaseState == LOW && occupyState == LOW)
+            {
+                // semi static
+                cellVal = 0.9;
+            }
+            else if( releaseState == HIGH && occupyState == LOW)
+            {
+                // Dynamic
+                cellVal = 0.3;
+            }
+            else if( releaseState == LOW && occupyState == HIGH)
+            {
+                // semi static occupied
+                cellVal = 0.5;
+            }
+            else
+            {
+                //ROS_ERROR("Undefined probability state with probability: %f, %f",getDataPointer(x,y)->getProbOfOccupy(), getDataPointer(x,y)->getProbOfRelease());
+                return false;
+            }
+            cellValueOutput = cellVal * 250;
+            if(y==_sizeY/2 - 40 && x == _sizeX/2 + 40) {
+                getDataPointer(x,y)->printValues(); std::cout << " " << getDataPointer(x,y)->getProbOfOccupy();
+                std::cout << " " << getDataPointer(x,y)->getProbOfRelease();
+                std::cout << std::endl;
+            }
+            //ROS_INFO_COND(y==_sizeY/2 && x == _sizeX/2 + 20, "cell(%i, %i)= %f", x, y, cellVal);
+            //cellValueOutput = cellVal.first * 200;
+            break;
+        }
+        case lastKnownObservation:
         {
-            //Static occupied
-            return false;
+             double cv = getDataPointer(x,y)->getLastKnownObservation();
+             cellValueOutput = cv * 250;
+            break;
         }
-        else if( releaseState==HIGH && occupyState == VERY_LOW)
-        {
-            // STatic free
-            cellVal = 0;
+        default:
+            break;
         }
-        else if( releaseState == LOW && occupyState == LOW)
-        {
-            // semi static
-            cellVal = 0.9;
-        }
-        else if( releaseState == HIGH && occupyState == LOW)
-        {
-            // Dynamic
-            cellVal = 0.3;
-        }
-        else if( releaseState == LOW && occupyState == HIGH)
-        {
-            // semi static occupied
-            cellVal = 0.5;
-        }
-        else
-        {
-            ROS_ERROR("Undefined probability state with probability: %f, %f",getDataPointer(x,y)->getProbOfOccupy(), getDataPointer(x,y)->getProbOfRelease());
-            return false;
-        }
-        cellValueOutput = cellVal * 250;
-        if(y==_sizeY/2 - 40 && x == _sizeX/2 + 40) {
-            getDataPointer(x,y)->printValues(); std::cout << " " << getDataPointer(x,y)->getProbOfOccupy();
-            std::cout << " " << getDataPointer(x,y)->getProbOfRelease();
-            std::cout << std::endl;
-        }
-        //ROS_INFO_COND(y==_sizeY/2 && x == _sizeX/2 + 20, "cell(%i, %i)= %f", x, y, cellVal);
-        //cellValueOutput = cellVal.first * 200;
     }
     return data;
 }
 
 
-void activityMap::traceLine(int x0, int y0, int x1, int y1)
+void activityMap::traceLine(int x0, int y0, int x1, int y1, bool markEnd)
 {
+
    //ROS_INFO("Tracing line from (%i,%i) to (%i,%i)",x0,y0,x1,y1);
    bresenham2D(x0,y0,x1,y1);
-   pointObservedOccupied(x1,y1,0);
+   if(markEnd)
+        pointObservedOccupied(x1,y1,0);
 }
 
 inline void activityMap::bresenham2D(int x1, int y1, const int x2, const int y2)

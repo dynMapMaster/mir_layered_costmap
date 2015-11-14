@@ -6,7 +6,7 @@
 
 #include <vector>
 
-enum costmapGenerationMethods {lastKnownObservation, mostFrequentObservation};
+enum costmapGenerationMethods {lastKnownObservation, mostFrequentObservation, probabilityClassification};
 
 
 
@@ -24,8 +24,10 @@ public:
     int getYSize();
     bool getCellValue(int x, int y, costmapGenerationMethods method, unsigned int &cellValueOutput);
     bool getEditLimits(unsigned int &minX, unsigned int &maxX, unsigned int &minY, unsigned int &maxY);
-    void traceLine(int x0, int y0, int x1, int y1);
+    void traceLine(int x0, int y0, int x1, int y1, bool markEnd = false);
     void useForgetting(double forgettingFactor, double maxValue);
+
+    void writeToImage(std::string path);
 
 protected:
     // Wrap map access

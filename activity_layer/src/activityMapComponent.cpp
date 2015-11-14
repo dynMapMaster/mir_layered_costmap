@@ -140,6 +140,11 @@ double activityMapComponent::getProbOfRelease()
     return (_releaseEvents+1) / ((double)_noOfOccupiedObservations+1);
 }
 
+int activityMapComponent::getLastKnownObservation()
+{
+    return _lastObservedState;
+}
+
 
 void activityMapComponent::add(const activityMapComponent* newComponent, collapsingMethod method)
 {

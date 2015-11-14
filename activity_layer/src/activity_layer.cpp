@@ -324,16 +324,17 @@ void ActivityLayer::updateCosts(layered_costmap_2d::Costmap2D& master_grid, int 
         for (int i = min_i; i < max_i; i++)
         {
             //ROS_INFO("i=%i",i);
-            if (!_map->getCellValue(i,j,lastKnownObservation,val)){
-                continue;
+            if (_map->getCellValue(i,j,probabilityClassification,val)){
+
+                //ROS_INFO("activity map has data");
+                unsigned char old_cost = master_array[it];
+                //if (old_cost == NO_INFORMATION || old_cost < val)
+                    master_array[it] =  val;
             }
-          //ROS_INFO("activity map has data");
-          unsigned char old_cost = master_array[it];
-         //if (old_cost == NO_INFORMATION || old_cost < val)
-            master_array[it] =  val;
-          it++;
+            it++;
         }
     }
+
     _map->resetEditLimits();
 }
 
@@ -375,7 +376,7 @@ void ActivityLayer::raytrace(const Observation& observation)
         master->worldToMapEnforceBounds(observation.cloud_->points[i].x,observation.cloud_->points[i].y,x1,y1);
 
 
-        _map->traceLine(x0,y0,x1,y1);
+        _map->traceLine(x0,y0,x1,y1,true);
     }
 }
 

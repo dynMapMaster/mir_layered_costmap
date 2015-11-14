@@ -39,6 +39,8 @@ public:
     double getProbOfRelease();
     double getProbOfOccupy();
 
+    int getLastKnownObservation();
+
     void add(const activityMapComponent* newComponent, collapsingMethod method = rawCopy);
 
     std::pair<double, double> getLongTermProb();
