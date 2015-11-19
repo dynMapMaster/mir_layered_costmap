@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 {
     ros::init(argc, argv, "occupancy_image_publisher");
     ros::NodeHandle n;
-    ros::Subscriber sub = n.subscribe<nav_msgs::OccupancyGrid::Ptr>("/robot_0/costmap/costmap/costmap", 1, &occupancyGridCb);
+    ros::Subscriber sub = n.subscribe<nav_msgs::OccupancyGrid::Ptr>("/costmap/costmap/costmap", 1, &occupancyGridCb);
     image_transport::ImageTransport it(n);
     image_pub = it.advertise("occupancy_image", 1);
     color_image_pub = it.advertise("occupancy_image_color", 1);
