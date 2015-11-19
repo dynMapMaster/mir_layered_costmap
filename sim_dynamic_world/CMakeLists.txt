@@ -38,3 +38,6 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 rosbuild_add_executable(dynamic_obsacle_control src/dynamic_obsacle_control.cpp)
 target_link_libraries(dynamic_obsacle_control ${LOG4CXX_LIBRARY})
 
+rosbuild_add_executable(jump_to_control src/jump_to_obstacle_control.cpp)
+target_link_libraries(jump_to_control ${LOG4CXX_LIBRARY})
+

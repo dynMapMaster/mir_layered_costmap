@@ -1,0 +1,20 @@
+<package>
+  <description brief="visualize_activity_layer">
+
+     visualize_activity_layer
+
+  </description>
+  <author>Anders Birkehøj Jensen</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/visualize_activity_layer</url>
+  <depend package="roscpp"/>
+  <depend package="nav_msgs"/>
+  <depend package="pcl"/>
+  <depend package="pcl_ros"/>
+  <depend package="layered_costmap_2d"/>
+  <depend package="sensor_msgs" />
+
+</package>
+
+

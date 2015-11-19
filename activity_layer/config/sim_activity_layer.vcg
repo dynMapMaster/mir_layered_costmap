@@ -1,7 +1,7 @@
 Background\ ColorB=0.498039
 Background\ ColorG=0.498039
 Background\ ColorR=0.498039
-Camera\ Config=309.844 1.07425 -0.185116 0
+Camera\ Config=81.567 1.07425 -0.185116 0
 Camera\ Type=rviz::FixedOrientationOrthoViewController
 Fixed\ Frame=/map
 Grid.Alpha=0.5
@@ -18,8 +18,8 @@ Grid.OffsetY=0
 Grid.OffsetZ=0
 Grid.Plane=0
 Grid.Plane\ Cell\ Count=10
-Grid.Reference\ Frame=/robot_0/odom
-Image.Enabled=1
+Grid.Reference\ Frame=/odom
+Image.Enabled=0
 Image.Image\ Topic=/occupancy_image_color
 Image.Queue\ Size=2
 Image.Transport\ Hint=raw
@@ -51,7 +51,7 @@ LaserScan.Position\ Transformer=XYZ
 LaserScan.Queue\ Size=10
 LaserScan.Selectable=1
 LaserScan.Style=1
-LaserScan.Topic=/robot_0/base_scan0
+LaserScan.Topic=/base_scan0
 LaserScan2..AxisColorAutocompute\ Value\ Bounds=1
 LaserScan2..AxisColorAxis=2
 LaserScan2..AxisColorMax\ Value=10
@@ -80,20 +80,49 @@ LaserScan2.Position\ Transformer=XYZ
 LaserScan2.Queue\ Size=10
 LaserScan2.Selectable=1
 LaserScan2.Style=1
-LaserScan2.Topic=/robot_0/base_scan1
+LaserScan2.Topic=/base_scan1
 Map.Alpha=0.7
 Map.Draw\ Behind=1
 Map.Enabled=1
 Map.New\ map\ range=1
-Map.Topic=/robot_0/costmap/costmap/costmap
+Map.Topic=/costmap/costmap/costmap
 Map2.Alpha=0.7
 Map2.Draw\ Behind=1
 Map2.Enabled=1
 Map2.New\ map\ range=1
 Map2.Topic=/map
-Property\ Grid\ Splitter=655,78
-Property\ Grid\ State=expanded=.Global Options,Grid.Enabled,TF.Enabled,TF.Status,TF.Tree,TF.Tree./map,TF.Tree./robot_0/odom,TF.Tree./robot_0/base_footprint,TF.Tree./robot_0/base_link,TF.Tree./robot_1/odom,TF.Tree./robot_2/odom,Map.Enabled,LaserScan.Enabled,LaserScan2.Enabled,Map2.Enabled,Image.Enabled;splitterratio=0.5
-QMainWindow=000000ff00000000fd0000000300000000000001e900000407fc0200000002fb000000100044006900730070006c006100790073010000001d0000032f000000ee00fffffffb0000000a0049006d0061006700650100000352000000d20000001900ffffff000000010000013100000407fc0200000003fb0000001e0054006f006f006c002000500072006f0070006500720074006900650073010000001d0000010c0000006700fffffffb0000000a00560069006500770073010000012f000001e3000000bb00fffffffb0000001200530065006c0065006300740069006f006e01000003180000010c0000006700ffffff00000003000007bf0000003efc0100000001fb0000000800540069006d00650100000000000007bf000002bf00ffffff000004990000040700000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+PointCloud..AxisColorAutocompute\ Value\ Bounds=1
+PointCloud..AxisColorAxis=2
+PointCloud..AxisColorMax\ Value=10
+PointCloud..AxisColorMin\ Value=-10
+PointCloud..AxisColorUse\ Fixed\ Frame=1
+PointCloud..FlatColorColorB=1
+PointCloud..FlatColorColorG=1
+PointCloud..FlatColorColorR=1
+PointCloud..IntensityAutocompute\ Intensity\ Bounds=1
+PointCloud..IntensityChannel\ Name=intensity
+PointCloud..IntensityMax\ ColorB=1
+PointCloud..IntensityMax\ ColorG=1
+PointCloud..IntensityMax\ ColorR=1
+PointCloud..IntensityMax\ Intensity=4096
+PointCloud..IntensityMin\ ColorB=0
+PointCloud..IntensityMin\ ColorG=0
+PointCloud..IntensityMin\ ColorR=0
+PointCloud..IntensityMin\ Intensity=0
+PointCloud..IntensityUse\ full\ RGB\ spectrum=0
+PointCloud.Alpha=1
+PointCloud.Billboard\ Size=0.05
+PointCloud.Color\ Transformer=RGB8
+PointCloud.Decay\ Time=0
+PointCloud.Enabled=1
+PointCloud.Position\ Transformer=XYZ
+PointCloud.Queue\ Size=1
+PointCloud.Selectable=1
+PointCloud.Style=1
+PointCloud.Topic=/activity_marked_cloud
+Property\ Grid\ Splitter=871,78
+Property\ Grid\ State=expanded=.Global Options,Grid.Enabled,TF.Enabled,TF.Status,TF.Tree,TF.Tree./map,TF.Tree./odom,TF.Tree./base_footprint,TF.Tree./base_link,Map.Enabled,LaserScan.Enabled,LaserScan2.Enabled,Map2.Enabled,Image.Enabled,PointCloud.Enabled;splitterratio=0.5
+QMainWindow=000000ff00000000fd0000000300000000000001e900000407fc0200000002fb000000100044006900730070006c006100790073010000001d00000407000000ee00fffffffb0000000a0049006d0061006700650000000352000000d20000001900ffffff000000010000013100000407fc0200000003fb0000001e0054006f006f006c002000500072006f0070006500720074006900650073010000001d0000010c0000006700fffffffb0000000a00560069006500770073010000012f000001e3000000bb00fffffffb0000001200530065006c0065006300740069006f006e01000003180000010c0000006700ffffff00000003000007bf0000003efc0100000001fb0000000800540069006d00650100000000000007bf000002bf00ffffff000004990000040700000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
 TF.All\ Enabled=1
 TF.Enabled=1
 TF.Frame\ Timeout=15
@@ -126,19 +155,15 @@ Name=Map2
 [Display6]
 ClassName=rviz::ImageDisplay
 Name=Image
+[Display7]
+ClassName=rviz::PointCloudDisplay
+Name=PointCloud
 [TF.Frames.]
-map.Enabled=1
-[TF.Frames./robot_0]
 base_footprint.Enabled=1
 base_laser_link0.Enabled=1
 base_laser_link1.Enabled=1
 base_link.Enabled=1
-odom.Enabled=1
-[TF.Frames./robot_1]
-base_footprint.Enabled=1
-odom.Enabled=1
-[TF.Frames./robot_2]
-base_footprint.Enabled=1
+map.Enabled=1
 odom.Enabled=1
 [Window]
 Height=1128

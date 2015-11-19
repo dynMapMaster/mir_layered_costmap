@@ -1,6 +1,6 @@
 # Costmap parameters
 global_frame: /map
-robot_base_frame: /robot_0/base_link
+robot_base_frame: /base_link
 transform_tolerance: 0.2
 rolling_window: false
 track_unknown_space: true
@@ -36,8 +36,8 @@ activity_layer:
   observation_sources: base_scan0 base_scan1
   base_scan0: {
       data_type: LaserScan,
-      sensor_frame: /robot_0/base_laser_link0,
-      topic: /robot_0/base_scan0,
+      sensor_frame: /base_laser_link0,
+      topic: /base_scan0,
       expected_update_rate: 0.0,
       observation_persistence: 0.0,
       marking: true,
@@ -47,8 +47,8 @@ activity_layer:
 
   base_scan1: {
       data_type: LaserScan,
-      sensor_frame: /robot_0/base_laser_link1 ,
-      topic: /robot_0/base_scan1,
+      sensor_frame: /base_laser_link1 ,
+      topic: /base_scan1,
       expected_update_rate: 0.0,
       observation_persistence: 0.0,
       marking: true,

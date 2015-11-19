@@ -40,19 +40,6 @@ int main(int argc, char** argv)
     n.param<double>("goal_tolerance", goal_tolerance, 0.001);
     n.param<double>("time_at_waypoints", time_at_waypoints,0.5);
     {
-        /*
-        XmlRpc::XmlRpcValue my_list;
-        n.getParam("my_list", my_list);
-        ROS_ASSERT(my_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
-        int sum=0;
-        for (int32_t i = 0; i < my_list.size(); ++i)
-        {
-          ROS_ASSERT(my_list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
-          sum += static_cast<double>(my_list[i]);
-          ROS_DEBUG("SUM: %f", sum);
-        }
-        */
-
         ROS_DEBUG("Retriving waypoints");
 
         XmlRpc::XmlRpcValue my_list;

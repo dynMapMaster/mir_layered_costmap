@@ -1,7 +1,0 @@
-translational_speed: 2.5
-goal_tolerance: 0.00001
-time_at_waypoints: 7.0
-waypoints: [
-  [1.5, -1.5],
-  [0.5, -1.5]
-]
