@@ -218,6 +218,20 @@ void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& mess
     buffer->lock();
     buffer->bufferCloud(cloud);
     buffer->unlock();
+
+    // Waste of time -> consider running in a timer callback
+    for(int i = 0; i < observation_buffers_.size(); i++)
+    {
+        vector<Observation> buffer;
+        observation_buffers_[i]->lock();
+        observation_buffers_[i]->getObservations(buffer);
+        observation_buffers_[i]->unlock();
+        for(int o = 0; o < buffer.size(); o++)
+        {
+            //ROS_INFO("observation: %i",o);
+            raytrace(buffer[o]);
+        }
+    }
 }
 
 void ActivityLayer::laserScanValidInfCallback(const sensor_msgs::LaserScanConstPtr& raw_message,
@@ -255,6 +269,20 @@ void ActivityLayer::laserScanValidInfCallback(const sensor_msgs::LaserScanConstP
     buffer->lock();
     buffer->bufferCloud(cloud);
     buffer->unlock();
+
+    // Waste of time -> consider running in a timer callback
+    for(int i = 0; i < observation_buffers_.size(); i++)
+    {
+        vector<Observation> buffer;
+        observation_buffers_[i]->lock();
+        observation_buffers_[i]->getObservations(buffer);
+        observation_buffers_[i]->unlock();
+        for(int o = 0; o < buffer.size(); o++)
+        {
+            //ROS_INFO("observation: %i",o);
+            raytrace(buffer[o]);
+        }
+    }
 }
 
 void ActivityLayer::pointCloudCallback(const sensor_msgs::PointCloudConstPtr& message,
@@ -272,18 +300,8 @@ void ActivityLayer::pointCloud2Callback(const sensor_msgs::PointCloud2ConstPtr& 
 void ActivityLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x,
                                           double* min_y, double* max_x, double* max_y)
 {
-    for(int i = 0; i < observation_buffers_.size(); i++)
-    {
-        vector<Observation> buffer;
-        observation_buffers_[i]->lock();
-        observation_buffers_[i]->getObservations(buffer);
-        observation_buffers_[i]->unlock();
-        for(int o = 0; o < buffer.size(); o++)
-        {
-            //ROS_INFO("observation: %i",o);
-            raytrace(buffer[o]);
-        }
-    }
+    ROS_INFO("copying temp to map");
+    _map->addObservationMap(_tempMap,medianDecisions);
 
     //ROS_INFO("Updating bound from activity layer");
     unsigned int layerMinX, layerMaxX, layerMinY, layerMaxY;
@@ -312,7 +330,7 @@ void ActivityLayer::updateFootprint(double robot_x, double robot_y, double robot
 
 void ActivityLayer::updateCosts(layered_costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
 {
-    //ROS_INFO("Updating cost from activity layer %i, %i, %i, %i",min_i, min_j, max_i, max_j);
+    ROS_INFO("Updating cost from activity layer %i, %i, %i, %i",min_i, min_j, max_i, max_j);
     unsigned char* master_array = master_grid.getCharMap();
     unsigned int val = 0;
     int spanSize = _map->getXSize();
@@ -336,6 +354,7 @@ void ActivityLayer::updateCosts(layered_costmap_2d::Costmap2D& master_grid, int 
     }
 
     _map->resetEditLimits();
+    ROS_INFO("Done updating");
 }
 
 void ActivityLayer::addStaticObservation(layered_costmap_2d::Observation& obs, bool marking, bool clearing)
@@ -375,8 +394,7 @@ void ActivityLayer::raytrace(const Observation& observation)
         master->worldToMapEnforceBounds(observation.origin_.x,observation.origin_.y,x0,y0);
         master->worldToMapEnforceBounds(observation.cloud_->points[i].x,observation.cloud_->points[i].y,x1,y1);
 
-
-        _map->traceLine(x0,y0,x1,y1,true);
+        _tempMap->traceLine(x0,y0,x1,y1,true);
     }
 }
 

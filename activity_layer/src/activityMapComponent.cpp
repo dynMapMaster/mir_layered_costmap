@@ -13,7 +13,7 @@ activityMapComponent::activityMapComponent()
     _occupyEvents = 0;
     _releaseEvents = 0;
     _timestamp = 0;
-
+    _useForgetFactor = false;
 
 }
 
@@ -55,6 +55,7 @@ void activityMapComponent::_observedFree(unsigned long time)
 {
     if(_useForgetFactor)
     {
+        //std::cout << "*********** using forgetting ************" << std::endl;
         _noOfFreeObservations++;
         if(_lastObservedState == occupied){
             _releaseEvents++;
@@ -69,6 +70,7 @@ void activityMapComponent::_observedFree(unsigned long time)
     }
     else
     {
+
         _noOfFreeObservations++;
         if(_lastObservedState == occupied){
             _releaseEvents++;
@@ -146,38 +148,42 @@ int activityMapComponent::getLastKnownObservation()
 }
 
 
-void activityMapComponent::add(const activityMapComponent* newComponent, collapsingMethod method)
+void activityMapComponent::add(activityMapComponent* newComponent, collapsingMethod method)
 {
-    switch (method) {
-    case meanDecisions:
-        throw "Not implemented - no difference from median";
-        break;
-    case medianDecisions:
-        if(newComponent->_noOfFreeObservations >= newComponent->_noOfOccupiedObservations)
-            this->observedFree(newComponent->_lastObservedState);
-        else
-            this->observedOccupied(newComponent->_lastObservedState);
+    if(newComponent->_lastObservedState != unseen)
+    {
+        switch (method) {
+        case meanDecisions:
+            throw "Not implemented - no difference from median";
+            break;
+        case medianDecisions:
+            if(newComponent->_noOfFreeObservations >= newComponent->_noOfOccupiedObservations)
+                this->observedFree(newComponent->_lastObservedState);
+            else
+            {
+                this->observedOccupied(newComponent->_lastObservedState);
+            }
 
-        if(newComponent->_timestamp > this->_timestamp){
-            this->_timestamp = newComponent->_timestamp;
-            this->_lastObservedState = newComponent->_lastObservedState;
+            if(newComponent->_timestamp > this->_timestamp){
+                this->_timestamp = newComponent->_timestamp;
+                this->_lastObservedState = newComponent->_lastObservedState;
+            }
+            break;
+        case rawCopy:
+            this->_noOfFreeObservations += newComponent->_noOfFreeObservations;
+            this->_noOfOccupiedObservations += newComponent->_noOfOccupiedObservations;
+            this->_occupyEvents += newComponent->_occupyEvents;
+            this->_releaseEvents += newComponent->_releaseEvents;
+
+            if(newComponent->_timestamp > this->_timestamp){
+                this->_timestamp = newComponent->_timestamp;
+                this->_lastObservedState = newComponent->_lastObservedState;
+            }
+            break;
+        default:
+            throw "Add observation - unknown method";
+            break;
         }
-
-        break;
-    case rawCopy:
-        this->_noOfFreeObservations += newComponent->_noOfFreeObservations;
-        this->_noOfOccupiedObservations += newComponent->_noOfOccupiedObservations;
-        this->_occupyEvents += newComponent->_occupyEvents;
-        this->_releaseEvents += newComponent->_releaseEvents;
-
-        if(newComponent->_timestamp > this->_timestamp){
-            this->_timestamp = newComponent->_timestamp;
-            this->_lastObservedState = newComponent->_lastObservedState;
-        }
-        break;
-    default:
-        throw "Add observation - unknown method";
-        break;
     }
 }
 
@@ -200,8 +206,20 @@ void activityMapComponent::printValues()
 
 
 
+unsigned long activityMapComponent::getTimestamp()
+{
+    return _timestamp;
+}
 
-
+void activityMapComponent::resetCell()
+{
+    _lastObservedState = unseen;
+    _noOfFreeObservations = 0;
+    _noOfOccupiedObservations = 0;
+    _occupyEvents = 0;
+    _releaseEvents = 0;
+    _timestamp = 0;
+}
 
 
 

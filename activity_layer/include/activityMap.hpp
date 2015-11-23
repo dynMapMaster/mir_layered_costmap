@@ -16,7 +16,8 @@ public:
     activityMap(int sizeX,int sizeY, bool useOverlay );
     ~activityMap();
     void resetEditLimits();
-    void addObservationMap(activityMap& newMap, collapsingMethod method = rawCopy);
+    void setEditLimits(int xMin, int xMax, int yMin, int yMax);
+    void addObservationMap(activityMap *newMap, collapsingMethod method = rawCopy, int minUnobservedTimeMs = 1000);
     void pointObservedFree(int x, int y, long unsigned time);
     void pointObservedOccupied(int x, int y, long unsigned time);
     void printDebugInfo();
@@ -35,6 +36,7 @@ protected:
     activityMapComponent* getDataPointer(int x, int y);
     void convertToEndOrigin(int& x, int& y);
 
+    void deleteCell(int x, int y);
     void checkValidityOfCell(int x, int y);
     void updateEditLimits(int x, int y);
     inline void bresenham2D(int x1,int y1,int const x2, int const y2);

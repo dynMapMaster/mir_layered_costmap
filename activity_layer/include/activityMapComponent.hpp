@@ -2,6 +2,7 @@
 #define _ACTIVITYMAPCOMPONENT_HPP
 
 #include <utility>
+#include <iostream>
 
 enum activityState{
     freeState = 0,
@@ -41,12 +42,15 @@ public:
 
     int getLastKnownObservation();
 
-    void add(const activityMapComponent* newComponent, collapsingMethod method = rawCopy);
+    void add(activityMapComponent *newComponent, collapsingMethod method = rawCopy);
 
     std::pair<double, double> getLongTermProb();
 
     void setForgetting(bool on, double forgettingFactor, double maxValue);
 
+    unsigned long getTimestamp();
+
+    void resetCell();
 
     void printValues();
 

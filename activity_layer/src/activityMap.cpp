@@ -112,6 +112,13 @@ void activityMap::resetEditLimits()
     _editMinY = -1;
 }
 
+void activityMap::setEditLimits(int xMin, int xMax, int yMin, int yMax)
+{
+    _editMaxX = xMax;
+    _editMaxY = yMax;
+    _editMinX = xMin;
+    _editMinY = yMin;
+}
 
 void activityMap::pointObservedFree(int x, int y, long unsigned time)
 {
@@ -142,16 +149,40 @@ void activityMap::updateEditLimits(int x, int y)
 
 }
 
-void activityMap::addObservationMap(activityMap& newMap, collapsingMethod method)
+void activityMap::addObservationMap(activityMap* newMap, collapsingMethod method, int minUnobservedTimeMs)
 {
-    for(int y = newMap._editMinY; y < newMap._editMaxY+1 ; y++){
-        for(int x = newMap._editMinX; x < newMap._editMaxX+1; x++){
-            if(newMap.pointContainsData(x,y))
-            {
-                this->getDataPointer(x,y)->add(newMap.getDataPointer(x,y),method);
+    if(newMap->_editMaxX >= 0 && newMap->_editMinY >= 0 && newMap->_editMaxY >= 0 && newMap->_editMinX >= 0)
+    {
+        int newXmin = -1 , newXmax =-1, newYmin = -1 , newYmax = -1;
+        unsigned long currentTime = ros::Time::now().toSec() * 1000;
+        for(int y = newMap->_editMinY; y <= newMap->_editMaxY ; y++){
+            for(int x = newMap->_editMinX; x <= newMap->_editMaxX; x++){
+                if(newMap->pointContainsData(x,y))
+                {
+                    activityMapComponent* newMapCell = newMap->getDataPointer(x,y);
+                    if(currentTime - newMapCell->getTimestamp() > minUnobservedTimeMs )
+                    {
+                        this->getDataPointer(x,y)->add(newMapCell,method);
+                        newMapCell->resetCell();
+                    }
+                    else
+                    {
+                        // set new limits
+                        if(newXmin < 0 || x < newXmin)
+                            newXmin = x;
+                        if(newXmax < 0 || x > newXmax)
+                            newXmax = x;
+                        if(newYmin < 0 || y < newYmin)
+                            newYmin = y;
+                        if(newYmax < 0 || y > newYmax)
+                            newYmax = y;
+                    }
+                }
+                this->updateEditLimits(x,y);
             }
-            this->updateEditLimits(x,y);
         }
+        //newMap->resetEditLimits();
+        newMap->setEditLimits(newXmin,newXmax,newYmin, newYmax);
     }
 }
 
@@ -346,15 +377,16 @@ bool activityMap::getCellValue(int x, int y, costmapGenerationMethods method, un
 
 void activityMap::traceLine(int x0, int y0, int x1, int y1, bool markEnd)
 {
-
+   unsigned long currentTime = ros::Time::now().toSec() * 1000;
    //ROS_INFO("Tracing line from (%i,%i) to (%i,%i)",x0,y0,x1,y1);
    bresenham2D(x0,y0,x1,y1);
    if(markEnd)
-        pointObservedOccupied(x1,y1,0);
+        pointObservedOccupied(x1,y1,currentTime);
 }
 
 inline void activityMap::bresenham2D(int x1, int y1, const int x2, const int y2)
 {
+    unsigned long currentTime = ros::Time::now().toSec() * 1000;
     int delta_x(x2 - x1);
     // if x1 == x2, then it does not matter what we set here
     signed char const ix((delta_x > 0) - (delta_x < 0));
@@ -373,7 +405,7 @@ inline void activityMap::bresenham2D(int x1, int y1, const int x2, const int y2)
         while (x1 != x2)
         {
             //ROS_INFO("Clearing point (%i,%i)",x1,y1);
-            pointObservedFree(x1,y1,0);
+            pointObservedFree(x1,y1,currentTime);
             if ((error >= 0) && (error || (ix > 0)))
             {
                 error -= delta_x;
@@ -395,7 +427,7 @@ inline void activityMap::bresenham2D(int x1, int y1, const int x2, const int y2)
         while (y1 != y2)
         {
             //ROS_INFO("Clearing point (%i,%i)",x1,y1);
-            pointObservedFree(x1,y1,0);
+           pointObservedFree(x1,y1,currentTime);
             if ((error >= 0) && (error || (iy > 0)))
             {
                 error -= delta_y;
@@ -445,7 +477,21 @@ bool activityMap::pointContainsData(int x, int y)
     return false;
 }
 
-
+void activityMap::deleteCell(int x, int y)
+{
+    if(pointContainsData(x,y))
+    {
+        if(_useOverlay)
+        {
+            ROS_ERROR("Delete with overlay not implemented yet");
+        }
+        else
+        {
+            delete _map[y*_sizeX+x];
+            _map[y*_sizeX+x] = NULL;
+        }
+    }
+}
 
 activityMapComponent* activityMap::getDataPointer(int x, int y)
 {
@@ -518,8 +564,10 @@ void activityMap::checkValidityOfCell(int x, int y)
         else
         {
             //ROS_DEBUG("Creating non overlay");
-            if(_useForgetting)
+            if(_useForgetting){
+                ROS_ERROR("USING FORGETTING");
                 _map[y * _sizeX + x] = new activityMapComponent(_useForgetting,_forgetFactor,_maxValue);
+            }
             else
                 _map[y * _sizeX + x] = new activityMapComponent();
         }
