@@ -77,27 +77,36 @@ void occupancyGridCb(const nav_msgs::OccupancyGrid::Ptr msg)
     cloud.header.stamp = ros::Time::now();
     sensor_msgs::ChannelFloat32& chan = cloud.channels[0];
     uint32_t i = 0;
-    for (uint32_t x_grid = 0; x_grid < msg->info.width; ++x_grid) {
-        for (uint32_t y_grid = 0; y_grid < msg->info.height; ++y_grid) {
+    for (uint32_t y_grid = 0; y_grid < msg->info.height; ++y_grid) {
+        for (uint32_t x_grid = 0; x_grid < msg->info.width; ++x_grid) {
             geometry_msgs::Point32& p = cloud.points[i];
             double wx, wy;
-            costmap.mapToWorld(x_grid, y_grid, wx, wy);
+            costmap.mapToWorld(x_grid, y_grid, wx, wy); // not sure why wy and wx needs to be switched
             p.x = wx; p.y = wy;
             p.z = 0;
             //ROS_INFO("val in map=%i",msg->data[i] );
-            uint8_t cost_val = getRawCost(msg->data[i]);
-            const float hue = (cost_val / 255.0) * 360;
-            if(msg->data[i] > 0)
+            uint32_t col;
+            if(msg->data[i] == -1) // unknown cell
             {
-                ROS_INFO("cost val= %i", cost_val);
-                ROS_INFO("hue = %f", hue);
+                col = UINT_MAX;
             }
-            float fr(0), fg(0), fb(0);
-            HSVtoRGB(fr, fg, fb, hue, 0.5, 0.5);
-            uint32_t r = fr * 255.0;
-            uint32_t g = fg * 255.0;
-            uint32_t b = fb * 255.0;
-            uint32_t col = (r << 16) | (g << 8) | b;
+            else
+            {
+                uint8_t cost_val = getRawCost(msg->data[i]);
+                const float hue = (cost_val / 255.0) * 360;
+                if(msg->data[i] > 0)
+                {
+                    ROS_INFO("cost val= %i", cost_val);
+                    ROS_INFO("hue = %f", hue);
+                }
+                float fr(0), fg(0), fb(0);
+                HSVtoRGB(fr, fg, fb, hue, 0.5, 0.5);
+                uint32_t r = fr * 255.0;
+                uint32_t g = fg * 255.0;
+                uint32_t b = fb * 255.0;
+                col = (r << 16) | (g << 8) | b;
+            }
+
             chan.values[i] = *reinterpret_cast<float*>(&col);
             i++;
         }
