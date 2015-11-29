@@ -10,7 +10,7 @@
 
   <node pkg="tf" type="static_transform_publisher" name="initial_pose_link_broadcaster" args="0. 0. 0 0 0 0 map odom 20" />  
 
-  <node name="costmap" pkg="layered_costmap_2d" type="costmap_2d_node" output="screen">
+  <node name="costmap" pkg="layered_costmap_2d" type="costmap_2d_node" >
     <rosparam file="$(find sim_dynamic_world)/launch/sim_activity_layer.yaml" command="load" ns="costmap"/> 
   </node>
 
@@ -29,25 +29,29 @@
   <!-- upper dynamic obstacle -->
   
   <!-- lower dynamic obstacle -->
+
   <node name="lower_dynamic_obs_controller" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
     <param name="name" value="lower_dyn_obs" />
     <rosparam param="waypoints">  
       [
-        [1.5, -1.5, 0.0, 0.1],
-        [0.5, -1.5, 90.0, 2.7]
+        [1.5, -1.5, 0.0, 0.33],
+        [0.5, -1.5, 90.0, 0.33]
       ]
     </rosparam>
   </node>
+
   <!-- upper dynamic obstacle -->
+
   <node name="upper_dynamic_obs_controller" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
     <param name="name" value="upper_dyn_obs" />
     <rosparam param="waypoints">  
       [
-        [-1.5, 1.5, 0.0, 2.0],
-        [-0.5, 1.5, 90.0, 1.0]
+        [-1.5, 1.5, 0.0, 4.4],
+        [-0.5, 1.5, 90.0, 1.7]
       ]
     </rosparam>
   </node>
+
   <node name="cloud_visualizer" pkg="visualize_activity_layer" type="occupancy_cloud" />
   <node name="occupancy_publisher" pkg="occupancy_image_publish" type="occupancy_image_publish_node" />
 

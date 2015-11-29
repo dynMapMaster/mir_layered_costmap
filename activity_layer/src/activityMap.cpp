@@ -324,7 +324,8 @@ bool activityMap::getCellValue(int x, int y, costmapGenerationMethods method, un
             if( releaseState==VERY_LOW && occupyState==HIGH)
             {
                 //Static occupied
-                return false;
+                //return false;
+                cellVal = 0.9;
             }
             else if( releaseState==HIGH && occupyState == VERY_LOW)
             {
@@ -334,7 +335,7 @@ bool activityMap::getCellValue(int x, int y, costmapGenerationMethods method, un
             else if( releaseState == LOW && occupyState == LOW)
             {
                 // semi static
-                cellVal = 0.9;
+                cellVal = 0.7;
             }
             else if( releaseState == HIGH && occupyState == LOW)
             {
@@ -349,7 +350,8 @@ bool activityMap::getCellValue(int x, int y, costmapGenerationMethods method, un
             else
             {
                 //ROS_ERROR("Undefined probability state with probability: %f, %f",getDataPointer(x,y)->getProbOfOccupy(), getDataPointer(x,y)->getProbOfRelease());
-                return false;
+                //return false;
+                cellVal = 1;
             }
             cellValueOutput = cellVal * 250;
             if(y==_sizeY/2 - 11 && x == _sizeX/2 + 19) {

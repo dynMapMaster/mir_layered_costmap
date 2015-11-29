@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 #endif
     ros::init(argc, argv, "dynamic_obstacle");
     ros::NodeHandle n("~");
-    ros::Publisher object_pose_pub = n.advertise<geometry_msgs::PoseStamped>("/objectpose",1);
+    ros::Publisher object_pose_pub = n.advertise<geometry_msgs::PoseStamped>("/objectpose",10);
     std::vector<Waypoint> waypoints;
     {
         string obstacle_name;

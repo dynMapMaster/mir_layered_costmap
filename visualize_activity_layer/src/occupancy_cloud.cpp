@@ -36,6 +36,7 @@ ros::Publisher pub;
 void HSVtoRGB(float& fR, float& fG, float& fB, const float& fH, const float& fS, const float& fV);
 uint8_t getRawCost(char translated_cost);
 void occupancyGridCb(const nav_msgs::OccupancyGrid::Ptr msg);
+float map(float value, float istart, float istop, float ostart, float ostop) ;
 
 int main(int argc, char** argv)
 {
@@ -91,16 +92,19 @@ void occupancyGridCb(const nav_msgs::OccupancyGrid::Ptr msg)
                 col = UINT_MAX;
             }
             else
-            {
+            {                
                 uint8_t cost_val = getRawCost(msg->data[i]);
+                const float value = map(cost_val, 0, 255, 0.3, 0.7);
                 const float hue = (cost_val / 255.0) * 360;
+                /*
                 if(msg->data[i] > 0)
                 {
                     ROS_INFO("cost val= %i", cost_val);
                     ROS_INFO("hue = %f", hue);
                 }
+                */
                 float fr(0), fg(0), fb(0);
-                HSVtoRGB(fr, fg, fb, hue, 0.5, 0.5);
+                HSVtoRGB(fr, fg, fb, hue, 0.5, value);
                 uint32_t r = fr * 255.0;
                 uint32_t g = fg * 255.0;
                 uint32_t b = fb * 255.0;
@@ -112,6 +116,11 @@ void occupancyGridCb(const nav_msgs::OccupancyGrid::Ptr msg)
         }
     }
     pub.publish(cloud);
+}
+
+float map(float value, float istart, float istop, float ostart, float ostop)
+{
+    return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
 }
 
 uint8_t getRawCost(char translated_cost)
