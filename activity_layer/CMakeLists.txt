@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.4.6)
 include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 set(ROS_BUILD_TYPE Debug)
-
 # Set the build type.  Options are:
 #  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
 #  Debug          : w/ debug symbols, w/o optimization
@@ -31,7 +30,8 @@ rosbuild_add_library(activity_layer
   src/activity_layer.cpp
   src/pmac_cell.cpp
   src/probablistic_cell.cpp
-  src/probablistic_filter.cpp
+  src/probabilistic_filter.cpp
+  src/pmac_learner.cpp
   src/activityMap.cpp
   src/activityMapComponent.cpp
 )

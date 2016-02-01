@@ -58,17 +58,25 @@
 #include <activityMap.hpp>
 #include <activityMapComponent.hpp>
 
+#include <observation_interface.h>
+#include <costmap_interpretator.h>
+#include <pmac_learner.h>
+#include <probabilistic_filter.h>
+
 namespace dynamic_map
 {
+
+typedef Pmac_learner LearnerT;
+typedef probabilistic_filter FilterT;
 
 class ActivityLayer : public layered_costmap_2d::Layer
 {
 public:
   ActivityLayer()
   {
-ROS_INFO("creating activity layer");
-    _map = NULL;  // this is the unsigned char* member of parent class Costmap2D.
-    _tempMap = NULL;
+    ROS_INFO("creating activity layer");
+    _observation_map = NULL;
+    _map = NULL; // this is the unsigned char* member of parent class Costmap2D.
   }
 
   virtual ~ActivityLayer();
@@ -172,11 +180,11 @@ protected:
 
 private:
     void reconfigureCB(layered_costmap_2d::ObstaclePluginConfig &config, uint32_t level);    
-    activityMap* _map;
-    activityMap* _tempMap;
+    FilterT* _observation_map;
+    LearnerT* _map;
     int _xSize, _ySize;
     double _resolution;
-
+    static const double SENSOR_STD_DEV = 0.5; // in cells
     std::string _global_frame;
 
 };

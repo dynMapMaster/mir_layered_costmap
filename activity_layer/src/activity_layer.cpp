@@ -183,11 +183,11 @@ ActivityLayer::~ActivityLayer()
     if (dsrv_)
         delete dsrv_;
 
+    if(_observation_map)
+        delete _observation_map;
+
     if(_map)
         delete _map;
-
-    if(_tempMap)
-        delete _tempMap;
 
 }
 void ActivityLayer::reconfigureCB(layered_costmap_2d::ObstaclePluginConfig &config, uint32_t level)
@@ -220,13 +220,13 @@ void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& mess
     buffer->unlock();
 
     // Waste of time -> consider running in a timer callback
-    for(int i = 0; i < observation_buffers_.size(); i++)
+    for(size_t i = 0; i < observation_buffers_.size(); i++)
     {
         vector<Observation> buffer;
         observation_buffers_[i]->lock();
         observation_buffers_[i]->getObservations(buffer);
         observation_buffers_[i]->unlock();
-        for(int o = 0; o < buffer.size(); o++)
+        for(size_t o = 0; o < buffer.size(); o++)
         {
             //ROS_INFO("observation: %i",o);
             raytrace(buffer[o]);
@@ -271,13 +271,13 @@ void ActivityLayer::laserScanValidInfCallback(const sensor_msgs::LaserScanConstP
     buffer->unlock();
 
     // Waste of time -> consider running in a timer callback
-    for(int i = 0; i < observation_buffers_.size(); i++)
+    for(size_t i = 0; i < observation_buffers_.size(); i++)
     {
         vector<Observation> buffer;
         observation_buffers_[i]->lock();
         observation_buffers_[i]->getObservations(buffer);
         observation_buffers_[i]->unlock();
-        for(int o = 0; o < buffer.size(); o++)
+        for(size_t o = 0; o < buffer.size(); o++)
         {
             //ROS_INFO("observation: %i",o);
             raytrace(buffer[o]);
@@ -301,12 +301,18 @@ void ActivityLayer::updateBounds(double robot_x, double robot_y, double robot_ya
                                           double* min_y, double* max_x, double* max_y)
 {
     ROS_INFO("copying temp to map");
-    _map->addObservationMap(_tempMap,medianDecisions);
+    _map->addObservationMap(_observation_map);
 
     //ROS_INFO("Updating bound from activity layer");
-    unsigned int layerMinX, layerMaxX, layerMinY, layerMaxY;
-    if(_map->getEditLimits(layerMinX,layerMaxX,layerMinY,layerMaxY))
+    int layerMinX, layerMaxX, layerMinY, layerMaxY;
+    _map->loadUpdateBounds(layerMinX, layerMaxX, layerMinY, layerMaxY);
+    if(layerMinX < 0 || layerMaxX < 0 || layerMinY < 0 || layerMaxY < 0)
     {
+
+    }
+    else
+    {
+        ROS_DEBUG("Activity layer: updateing bounds");
         Costmap2D* master = layered_costmap_->getCostmap();
         double min_xTemp, max_xTemp, min_yTemp, max_yTemp ;
         master->mapToWorld(layerMinX,layerMinY,min_xTemp,min_yTemp);
@@ -317,7 +323,7 @@ void ActivityLayer::updateBounds(double robot_x, double robot_y, double robot_ya
         *min_y = (min_yTemp < *min_y) ? min_yTemp : *min_y;
         *max_y = (max_yTemp > *max_y) ? max_yTemp : *max_y;
         //ROS_INFO("Bounds: %f %f %f %f %f",min_xTemp,max_xTemp, min_yTemp, max_yTemp, _resolution);
-    }    
+    }
     //ROS_INFO("Bounds: %f %f %f %f %f",*min_x,*max_x, *min_y, *max_y, _resolution);
 
 }
@@ -330,10 +336,9 @@ void ActivityLayer::updateFootprint(double robot_x, double robot_y, double robot
 
 void ActivityLayer::updateCosts(layered_costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
 {
-    ROS_INFO("Updating cost from activity layer %i, %i, %i, %i",min_i, min_j, max_i, max_j);
+    //ROS_INFO("Updating cost from activity layer %i, %i, %i, %i",min_i, min_j, max_i, max_j);
     unsigned char* master_array = master_grid.getCharMap();
-    unsigned int val = 0;
-    int spanSize = _map->getXSize();
+    unsigned char val = 0;
     unsigned int span = master_grid.getSizeInCellsX();
     for (int j = min_j; j < max_j; j++)
     {
@@ -341,9 +346,8 @@ void ActivityLayer::updateCosts(layered_costmap_2d::Costmap2D& master_grid, int 
         unsigned int it = j * span + min_i;
         for (int i = min_i; i < max_i; i++)
         {
-            //ROS_INFO("i=%i",i);
-            if (_map->getCellValue(i,j,probabilityClassification,val)){
-
+            if (_map->getCellValue(i,j,val)){
+                ROS_INFO("occupied val=%i",val);
                 //ROS_INFO("activity map has data");
                 unsigned char old_cost = master_array[it];
                 //if (old_cost == NO_INFORMATION || old_cost < val)
@@ -354,7 +358,7 @@ void ActivityLayer::updateCosts(layered_costmap_2d::Costmap2D& master_grid, int 
     }
 
     _map->resetEditLimits();
-    ROS_INFO("Done updating");
+    //ROS_INFO("Done updating");
 }
 
 void ActivityLayer::addStaticObservation(layered_costmap_2d::Observation& obs, bool marking, bool clearing)
@@ -387,14 +391,12 @@ bool ActivityLayer::getClearingObservations(std::vector<Observation>& clearing_o
 void ActivityLayer::raytrace(const Observation& observation)
 {
     Costmap2D* master = layered_costmap_->getCostmap();
-    for(int i = 0; i < observation.cloud_->size();i++){
-        //ROS_INFO("Point: %i", i);
-
+    for(size_t i = 0; i < observation.cloud_->size();i++){
         int x0,y0, x1, y1;
         master->worldToMapEnforceBounds(observation.origin_.x,observation.origin_.y,x0,y0);
         master->worldToMapEnforceBounds(observation.cloud_->points[i].x,observation.cloud_->points[i].y,x1,y1);
 
-        _tempMap->traceLine(x0,y0,x1,y1,true);
+        _observation_map->raytrace(x0,y0,x1,y1,true);
     }
 }
 
@@ -415,25 +417,20 @@ void ActivityLayer::updateRaytraceBounds(double ox, double oy, double wx, double
 }
 
 void ActivityLayer::matchSize()
-{    
+{
     Costmap2D* master = layered_costmap_->getCostmap();
 
     if(_map)
         delete _map;
-    ROS_INFO("tempmap");
-    if(_tempMap)
-        delete _tempMap;
-    ROS_INFO("tempmap done");
+    if(_observation_map)
+        delete _observation_map;
     _xSize = master->getSizeInCellsX();
     _ySize = master->getSizeInCellsY();
     _resolution = master->getResolution();
-    ROS_INFO("Resolution: %f", _resolution);
     int originX = master->getOriginX() /_resolution;
     int originY = master->getOriginY() / _resolution;
-    _map = new activityMap(_xSize,_ySize, false);
-    //_map->useForgetting(0.2,20);
-    _tempMap = new activityMap(_xSize, _ySize,false);
-
+    _observation_map = new FilterT(_xSize, _ySize, _resolution, SENSOR_STD_DEV);
+    _map = new LearnerT(_xSize, _ySize, _resolution);
 }
 
 void ActivityLayer::reset()

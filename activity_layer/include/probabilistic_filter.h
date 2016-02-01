@@ -23,8 +23,8 @@ public:
     // Loads the update bounds from grid structure
     void loadUpdateBounds(int& xMin, int& xMax, int& yMin, int& yMax);
 
-    // Resets the grid structures update limits
-    void resetUpdateLimits();
+    // Resets the grid structures update limits    
+    void resetEditLimits();
 
 private:
     Grid_structure<Probablistic_cell>* _map;

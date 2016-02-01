@@ -35,7 +35,7 @@
     <rosparam param="waypoints">  
       [
         [1.5, -1.5, 0.0, 0.33],
-        [0.5, -1.5, 90.0, 0.33]
+        [0.5, -1.5, 90.0, 1.0]
       ]
     </rosparam>
   </node>
@@ -46,8 +46,8 @@
     <param name="name" value="upper_dyn_obs" />
     <rosparam param="waypoints">  
       [
-        [-1.5, 1.5, 0.0, 4.4],
-        [-0.5, 1.5, 90.0, 1.7]
+        [-1.5, 1.5, 0.0, 120.],
+        [-0.5, 1.5, 90.0, 240.]
       ]
     </rosparam>
   </node>

@@ -1,5 +1,4 @@
 #include "probabilistic_filter.h"
-#include "Box.h"
 #include <cmath>
 
 
@@ -14,7 +13,6 @@ probabilistic_filter::~probabilistic_filter()
 {
     delete _map;
 }
-
 
 void probabilistic_filter::raytrace(int x0, int y0, int x1, int y1, bool markEnd)
 {
@@ -191,4 +189,9 @@ inline std::vector<std::pair<int,int> > probabilistic_filter::bresenham2Dv0(int 
     }
 
     return resultLine;
+}
+
+void probabilistic_filter::resetEditLimits()
+{
+    _map->resetUpdateBounds();
 }
