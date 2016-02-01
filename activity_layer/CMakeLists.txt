@@ -29,6 +29,9 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 rosbuild_add_library(activity_layer
   src/activity_layer.cpp
+  src/pmac_cell.cpp
+  src/probablistic_cell.cpp
+  src/probablistic_filter.cpp
   src/activityMap.cpp
   src/activityMapComponent.cpp
 )
