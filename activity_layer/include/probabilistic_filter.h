@@ -4,24 +4,36 @@
 #include <observation_interface.h>
 #include <grid_structure.h>
 #include <probablistic_cell.h>
+#include <vector>
+#include <utility>
+
 
 class probabilistic_filter : public Observation_interface
 {
 public:
-    probabilistic_filter(int xDim, int yDim, double resolution);
+    probabilistic_filter(int xDim, int yDim, double resolution, double laserStdDev);
     ~probabilistic_filter();
 
+    // Traces a ray to x1,y1. All positions are written with a gaussian kernel based on lasernoise
     void raytrace(int x0, int y0, int x1, int y1, bool markEnd);
-    double getOccupancyPrabability(int x, int y);
-    void loadUpdateBounds(int& xMin, int& xMax, int& yMin, int& yMax);
-    void resetUpdateLimits();
-    void bresenham2D(int x1, int y1, const int x2, const int y2);
 
-    // DEBUG
-    Grid_structure<Probablistic_cell>* getMap(){return _map;}
+    // return the occupancy probability of the underlying cell
+    double getOccupancyPrabability(int x, int y);
+
+    // Loads the update bounds from grid structure
+    void loadUpdateBounds(int& xMin, int& xMax, int& yMin, int& yMax);
+
+    // Resets the grid structures update limits
+    void resetUpdateLimits();
 
 private:
     Grid_structure<Probablistic_cell>* _map;
+    double _laserNoiseVar;
+    double _laserNoiseStdDev;
+
+    double calculateProb(const std::vector<double>& origin, const std::vector<double>& direction, const std::vector<double>& intersectResult, int goalX, int goalY);
+    std::vector<std::pair<int,int> > bresenham2Dv0(int x1, int y1, const int x2, const int y2);
+    double phi(double x);
 };
 
 #endif // PROBABILISTIC_FILTER_H
