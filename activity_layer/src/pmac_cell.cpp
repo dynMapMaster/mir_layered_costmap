@@ -35,6 +35,7 @@ void Pmac_cell::addProbability(double occ_prob)
         if(occupied_count > MAX_NO_OF_OBS)
         {
             exit *= double(MAX_NO_OF_OBS) / occupied_count;
+            occupied_count = MAX_NO_OF_OBS;
         }
         // Adjust inactive state
         free_count= 1 + (free_count-1) * recency_weightning;
@@ -46,6 +47,7 @@ void Pmac_cell::addProbability(double occ_prob)
         if(free_count > MAX_NO_OF_OBS)
         {
             entry *= double(MAX_NO_OF_OBS) / free_count;
+            free_count = MAX_NO_OF_OBS;
         }
         // Adjust inactive state
         occupied_count = 1 + (occupied_count-1) * recency_weightning;
