@@ -2,6 +2,8 @@
 #define GRID_STRUCTURE_H
 
 #include <stddef.h>
+#include "ros/ros.h"
+#include <iostream>
 
 template<class T> class Grid_structure
 {
@@ -98,16 +100,29 @@ T* Grid_structure<T>::editCell(int x, int y)
        // ROS_ERROR("Attempt to access non-existting map component in activity map x=%i  y=%i", x,y);
         throw "Attempt to access non-existting map component in activity map";
     }
-    //ROS_INFO("returning non overlay pointer");
 
     if(_map[y * _sizeX + x] == NULL)
     {
-        _map[y * _sizeX + x] = new T();
+        try
+        {
+             _map[y * _sizeX + x] = new T();
+        }
+        catch(std::bad_alloc& ba)
+        {
+            std::cout << "New operator failed: " << ba.what() << std::endl;
+        }
     }
 
     updateEditLimits(x,y);
 
-    return _map[y * _sizeX + x];
+    if(_map[y * _sizeX + x] == NULL)
+    {
+        std::cout << "Edit Cell - was null AFTER creating" << std::endl;
+        throw "NULL ALERT";
+    }
+
+
+    return  _map[y * _sizeX + x];
 }
 
 template<class T>

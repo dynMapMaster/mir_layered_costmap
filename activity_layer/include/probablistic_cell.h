@@ -9,6 +9,7 @@ public:
     Probablistic_cell();
     void addMeasurement(int measurement, double prob);
     double getProbForOccupied();
+    void resetCell();
 private:
     double occupied_count, free_count;
 };

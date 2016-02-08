@@ -69,6 +69,7 @@ double probabilistic_filter::getOccupancyPrabability(int x, int y)
     if(cell != NULL)
     {
         result = cell->getProbForOccupied();
+        cell->resetCell();
     }
     return result;
 }

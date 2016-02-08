@@ -34,3 +34,9 @@ double Probablistic_cell::getProbForOccupied()
     occupied_count = 0;
     return occupiedness;
 }
+
+void Probablistic_cell::resetCell()
+{
+    occupied_count = 0;
+    free_count = 0;
+}
