@@ -10,7 +10,7 @@
 
   <node pkg="tf" type="static_transform_publisher" name="initial_pose_link_broadcaster" args="0. 0. 0 0 0 0 map odom 20" />  
 
-  <node name="costmap" pkg="layered_costmap_2d" type="costmap_2d_node" >
+  <node name="costmap" pkg="layered_costmap_2d" type="costmap_2d_node" output="screen">
     <rosparam file="$(find sim_dynamic_world)/launch/sim_activity_layer.yaml" command="load" ns="costmap"/> 
   </node>
 
@@ -46,8 +46,8 @@
     <param name="name" value="upper_dyn_obs" />
     <rosparam param="waypoints">  
       [
-        [-1.5, 1.5, 0.0, 120.],
-        [-0.5, 1.5, 90.0, 240.]
+        [-1.5, 1.5, 0.0, 30.],
+        [-0.5, 1.5, 90.0, 60.]
       ]
     </rosparam>
   </node>
@@ -55,7 +55,7 @@
   <node name="cloud_visualizer" pkg="visualize_activity_layer" type="occupancy_cloud" />
   <node name="occupancy_publisher" pkg="occupancy_image_publish" type="occupancy_image_publish_node" />
 
-  <node name="visulizer" pkg="rviz" type="rviz" args="-d $(find activity_layer)/config/sim_activity_layer.vcg"/>
+  <!--node name="visulizer" pkg="rviz" type="rviz" args="-d $(find activity_layer)/config/sim_activity_layer.vcg"/-->
   
  <node name="occupancy_im_shower" pkg="rqt_image_view" type="rqt_image_view" />
 

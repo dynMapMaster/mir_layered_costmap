@@ -300,7 +300,6 @@ void ActivityLayer::pointCloud2Callback(const sensor_msgs::PointCloud2ConstPtr& 
 void ActivityLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x,
                                           double* min_y, double* max_x, double* max_y)
 {
-    ROS_INFO("copying temp to map");
     _map->addObservationMap(_observation_map);
 
     //ROS_INFO("Updating bound from activity layer");
@@ -347,7 +346,10 @@ void ActivityLayer::updateCosts(layered_costmap_2d::Costmap2D& master_grid, int 
         for (int i = min_i; i < max_i; i++)
         {
             if (_map->getCellValue(i,j,val)){
-                ROS_INFO("occupied val=%i",val);
+                if(i < 74 && i > 72 && j == 200-70)
+                {
+                    //ROS_ERROR("occupied val=%i",val);
+                }
                 //ROS_INFO("activity map has data");
                 unsigned char old_cost = master_array[it];
                 //if (old_cost == NO_INFORMATION || old_cost < val)
