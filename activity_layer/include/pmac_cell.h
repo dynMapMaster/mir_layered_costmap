@@ -8,6 +8,7 @@ public:
     Pmac_cell();
     void addProbability(double occ_prob);
     double getLongTermOccupancyProb();
+    double getProjectedOccupancyProbability();
 private:
     static const int NO_INTIAL_UPDATES = 100;
     static const int MAX_NO_OF_OBS = 1e4;

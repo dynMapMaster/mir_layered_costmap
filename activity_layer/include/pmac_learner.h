@@ -14,7 +14,7 @@ public:
     void loadUpdateBounds(int& xMin, int& xMax, int& yMin, int& yMax);
     double getOccupancyPrabability(int x, int y); // just for testing    
     void resetEditLimits();
-    static const uint64_t UPDATE_INTERVAL = 20e9; // in nanoseconds
+    static const uint64_t UPDATE_INTERVAL = 5e9; // in nanoseconds
     void setUpdateInterval(double time_between_updates);
 private:    
     Grid_structure<Pmac_cell> grid;

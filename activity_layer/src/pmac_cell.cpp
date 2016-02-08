@@ -61,3 +61,11 @@ double Pmac_cell::getLongTermOccupancyProb()
     double lambda_exit = (exit + 1) / (occupied_count + 1); // a(2,1)
     return 1.0 / (lambda_exit + lambda_entry) * lambda_exit;
 }
+
+double Pmac_cell::getProjectedOccupancyProbability()
+{
+    double lambda_entry = (entry + 1) / (free_count + 1); // a(1,2)
+    double lambda_exit = (exit + 1) / (occupied_count + 1); // a(2,1)
+
+    return prev_occ_prob * (1-lambda_entry) + prev_occ_prob * lambda_exit;
+}

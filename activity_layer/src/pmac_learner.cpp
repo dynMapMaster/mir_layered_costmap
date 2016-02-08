@@ -11,7 +11,7 @@ bool Pmac_learner::getCellValue(int x, int y, unsigned char& cellValueOutput)
     Pmac_cell* cell = grid.readCell(x,y);
     if (cell != NULL)
     {
-        double occupancy_prob = cell->getLongTermOccupancyProb();
+        double occupancy_prob = cell->getProjectedOccupancyProbability();
         if(occupancy_prob < 0) {
             occupancy_prob = 0;
         }
@@ -40,7 +40,7 @@ void Pmac_learner::addObservationMap(Observation_interface* observation)
             for(int y = min_y; y <= max_y ; y++){
                 for(int x = min_x; x <= max_x; x++){
                     double occupancy_prob = observation->getOccupancyPrabability(x,y);
-                    if (occupancy_prob > 0) {
+                    if (occupancy_prob >= 0) {
                         Pmac_cell* cell = grid.editCell(x,y);
                         cell->addProbability(occupancy_prob);
                     }
@@ -60,7 +60,11 @@ double Pmac_learner::getOccupancyPrabability(int x, int y)
 {
     Pmac_cell* cell = grid.readCell(x,y);
     if (cell != NULL)
-        return cell->getLongTermOccupancyProb();
+    {
+        //return cell->getLongTermOccupancyProb();
+        double val = cell->getProjectedOccupancyProbability();
+        return val;
+    }
     else
         return -1;
 }
