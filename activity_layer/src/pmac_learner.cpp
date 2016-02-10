@@ -12,6 +12,13 @@ bool Pmac_learner::getCellValue(int x, int y, unsigned char& cellValueOutput)
     if (cell != NULL)
     {
         double occupancy_prob = cell->getProjectedOccupancyProbability();
+
+        if(x == 75 && y == 75)
+        {
+            ROS_ERROR("occ val: %f  - %f  %f  ", occupancy_prob, cell->free_count, cell->occupied_count );
+
+        }
+
         if(occupancy_prob < 0) {
             occupancy_prob = 0;
         }
@@ -72,4 +79,21 @@ double Pmac_learner::getOccupancyPrabability(int x, int y)
 void Pmac_learner::resetEditLimits()
 {
     grid.resetUpdateBounds();
+}
+
+void Pmac_learner::initCell(int x, int y, Initial_values value)
+{
+    switch(value)
+    {
+        case Free:
+            grid.editCell(x,y)->init(0,5);
+            break;
+        case Unknown:
+            break;
+        case Obstacle:
+            grid.editCell(x,y)->init(5,0);
+            break;
+        default:
+            break;
+    }
 }

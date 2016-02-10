@@ -9,7 +9,8 @@ public:
     void addProbability(double occ_prob);
     double getLongTermOccupancyProb();
     double getProjectedOccupancyProbability();
-private:
+    void init(double initialOccupancy, double initialFree);
+//private:
     static const int NO_INTIAL_UPDATES = 100;
     static const int MAX_NO_OF_OBS = 1e4;
     static const double FORGET_FACTOR = 2000.0 / 2001.0;

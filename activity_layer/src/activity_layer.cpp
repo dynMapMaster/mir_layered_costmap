@@ -39,6 +39,9 @@
 #include <layered_costmap_2d/costmap_math.h>
 #include <pluginlib/class_list_macros.h>
 
+#include <nav_msgs/OccupancyGrid.h>
+#include <nav_msgs/GetMap.h>
+
 //PLUGINLIB_EXPORT_CLASS(layered_costmap_2d::ActivityLayer, layered_costmap_2d::Layer)
 PLUGINLIB_DECLARE_CLASS(dynamic_map, ActivityLayer, dynamic_map::ActivityLayer,layered_costmap_2d::Layer)
 using layered_costmap_2d::NO_INFORMATION;
@@ -397,8 +400,17 @@ void ActivityLayer::raytrace(const Observation& observation)
         int x0,y0, x1, y1;
         master->worldToMapEnforceBounds(observation.origin_.x,observation.origin_.y,x0,y0);
         master->worldToMapEnforceBounds(observation.cloud_->points[i].x,observation.cloud_->points[i].y,x1,y1);
-
-        _observation_map->raytrace(x0,y0,x1,y1,true);
+        try
+        {
+            if(x0 >= 0 && x0 < _xSize  && x1 >= 0 && x1 < _xSize && y0 >= 0 && y0 < _ySize  && y1 >= 0 && y1 < _ySize)
+            {
+                _observation_map->raytrace(x0,y0,x1,y1,true);
+            }
+        }
+        catch(const char* s)
+        {
+            ROS_ERROR("%s",s);
+        }
     }
 }
 
@@ -433,6 +445,54 @@ void ActivityLayer::matchSize()
     int originY = master->getOriginY() / _resolution;
     _observation_map = new FilterT(_xSize, _ySize, _resolution, SENSOR_STD_DEV);
     _map = new LearnerT(_xSize, _ySize, _resolution);
+
+    // request map from mapserver
+    nav_msgs::OccupancyGrid grid = requestMap();
+    // Initialize _map
+    for(int x = 0; x < grid.info.width; x++){
+        for(int y = 0; y < grid.info.height; y++){
+            Costmap_interpretator::Initial_values val = determineInitialValue(grid.data[y * grid.info.width + x]);
+            _map->initCell(x,y,val);
+        }
+    }
+}
+
+
+
+nav_msgs::OccupancyGrid ActivityLayer::requestMap()
+{
+    // get map via RPC
+      nav_msgs::GetMap::Request  req;
+      nav_msgs::GetMap::Response resp;
+      ROS_INFO("Requesting the map...");
+      while(!ros::service::call("static_map", req, resp))
+      {
+        ROS_WARN("Request for map failed; trying again...");
+        ros::Duration d(0.5);
+        d.sleep();
+      }
+    return resp.map;
+}
+
+Costmap_interpretator::Initial_values ActivityLayer::determineInitialValue(unsigned char val)
+{
+    if(val == 224)
+    {
+        return Costmap_interpretator::Obstacle;
+    }
+    else if( val == 96)
+    {
+        return Costmap_interpretator::Unknown;
+    }
+    else if( val < 224)
+    {
+        return Costmap_interpretator::Free;
+    }
+    else
+    {
+        ROS_ERROR("Activity layer: Unknown map value received: %i", val);
+    }
+    return Costmap_interpretator::Unknown;
 }
 
 void ActivityLayer::reset()

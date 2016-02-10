@@ -45,12 +45,34 @@ void probabilistic_filter::raytrace(int x0, int y0, int x1, int y1, bool markEnd
                 if(resultLine[i].first == x1 && resultLine[i].second == y1)
                 {
                     if(markEnd)
-                        _map->editCell(resultLine[i+k].first,resultLine[i+k].second)->addMeasurement(Probablistic_cell::OBS_OCCUPIED,prob);
+                    {
+                        try
+                        {
+                            if(resultLine[i+k].first >= 0 && resultLine[i+k].first < _map->sizeX()  && resultLine[i+k].second >= 0 && resultLine[i+k].second < _map->sizeY() )
+                            {
+                                 _map->editCell(resultLine[i+k].first,resultLine[i+k].second)->addMeasurement(Probablistic_cell::OBS_OCCUPIED,prob);
+                            }
+                        }
+                        catch(const char* s)
+                        {
+                            ROS_ERROR("Filter marking goal error %s", s);
+                        }
+                    }
                     goalEncountered = true;
                 }
                 else
                 {
-                    _map->editCell(resultLine[i+k].first,resultLine[i+k].second)->addMeasurement(Probablistic_cell::OBS_FREE,prob);
+                    try
+                    {
+                        if(resultLine[i+k].first >= 0 && resultLine[i+k].first < _map->sizeX()  && resultLine[i+k].second >= 0 && resultLine[i+k].second < _map->sizeY() )
+                        {
+                            _map->editCell(resultLine[i+k].first,resultLine[i+k].second)->addMeasurement(Probablistic_cell::OBS_FREE,prob);
+                        }
+                    }
+                    catch(const char* s)
+                    {
+                        ROS_ERROR("Filter marking free error %s", s);
+                    }
                 }
 
             }

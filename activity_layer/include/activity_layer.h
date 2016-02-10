@@ -55,8 +55,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <layered_costmap_2d/ObstaclePluginConfig.h>
 #include <layered_costmap_2d/footprint.h>
-#include <activityMap.hpp>
-#include <activityMapComponent.hpp>
+
 
 #include <observation_interface.h>
 #include <costmap_interpretator.h>
@@ -186,6 +185,13 @@ private:
     double _resolution;
     static const double SENSOR_STD_DEV = 0.5; // in cells
     std::string _global_frame;
+
+
+    // Request a map for initialization from mapserver
+    nav_msgs::OccupancyGrid requestMap();
+
+    // Determine the initial value from the received map
+    Costmap_interpretator::Initial_values determineInitialValue(unsigned char val);
 
 };
 

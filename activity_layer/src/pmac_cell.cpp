@@ -2,7 +2,7 @@
 
 Pmac_cell::Pmac_cell()
     : occupied_count(0), free_count(0), entry(0), exit(0),
-    prev_occ_prob(0), previous_is_occupied(false)
+    prev_occ_prob(0.5), previous_is_occupied(false)
 {
 }
 
@@ -38,8 +38,8 @@ void Pmac_cell::addProbability(double occ_prob)
             occupied_count = MAX_NO_OF_OBS;
         }
         // Adjust inactive state
-        free_count= 1 + (free_count-1) * recency_weightning;
-        exit = 1 + (exit-1) * recency_weightning;
+        free_count= 1 + (free_count-1) * FORGET_FACTOR;
+        exit = 1 + (exit-1) * FORGET_FACTOR;
     }
     else
     {
@@ -50,8 +50,8 @@ void Pmac_cell::addProbability(double occ_prob)
             free_count = MAX_NO_OF_OBS;
         }
         // Adjust inactive state
-        occupied_count = 1 + (occupied_count-1) * recency_weightning;
-        entry = 1 + (entry-1) * recency_weightning;
+        occupied_count = 1 + (occupied_count-1) * FORGET_FACTOR;
+        entry = 1 + (entry-1) * FORGET_FACTOR;
     }
 }
 
@@ -68,4 +68,21 @@ double Pmac_cell::getProjectedOccupancyProbability()
     double lambda_exit = (exit + 1) / (occupied_count + 1); // a(2,1)
 
     return prev_occ_prob * (1-lambda_entry) + prev_occ_prob * lambda_exit;
+}
+
+void Pmac_cell::init(double initialOccupancy, double initialFree)
+{
+    occupied_count = initialOccupancy;
+    free_count = initialFree;
+
+    if(initialOccupancy > initialFree)
+    {
+        prev_occ_prob = 1;
+        previous_is_occupied = true;
+    }
+    else
+    {
+        prev_occ_prob = 0;
+        previous_is_occupied = false;
+    }
 }

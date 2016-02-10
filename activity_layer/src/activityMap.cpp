@@ -512,8 +512,8 @@ activityMapComponent* activityMap::getDataPointer(int x, int y)
 
         if(x > _sizeX || y > _sizeY || x < 0  || y < 0)
         {
-            ROS_ERROR("Attempt to access non-existting map component in activity map x=%i  y=%i", x,y);
-            throw "Attempt to access non-existting map component in activity map";
+            ROS_ERROR("Attempt to access non-existting map component in activity map ARHARHAR x=%i  y=%i", x,y);
+            throw "Attempt to access non-existting map component in activity map ARHARHAR";
         }
         int patchPointerY = y/_mapPatchYSize;
         int patchPointerX = x/_mapPatchXSize;
@@ -526,8 +526,8 @@ activityMapComponent* activityMap::getDataPointer(int x, int y)
 
         if(x > _sizeX || y > _sizeY || x < 0  || y < 0)
         {
-            ROS_ERROR("Attempt to access non-existting map component in activity map x=%i  y=%i", x,y);
-            throw "Attempt to access non-existting map component in activity map";
+            ROS_ERROR("Attempt to access non-existting map component in activity ARHARHARmap x=%i  y=%i", x,y);
+            throw "Attempt to access non-existtingARHARHARARHARHARARHARHAR map component in activity map";
         }
         //ROS_INFO("returning non overlay pointer");
         return _map[y * _sizeX + x];

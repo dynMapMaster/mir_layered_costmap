@@ -32,6 +32,12 @@ public:
     // Throws exception if x or y is out of bounds
     T* editCell(int x, int y);
 
+    //  Returns the size of the grid in x direction
+    int sizeX(){return _sizeX;}
+
+    //  Returns the size of the grid in y direction
+    int sizeY(){return _sizeY;}
+
 private:
     T** _map;
     int _sizeX, _sizeY;
@@ -84,8 +90,8 @@ T* Grid_structure<T>::readCell(int x, int y) const
 {
     if(x > _sizeX || y > _sizeY || x < 0  || y < 0)
     {
-       // ROS_ERROR("Attempt to access non-existting map component in activity map x=%i  y=%i", x,y);
-        throw "Attempt to access non-existting map component in activity map";
+        ROS_ERROR("Attempt to access non-existting map component in grid structure of size %i x %i:   x=%i  y=%i",_sizeX, _sizeY, x,y);
+        throw "Attempt to access non-existting map component in grid structure";
     }
     //ROS_INFO("returning non overlay pointer");
     return _map[y * _sizeX + x];
@@ -97,8 +103,8 @@ T* Grid_structure<T>::editCell(int x, int y)
 
     if(x > _sizeX || y > _sizeY || x < 0  || y < 0)
     {
-       // ROS_ERROR("Attempt to access non-existting map component in activity map x=%i  y=%i", x,y);
-        throw "Attempt to access non-existting map component in activity map";
+        ROS_ERROR("Attempt to access non-existting map component in grid structure of size %i x %i:   x=%i  y=%i",_sizeX, _sizeY, x,y);
+        throw "Attempt to access non-existting map component in grid structure";
     }
 
     if(_map[y * _sizeX + x] == NULL)
