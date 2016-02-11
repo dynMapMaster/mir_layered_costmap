@@ -5,11 +5,11 @@ transform_tolerance: 0.2
 rolling_window: false
 track_unknown_space: true
 always_send_full_costmap: true
-width: 10.0
-height: 10.0
+width: 5.0
+height: 5.0
 resolution: 0.05
-origin_x: -5.0
-origin_y: -5.0
+origin_x: -2.5
+origin_y: -2.5
 
 update_frequency: 5.0
 publish_frequency: 2.0
