@@ -5,22 +5,32 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <pwd.h>
+#include <string>
 void imCb(const sensor_msgs::ImageConstPtr im_msg);
 
 std::string topic_name;
 std::string file_path;
-bool awaiting_image;
+bool awaiting_image = false;
+bool store_color = false;
 int main(int argc, char** argv)
 {
-    topic_name = "occupancy_image_color";
-    if(argc == 2)
+    topic_name = "occupancy_image";
+    if(argc == 3)
     {
-        file_path = argv[1];
+        store_color = std::string("-c") == std::string(argv[1]);
+        file_path = argv[2];
+    }
+    else if(argc == 2)
+    {
+        store_color = std::string("-c") == std::string(argv[1]);
+        file_path = argv[2];
     }
     else {
         file_path += "/tmp/occupancy_image";
-        ROS_WARN("No path specified defaulting to: %s",file_path.c_str());
+        ROS_WARN("No path specified defaulting to: %s",file_path.c_str());        
     }
+    if (store_color)
+        store_color += "_color";
     file_path += ".png";
     ros::init(argc, argv, "occupancy_image_publisher");
     ros::NodeHandle n;
@@ -38,16 +48,32 @@ int main(int argc, char** argv)
 }
 void imCb(const sensor_msgs::ImageConstPtr im_msg)
 {
-    // Convert image to opencv
     cv_bridge::CvImageConstPtr cv_ptr;
-    try
+    if(store_color)
     {
-      cv_ptr = cv_bridge::toCvShare(im_msg, sensor_msgs::image_encodings::BGR8);
+        // Convert image to opencv
+        try
+        {
+          cv_ptr = cv_bridge::toCvShare(im_msg, sensor_msgs::image_encodings::BGR8);
+        }
+        catch (cv_bridge::Exception& e)
+        {
+          ROS_ERROR("cv_bridge exception: %s", e.what());
+          return;
+        }
     }
-    catch (cv_bridge::Exception& e)
+    else
     {
-      ROS_ERROR("cv_bridge exception: %s", e.what());
-      return;
+        // Convert image to opencv
+        try
+        {
+          cv_ptr = cv_bridge::toCvShare(im_msg, sensor_msgs::image_encodings::MONO8);
+        }
+        catch (cv_bridge::Exception& e)
+        {
+          ROS_ERROR("cv_bridge exception: %s", e.what());
+          return;
+        }
     }
     cv::imwrite(file_path, cv_ptr->image);
     ROS_INFO("Storing image to path: %s", file_path.c_str());
