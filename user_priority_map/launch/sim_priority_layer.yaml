@@ -18,7 +18,7 @@ footprint_padding: 0.01
 
 plugins:
 - {name: priority_layer,       type: "user_priority_map/UserPriorityLayer"}
-- {name: obstacle_layer,       type: "layered_costmap_2d/ObstacleLayer"}
+#- {name: obstacle_layer,       type: "layered_costmap_2d/ObstacleLayer"}
 #- {name: activity_layer,       type: "dynamic_map/ActivityLayer"}
 
 activity_layer:
