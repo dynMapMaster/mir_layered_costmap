@@ -53,32 +53,25 @@ cv::Vec3b getColorFromMapValue(int8_t val)
 {
     cv::Vec3b res;
 
+    u_char min = 0, max = 100, halfmax = 50;
     if(val < 0)
     {
         res[0] = 128;
         res[1] = 128;
         res[2] = 128;
     }
-    else if( val >= 0 && val <=100)
+    else if(min <= val && val < halfmax)
     {
-        if(val <= 50){
-            res[2] = 250 - (50 -val) * 3;
-            res[1] = 250;
-            res[0] = 0;
-        }
-        else
-        {
-            res[2] = 250;
-            res[1] = 250 - val * 2.5;
-            res[0] = 0;
-           // ROS_INFO("val: %i   - green: %i",val,res[1]);
-        }
+        res[2] = 0;
+        res[1] = (u_char)( 255./(halfmax - min) * (val - min));
+        res[0] = u_char( 255. + -255./(halfmax - min)  * (val - min));
     }
     else
     {
+        res[2] = (u_char)( 255./(max - halfmax) * (val - max));
+        res[1] = (u_char)( 255. + -255./(max - halfmax)  * (val - max));
         res[0] = 0;
-        res[1] = 0;
-        res[2] = 0;
     }
+
     return res;
 }
