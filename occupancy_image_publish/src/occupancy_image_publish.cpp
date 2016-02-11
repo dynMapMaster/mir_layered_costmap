@@ -28,7 +28,7 @@ void occupancyGridCb(const nav_msgs::OccupancyGrid::Ptr msg)
     unsigned im_length = msg->info.height*msg->info.width;
     for (int i = 0; i < msg->info.height; ++i) {
         for (int j = 0; j < msg->info.width; ++j) {
-            im.data[i* msg->info.width + j] = msg->data[(msg->info.height-i)*msg->info.width + j];
+            im.data[i* msg->info.width + j] = msg->data[(msg->info.height-(i+1))*msg->info.width + j];
         }
     }
     sensor_msgs::ImagePtr im_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", im).toImageMsg();
@@ -41,7 +41,7 @@ void occupancyGridCb(const nav_msgs::OccupancyGrid::Ptr msg)
     for(int y=0; y < msg->info.height;y++){
         cv::Vec3b* imgRow = imgColor.ptr<cv::Vec3b>(y);
         for(int x = 0; x < msg->info.width;x++){
-            imgRow[x] = getColorFromMapValue(msg->data[(msg->info.height-y)*msg->info.width + x]);
+            imgRow[x] = getColorFromMapValue(msg->data[(msg->info.height-(y+1))*msg->info.width + x]);
         }
     }
     sensor_msgs::ImagePtr imColor_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", imgColor).toImageMsg();
