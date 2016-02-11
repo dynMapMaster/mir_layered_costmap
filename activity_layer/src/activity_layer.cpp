@@ -171,7 +171,7 @@ void ActivityLayer::onInitialize()
           target_frames.push_back(sensor_frame);
           observation_notifiers_.back()->setTargetFrames(target_frames);
         }
-
+        matchSize();
     }
 }
 
