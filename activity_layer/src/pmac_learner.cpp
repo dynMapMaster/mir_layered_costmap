@@ -13,19 +13,13 @@ bool Pmac_learner::getCellValue(int x, int y, unsigned char& cellValueOutput)
     {
         double occupancy_prob = cell->getProjectedOccupancyProbability();
 
-        if(x == 75 && y == 75)
-        {
-            ROS_ERROR("occ val: %f  - %f  %f  ", occupancy_prob, cell->free_count, cell->occupied_count );
-
-        }
-
         if(occupancy_prob < 0) {
             occupancy_prob = 0;
         }
         else if(occupancy_prob > 1) {
             occupancy_prob = 1;
         }
-        cellValueOutput = 255 * occupancy_prob;
+        cellValueOutput = 252 * occupancy_prob;
         return true;
     }
     else
@@ -86,12 +80,12 @@ void Pmac_learner::initCell(int x, int y, Initial_values value)
     switch(value)
     {
         case Free:
-            grid.editCell(x,y)->init(0,5);
+            grid.editCell(x,y)->init(0,50);
             break;
         case Unknown:
             break;
         case Obstacle:
-            grid.editCell(x,y)->init(5,0);
+            grid.editCell(x,y)->init(200,0);
             break;
         default:
             break;

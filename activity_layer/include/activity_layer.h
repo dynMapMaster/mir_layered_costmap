@@ -183,7 +183,7 @@ private:
     LearnerT* _map;
     int _xSize, _ySize;
     double _resolution;
-    static const double SENSOR_STD_DEV = 0.5; // in cells
+    static const double SENSOR_STD_DEV = 0.01; // in m
     std::string _global_frame;
 
 

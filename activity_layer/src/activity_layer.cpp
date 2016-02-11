@@ -349,21 +349,19 @@ void ActivityLayer::updateCosts(layered_costmap_2d::Costmap2D& master_grid, int 
         for (int i = min_i; i < max_i; i++)
         {
             if (_map->getCellValue(i,j,val)){
-                if(i < 74 && i > 72 && j == 200-70)
-                {
-                    //ROS_ERROR("occupied val=%i",val);
-                }
-                //ROS_INFO("activity map has data");
                 unsigned char old_cost = master_array[it];
                 //if (old_cost == NO_INFORMATION || old_cost < val)
                     master_array[it] =  val;
+            }
+            else
+            {
+                master_array[it] = 96;
             }
             it++;
         }
     }
 
     _map->resetEditLimits();
-    //ROS_INFO("Done updating");
 }
 
 void ActivityLayer::addStaticObservation(layered_costmap_2d::Observation& obs, bool marking, bool clearing)
@@ -402,10 +400,7 @@ void ActivityLayer::raytrace(const Observation& observation)
         master->worldToMapEnforceBounds(observation.cloud_->points[i].x,observation.cloud_->points[i].y,x1,y1);
         try
         {
-            if(x0 >= 0 && x0 < _xSize  && x1 >= 0 && x1 < _xSize && y0 >= 0 && y0 < _ySize  && y1 >= 0 && y1 < _ySize)
-            {
                 _observation_map->raytrace(x0,y0,x1,y1,true);
-            }
         }
         catch(const char* s)
         {
@@ -443,7 +438,7 @@ void ActivityLayer::matchSize()
     _resolution = master->getResolution();
     int originX = master->getOriginX() /_resolution;
     int originY = master->getOriginY() / _resolution;
-    _observation_map = new FilterT(_xSize, _ySize, _resolution, SENSOR_STD_DEV);
+    _observation_map = new FilterT(_xSize, _ySize, _resolution, SENSOR_STD_DEV / _resolution);
     _map = new LearnerT(_xSize, _ySize, _resolution);
 
     // request map from mapserver
