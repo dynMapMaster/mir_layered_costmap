@@ -1,0 +1,11 @@
+<!-- -->
+<launch>  
+  <node name="costmap" pkg="layered_costmap_2d" type="costmap_2d_node" output="screen" >
+		<rosparam file="$(find user_priority_map)/launch/sim_priority_layer.yaml" command="load" ns="costmap"/> 
+  </node>
+  <node name="visulizer" pkg="rviz" type="rviz" args="-d $(find activity_layer)/config/sim_activity_layer.vcg"/>   
+
+  <node name="occupancy_publisher" pkg="occupancy_image_publish" type="occupancy_image_publish_node" />
+
+ <node name="occupancy_im_shower" pkg="rqt_image_view" type="rqt_image_view" />
+</launch>

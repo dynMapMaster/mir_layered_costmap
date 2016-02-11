@@ -1,0 +1,8 @@
+<!-- -->
+<class_libraries>
+  <library path="lib/libuser_priority_layer">
+    <class name="user_priority_map/UserPriorityLayer" type="user_priority_map::UserPriorityLayer"  base_class_type="layered_costmap_2d::Layer">
+      <description>Updates map with dynamic obstacles</description>
+    </class>
+  </library>
+</class_libraries>
