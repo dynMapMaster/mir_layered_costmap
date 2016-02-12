@@ -82,6 +82,7 @@ Costmap2DROS::Costmap2DROS(std::string name, tf::TransformListener& tf) :
   ros::Time last_error = ros::Time::now();
   std::string tf_error;
   // we need to make sure that the transform between the robot base frame and the global frame is available
+  /* Excluded wait for transform to avoid never sending a map to amcl that does not give the tf fram map
   while (ros::ok()
       && !tf_.waitForTransform(global_frame_, robot_base_frame_, ros::Time(), ros::Duration(0.1), ros::Duration(0.01),
                                &tf_error))
@@ -97,7 +98,7 @@ Costmap2DROS::Costmap2DROS(std::string name, tf::TransformListener& tf) :
     // will do for the warning above. Reset the string here to avoid accumulation.
     tf_error.clear();
   }
-
+    */
   // check if we want a rolling window version of the costmap
   bool rolling_window, track_unknown_space, always_send_full_costmap;
   private_nh.param("rolling_window", rolling_window, false);

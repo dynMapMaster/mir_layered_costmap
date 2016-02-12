@@ -113,7 +113,8 @@ void Costmap2DPublisher::prepareGrid()
   unsigned char* data = costmap_->getCharMap();
   for (unsigned int i = 0; i < grid_.data.size(); i++)
   {
-    grid_.data[i] = cost_translation_table_[ data[ i ]];
+    //grid_.data[i] = cost_translation_table_[ data[ i ]];
+    grid_.data[i] = data[ i ];
   }
 }
 
@@ -152,7 +153,8 @@ void Costmap2DPublisher::publishCostmap()
       for (unsigned int x = x0_; x < xn_; x++)
       {
         unsigned char cost = costmap_->getCost(x, y);
-        update.data[i++] = cost_translation_table_[ cost ];
+        //update.data[i++] = cost_translation_table_[ cost ];
+        update.data[i++] = cost;
       }
     }
     if (costmap_update_pub_.getNumSubscribers() > 0)
