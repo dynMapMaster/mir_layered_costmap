@@ -94,7 +94,7 @@ static_obstacle( pose [ -0.75 -0.5 0 0.0 ] name "static_block" color "green")
 floorplan
 ( 
   name "small_box"
-  bitmap "empty_100.png"
+  bitmap "feature_100.png"
   size [5 5 1.0]
   pose [ 0 0 0 0.0 ]
 )
