@@ -171,8 +171,8 @@ void ActivityLayer::onInitialize()
           target_frames.push_back(sensor_frame);
           observation_notifiers_.back()->setTargetFrames(target_frames);
         }
-        matchSize();
     }
+    matchSize();
 }
 
 void ActivityLayer::setupDynamicReconfigure(ros::NodeHandle& nh)
@@ -406,6 +406,10 @@ void ActivityLayer::raytrace(const Observation& observation)
         {
             ROS_ERROR("%s",s);
         }
+        catch(...)
+        {
+            ROS_ERROR("Raytrace unknown error");
+        }
     }
 }
 
@@ -444,10 +448,13 @@ void ActivityLayer::matchSize()
     // request map from mapserver
     nav_msgs::OccupancyGrid grid = requestMap();
     // Initialize _map
-    for(int x = 0; x < grid.info.width; x++){
-        for(int y = 0; y < grid.info.height; y++){
-            Costmap_interpretator::Initial_values val = determineInitialValue(grid.data[y * grid.info.width + x]);
-            _map->initCell(x,y,val);
+    if(_xSize >= grid.info.width && _ySize >= grid.info.width)
+    {
+        for(int x = 0; x < grid.info.width; x++){
+            for(int y = 0; y < grid.info.height; y++){
+                Costmap_interpretator::Initial_values val = determineInitialValue(grid.data[y * grid.info.width + x]);
+                _map->initCell(x,y,val);
+            }
         }
     }
 }

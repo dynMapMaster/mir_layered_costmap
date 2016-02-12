@@ -15,20 +15,21 @@ probabilistic_filter::~probabilistic_filter()
 }
 
 void probabilistic_filter::raytrace(int x0, int y0, int x1, int y1, bool markEnd)
-{
+{   
+    std::vector<std::pair<int, int> > resultLine = bresenham2Dv0(x0, y0, x1, y1);
+    std::pair<int, int> goal(x1,y1);
     double dx= x1-x0;
     double dy = y1 - y0;
     double totalDelta = sqrt(dx*dx+dy*dy);
-    dx /= totalDelta;
-    dy /= totalDelta;
-    int xExtended = x1 + dx * 6;
-    int yExtended = y1 + dy * 6;
-
-    std::vector<std::pair<int, int> > resultLine = bresenham2Dv0(x0, y0, x1, y1);
-    std::pair<int, int> goal(x1,y1);
-    std::vector<std::pair<int, int> > extendedLine = bresenham2Dv0(x1, y1, xExtended, yExtended);
-    resultLine.insert(resultLine.end(),extendedLine.begin(), extendedLine.end());
-
+    if(totalDelta > 0)
+    {
+        dx /= totalDelta;
+        dy /= totalDelta;
+        int xExtended = x1 + dx * 6;
+        int yExtended = y1 + dy * 6;
+        std::vector<std::pair<int, int> > extendedLine = bresenham2Dv0(x1, y1, xExtended, yExtended);
+        resultLine.insert(resultLine.end(),extendedLine.begin(), extendedLine.end());
+    }
 
     bool goalEncountered = false;
     for(int i = 0; i < (int) resultLine.size();i++)
@@ -151,7 +152,7 @@ double probabilistic_filter::phi(double x)
 
 
 inline std::vector<std::pair<int,int> > probabilistic_filter::bresenham2Dv0(int x1, int y1, const int x2, const int y2)
-{
+{    
     int delta_x(x2 - x1);
     // if x1 == x2, then it does not matter what we set here
     signed char const ix((delta_x > 0) - (delta_x < 0));

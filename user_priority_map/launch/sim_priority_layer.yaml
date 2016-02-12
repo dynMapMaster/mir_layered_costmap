@@ -17,9 +17,10 @@ publish_frequency: 2.0
 footprint_padding: 0.01
 
 plugins:
+- {name: activity_layer,       type: "dynamic_map/ActivityLayer"}
 - {name: priority_layer,       type: "user_priority_map/UserPriorityLayer"}
 #- {name: obstacle_layer,       type: "layered_costmap_2d/ObstacleLayer"}
-- {name: activity_layer,       type: "dynamic_map/ActivityLayer"}
+
 
 activity_layer:
   transform_tolerance: 0.2  
