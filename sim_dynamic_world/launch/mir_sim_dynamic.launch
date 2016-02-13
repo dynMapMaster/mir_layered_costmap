@@ -7,9 +7,7 @@
 		<remap from="/costmap/costmap/costmap" to="dynamic_map" />
   </node>
 
-  <node name="occupancy_publisher" pkg="occupancy_image_publish" type="occupancy_image_publish_node" >
-		<remap from="/costmap/costmap/costmap" to="dynamic_map" />
-	</node>
+  <node name="occupancy_publisher" pkg="occupancy_image_publish" type="occupancy_image_publish_node" />
   
  	<node name="occupancy_im_shower" pkg="rqt_image_view" type="rqt_image_view" />
 </launch>
