@@ -29,34 +29,23 @@
 #include <sensor_msgs/PointCloud.h>
 #include <layered_costmap_2d/costmap_2d.h>
 #include <nav_msgs/OccupancyGrid.h>
-
 using namespace layered_costmap_2d;
-uint8_t reverse_cost_translation_table_[256];
 ros::Publisher pub;
-void HSVtoRGB(float& fR, float& fG, float& fB, const float& fH, const float& fS, const float& fV);
-uint8_t getRawCost(char translated_cost);
 void occupancyGridCb(const nav_msgs::OccupancyGrid::Ptr msg);
-float map(float value, float istart, float istop, float ostart, float ostop) ;
+uint8_t map(uint8_t value, uint8_t istart, uint8_t istop, uint8_t ostart, uint8_t ostop);
+
+const float fr[] = { 0, 0.03968253968253968, 0.07936507936507936, 0.119047619047619, 0.1587301587301587, 0.1984126984126984, 0.2380952380952381, 0.2777777777777778, 0.3174603174603174, 0.3571428571428571, 0.3968253968253968, 0.4365079365079365, 0.4761904761904762, 0.5158730158730158, 0.5555555555555556, 0.5952380952380952, 0.6349206349206349, 0.6746031746031745, 0.7142857142857142, 0.753968253968254, 0.7936507936507936, 0.8333333333333333, 0.873015873015873, 0.9126984126984127, 0.9523809523809523, 0.992063492063492, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+const float fg[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.03174603174603163, 0.0714285714285714, 0.1111111111111112, 0.1507936507936507, 0.1904761904761905, 0.23015873015873, 0.2698412698412698, 0.3095238095238093, 0.3492063492063491, 0.3888888888888888, 0.4285714285714284, 0.4682539682539679, 0.5079365079365079, 0.5476190476190477, 0.5873015873015872, 0.6269841269841268, 0.6666666666666665, 0.7063492063492065, 0.746031746031746, 0.7857142857142856, 0.8253968253968254, 0.8650793650793651, 0.9047619047619047, 0.9444444444444442, 0.984126984126984, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+const float fb[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.04761904761904745, 0.1269841269841265, 0.2063492063492056, 0.2857142857142856, 0.3650793650793656, 0.4444444444444446, 0.5238095238095237, 0.6031746031746028, 0.6825396825396828, 0.7619047619047619, 0.8412698412698409, 0.92063492063492, 1};
+
 
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "costmap_2d_cloud");
   ros::NodeHandle n;
-  // fill cost translation table
-  reverse_cost_translation_table_[0] = 0;  // NO obstacle
-  reverse_cost_translation_table_[99] = 253;  // INSCRIBED obstacle
-  reverse_cost_translation_table_[100] = 254;  // LETHAL obstacle
-  reverse_cost_translation_table_[-1] = 255;  // UNKNOWN
-  // regular cost values scale the range 1 to 252 (inclusive) to fit into 1 to 98 (inclusive).
-  ROS_INFO("cost map");
-  for (int i = 1; i < 98; i++)
-  {
-    reverse_cost_translation_table_[ i ] = char(1 + (251 * (i - 1)) / 97);
-    ROS_INFO("%i => %i",i, reverse_cost_translation_table_[ i ]);
-  }
   // special values:
   ROS_DEBUG("Startup");
-  ros::Subscriber sub = n.subscribe<nav_msgs::OccupancyGrid::Ptr>("/costmap/costmap/costmap", 1, &occupancyGridCb);
+  ros::Subscriber sub = n.subscribe<nav_msgs::OccupancyGrid::Ptr>("/dynamic_map", 1, &occupancyGridCb);
   pub = n.advertise<sensor_msgs::PointCloud>("activity_marked_cloud", 2);
   ros::spin();
 }
@@ -65,7 +54,7 @@ void occupancyGridCb(const nav_msgs::OccupancyGrid::Ptr msg)
 {
     if(msg->data.empty())
     {
-        ROS_ERROR("Received empty voxel grid");
+        ROS_ERROR("Received empty grid");
         return;
     }
     Costmap2D costmap(msg->info.width, msg->info.height,msg->info.resolution, msg->info.origin.position.x, msg->info.origin.position.y);
@@ -93,21 +82,13 @@ void occupancyGridCb(const nav_msgs::OccupancyGrid::Ptr msg)
             }
             else
             {                
-                uint8_t cost_val = getRawCost(msg->data[i]);
-                const float value = map(cost_val, 0, 255, 0.3, 0.7);
-                const float hue = (cost_val / 255.0) * 360;
-                /*
-                if(msg->data[i] > 0)
-                {
-                    ROS_INFO("cost val= %i", cost_val);
-                    ROS_INFO("hue = %f", hue);
-                }
-                */
-                float fr(0), fg(0), fb(0);
-                HSVtoRGB(fr, fg, fb, hue, 0.5, value);
-                uint32_t r = fr * 255.0;
-                uint32_t g = fg * 255.0;
-                uint32_t b = fb * 255.0;
+                uint8_t cost_val = (uint8_t)(msg->data[i]);
+                cost_val = map(cost_val, 0, 255, 0, 63);
+                ROS_INFO("val map=%i",cost_val );
+                ROS_INFO("red=%f",fr[cost_val] );
+                uint32_t r = fr[cost_val] * 255.0;
+                uint32_t g = fg[cost_val] * 255.0;
+                uint32_t b = fb[cost_val] * 255.0;
                 col = (r << 16) | (g << 8) | b;
             }
 
@@ -115,78 +96,11 @@ void occupancyGridCb(const nav_msgs::OccupancyGrid::Ptr msg)
             i++;
         }
     }
+    ROS_INFO("Publishing cloud");
     pub.publish(cloud);
 }
-
-float map(float value, float istart, float istop, float ostart, float ostop)
+uint8_t map(uint8_t value, uint8_t istart, uint8_t istop, uint8_t ostart, uint8_t ostop)
 {
-    return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
+    return ostart + double(ostop - ostart) * (double(value - istart) / double(istop - istart)) + 0.5;
 }
 
-uint8_t getRawCost(char translated_cost)
-{
-    if(translated_cost < 0)
-    {
-        return 0;
-    }
-    else
-    {
-        return reverse_cost_translation_table_[translated_cost];
-    }
-}
-
-/*! \brief Convert HSV to RGB color space
-
-  Converts a given set of HSV values `h', `s', `v' into RGB
-  coordinates. The output RGB values are in the range [0, 1], and
-  the input HSV values are in the ranges h = [0, 360], and s, v =
-  [0, 1], respectively.
-
-  \param fR Red component, used as output, range: [0, 1]
-  \param fG Green component, used as output, range: [0, 1]
-  \param fB Blue component, used as output, range: [0, 1]
-  \param fH Hue component, used as input, range: [0, 360]
-  \param fS Hue component, used as input, range: [0, 1]
-  \param fV Hue component, used as input, range: [0, 1]
-
-*/
-void HSVtoRGB(float& fR, float& fG, float& fB, const float& fH, const float& fS, const float& fV) {
-  float fC = fV * fS; // Chroma
-  float fHPrime = fmod(fH / 60.0, 6);
-  float fX = fC * (1 - fabs(fmod(fHPrime, 2) - 1));
-  float fM = fV - fC;
-
-  if(0 <= fHPrime && fHPrime < 1) {
-    fR = fC;
-    fG = fX;
-    fB = 0;
-  } else if(1 <= fHPrime && fHPrime < 2) {
-    fR = fX;
-    fG = fC;
-    fB = 0;
-  } else if(2 <= fHPrime && fHPrime < 3) {
-    fR = 0;
-    fG = fC;
-    fB = fX;
-  } else if(3 <= fHPrime && fHPrime < 4) {
-    fR = 0;
-    fG = fX;
-    fB = fC;
-  } else if(4 <= fHPrime && fHPrime < 5) {
-    fR = fX;
-    fG = 0;
-    fB = fC;
-  } else if(5 <= fHPrime && fHPrime < 6) {
-    fR = fC;
-    fG = 0;
-    fB = fX;
-  } else {
-    fR = 0;
-    fG = 0;
-    fB = 0;
-  }
-
-  fR += fM;
-  fG += fM;
-  fB += fM;
-}
