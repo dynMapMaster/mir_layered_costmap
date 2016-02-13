@@ -11,6 +11,7 @@
 
   <node name="costmap" pkg="layered_costmap_2d" type="costmap_2d_node" output="screen">
     <rosparam file="$(find sim_dynamic_world)/launch/sim_activity_layer.yaml" command="load" ns="costmap"/> 
+		<remap from="/costmap/costmap/costmap" to="dynamic_map" />
   </node>
 
   <!-- Mir simple controller -->
