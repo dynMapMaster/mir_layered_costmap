@@ -1,13 +1,27 @@
 <!-- -->
 <launch>
 	<param name="use_sim_time" value="true" />
+
 	<include file="$(find mirCommon)/launch/mir_bringup.launch"/>
+
   <node name="costmap" pkg="layered_costmap_2d" type="costmap_2d_node" output="screen" >
 		<rosparam file="$(find user_priority_map)/launch/sim_priority_layer.yaml" command="load" ns="costmap"/> 
 		<remap from="/costmap/costmap/costmap" to="dynamic_map" />
   </node>
 
-  <node name="occupancy_publisher" pkg="occupancy_image_publish" type="occupancy_image_publish_node" />
+  <node name="occupancy_publisher" pkg="occupancy_image_publish" type="occupancy_image_publish_node" >
+	</node>
   
  	<node name="occupancy_im_shower" pkg="rqt_image_view" type="rqt_image_view" />
+  
+  <node name="mir_jump_controller" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 1" />
+    <rosparam param="waypoints">  
+      [
+        [5.0, 0.5, 0.0, 1.0],
+        [20.0, 20.0, 0.0, 1.0]
+      ]
+    </rosparam>
+  </node>
+
 </launch>
