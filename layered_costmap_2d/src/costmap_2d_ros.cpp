@@ -383,6 +383,19 @@ void Costmap2DROS::mapUpdateLoop(double frequency)
 
   ros::NodeHandle nh;
   ros::Rate r(frequency);
+
+  unsigned int x0, y0, xn, yn;
+  size_t counter = 0;
+  while (nh.ok() && !map_update_thread_shutdown_ && counter < 2)
+  {
+      updateMap();
+      layered_costmap_->getBounds(&x0, &xn, &y0, &yn);
+      publisher_->updateBounds(x0, xn, y0, yn);
+      publisher_->publishCostmap();
+      ros::Duration(1.0).sleep();
+      counter++;
+  }
+  last_publish_ = ros::Time::now();
   while (nh.ok() && !map_update_thread_shutdown_)
   {
     struct timeval start, end;
