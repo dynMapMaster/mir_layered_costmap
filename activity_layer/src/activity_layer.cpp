@@ -461,7 +461,7 @@ void ActivityLayer::matchSize()
     // request map from mapserver
     nav_msgs::OccupancyGrid grid = requestMap();
     // Initialize _map
-    if(_xSize >= grid.info.width && _ySize >= grid.info.width)
+    if(_xSize >= grid.info.width && _ySize >= grid.info.height)
     {
         for(int x = 0; x < grid.info.width; x++){
             for(int y = 0; y < grid.info.height; y++){
