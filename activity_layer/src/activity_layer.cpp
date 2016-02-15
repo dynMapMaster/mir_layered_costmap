@@ -42,6 +42,7 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/GetMap.h>
 
+
 //PLUGINLIB_EXPORT_CLASS(layered_costmap_2d::ActivityLayer, layered_costmap_2d::Layer)
 PLUGINLIB_DECLARE_CLASS(dynamic_map, ActivityLayer, dynamic_map::ActivityLayer,layered_costmap_2d::Layer)
 using layered_costmap_2d::NO_INFORMATION;
@@ -66,6 +67,12 @@ void ActivityLayer::onInitialize()
     _global_frame = layered_costmap_->getGlobalFrameID();
     double transform_tolerance;
     nh.param("transform_tolerance", transform_tolerance, 0.2);
+
+    //Subscribe to amcl pose
+    string poseTopicName ="";
+    nh.param("pose_topic",poseTopicName,string("amcl_pose"));
+    poseIsAccurate = false;
+    poseSubscriber = g_nh.subscribe(poseTopicName, 50, &ActivityLayer::poseCB,this);
 
     std::string topics_string;
     // get the topics that we'll subscribe to from the parameter server
@@ -201,38 +208,41 @@ void ActivityLayer::reconfigureCB(layered_costmap_2d::ObstaclePluginConfig &conf
 void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& message,
                                       const boost::shared_ptr<ObservationBuffer>& buffer)
 {
-    // project the laser into a point cloud
-    sensor_msgs::PointCloud2 cloud;
-    cloud.header = message->header;
-
-    // project the scan into a point cloud
-    try
+    if(poseIsAccurate)
     {
-      projector_.transformLaserScanToPointCloud(message->header.frame_id, *message, cloud, *tf_);
-    }
-    catch (tf::TransformException &ex)
-    {
-      ROS_WARN("High fidelity enabled, but TF returned a transform exception to frame %s: %s", _global_frame.c_str(),
-               ex.what());
-      projector_.projectLaser(*message, cloud);
-    }
+        // project the laser into a point cloud
+        sensor_msgs::PointCloud2 cloud;
+        cloud.header = message->header;
 
-    // buffer the point cloud
-    buffer->lock();
-    buffer->bufferCloud(cloud);
-    buffer->unlock();
-
-    // Waste of time -> consider running in a timer callback
-    for(size_t i = 0; i < observation_buffers_.size(); i++)
-    {
-        vector<Observation> buffer;
-        observation_buffers_[i]->lock();
-        observation_buffers_[i]->getObservations(buffer);
-        observation_buffers_[i]->unlock();
-        for(size_t o = 0; o < buffer.size(); o++)
+        // project the scan into a point cloud
+        try
         {
-            //ROS_INFO("observation: %i",o);
-            raytrace(buffer[o]);
+          projector_.transformLaserScanToPointCloud(message->header.frame_id, *message, cloud, *tf_);
+        }
+        catch (tf::TransformException &ex)
+        {
+          ROS_WARN("High fidelity enabled, but TF returned a transform exception to frame %s: %s", _global_frame.c_str(),
+                   ex.what());
+          projector_.projectLaser(*message, cloud);
+        }
+
+        // buffer the point cloud
+        buffer->lock();
+        buffer->bufferCloud(cloud);
+        buffer->unlock();
+
+        // Waste of time -> consider running in a timer callback
+        for(size_t i = 0; i < observation_buffers_.size(); i++)
+        {
+            vector<Observation> buffer;
+            observation_buffers_[i]->lock();
+            observation_buffers_[i]->getObservations(buffer);
+            observation_buffers_[i]->unlock();
+            for(size_t o = 0; o < buffer.size(); o++)
+            {
+                //ROS_INFO("observation: %i",o);
+                raytrace(buffer[o]);
+            }
         }
     }
 }
@@ -240,50 +250,53 @@ void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& mess
 void ActivityLayer::laserScanValidInfCallback(const sensor_msgs::LaserScanConstPtr& raw_message,
                                               const boost::shared_ptr<ObservationBuffer>& buffer)
 {
-    // Filter positive infinities ("Inf"s) to max_range.
-    float epsilon = 0.0001;  // a tenth of a millimeter
-    sensor_msgs::LaserScan message = *raw_message;
-    for (size_t i = 0; i < message.ranges.size(); i++)
+    if(poseIsAccurate)
     {
-      float range = message.ranges[ i ];
-      if (!std::isfinite(range) && range > 0)
-      {
-        message.ranges[ i ] = message.range_max - epsilon;
-      }
-    }
-
-    // project the laser into a point cloud
-    sensor_msgs::PointCloud2 cloud;
-    cloud.header = message.header;
-
-    // project the scan into a point cloud
-    try
-    {
-      projector_.transformLaserScanToPointCloud(message.header.frame_id, message, cloud, *tf_);
-    }
-    catch (tf::TransformException &ex)
-    {
-      ROS_WARN("High fidelity enabled, but TF returned a transform exception to frame %s: %s",
-               _global_frame.c_str(), ex.what());
-      projector_.projectLaser(message, cloud);
-    }
-
-    // buffer the point cloud
-    buffer->lock();
-    buffer->bufferCloud(cloud);
-    buffer->unlock();
-
-    // Waste of time -> consider running in a timer callback
-    for(size_t i = 0; i < observation_buffers_.size(); i++)
-    {
-        vector<Observation> buffer;
-        observation_buffers_[i]->lock();
-        observation_buffers_[i]->getObservations(buffer);
-        observation_buffers_[i]->unlock();
-        for(size_t o = 0; o < buffer.size(); o++)
+        // Filter positive infinities ("Inf"s) to max_range.
+        float epsilon = 0.0001;  // a tenth of a millimeter
+        sensor_msgs::LaserScan message = *raw_message;
+        for (size_t i = 0; i < message.ranges.size(); i++)
         {
-            //ROS_INFO("observation: %i",o);
-            raytrace(buffer[o]);
+          float range = message.ranges[ i ];
+          if (!std::isfinite(range) && range > 0)
+          {
+            message.ranges[ i ] = message.range_max - epsilon;
+          }
+        }
+
+        // project the laser into a point cloud
+        sensor_msgs::PointCloud2 cloud;
+        cloud.header = message.header;
+
+        // project the scan into a point cloud
+        try
+        {
+          projector_.transformLaserScanToPointCloud(message.header.frame_id, message, cloud, *tf_);
+        }
+        catch (tf::TransformException &ex)
+        {
+          ROS_WARN("High fidelity enabled, but TF returned a transform exception to frame %s: %s",
+                   _global_frame.c_str(), ex.what());
+          projector_.projectLaser(message, cloud);
+        }
+
+        // buffer the point cloud
+        buffer->lock();
+        buffer->bufferCloud(cloud);
+        buffer->unlock();
+
+        // Waste of time -> consider running in a timer callback
+        for(size_t i = 0; i < observation_buffers_.size(); i++)
+        {
+            vector<Observation> buffer;
+            observation_buffers_[i]->lock();
+            observation_buffers_[i]->getObservations(buffer);
+            observation_buffers_[i]->unlock();
+            for(size_t o = 0; o < buffer.size(); o++)
+            {
+                //ROS_INFO("observation: %i",o);
+                raytrace(buffer[o]);
+            }
         }
     }
 }
@@ -502,4 +515,18 @@ void ActivityLayer::reset()
 
 }
 
+void ActivityLayer::poseCB(geometry_msgs::PoseWithCovarianceStamped pose)
+{
+    if(pose.pose.covariance[0] < POSE_POS_STDDEV && pose.pose.covariance[7] < POSE_POS_STDDEV && pose.pose.covariance[35] < POSE_ORI_STDDEV)
+    {
+        poseIsAccurate = true;
+    }
+    else
+    {
+        poseIsAccurate = false;
+    }
+}
+
 }  // namespace layered_costmap_2d
+
+

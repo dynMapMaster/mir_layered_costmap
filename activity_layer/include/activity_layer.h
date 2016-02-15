@@ -56,6 +56,8 @@
 #include <layered_costmap_2d/ObstaclePluginConfig.h>
 #include <layered_costmap_2d/footprint.h>
 
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
+
 
 #include <observation_interface.h>
 #include <costmap_interpretator.h>
@@ -186,6 +188,15 @@ private:
     static const double SENSOR_STD_DEV = 0.01; // in m
     std::string _global_frame;
 
+
+    bool poseIsAccurate;
+    ros::Subscriber poseSubscriber;
+
+    static const double POSE_POS_STDDEV = 0.3162; //sqrt(0.1)
+    static const double POSE_ORI_STDDEV = 0.1732; // sqrt(0.03)
+
+    // Pose callback
+    void poseCB(geometry_msgs::PoseWithCovarianceStamped pose);
 
     // Request a map for initialization from mapserver
     nav_msgs::OccupancyGrid requestMap();
