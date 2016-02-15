@@ -18,7 +18,7 @@ using namespace std;
 void imCb(const sensor_msgs::ImageConstPtr im_msg);
 
 string file_path;
-string topic_name = "occupancy_image";
+string topic_name = "/occupancy_image";
 bool awaiting_image = false;
 
 int main(int argc, char** argv)
@@ -52,7 +52,7 @@ int main(int argc, char** argv)
         }
     }
 
-    ros::init(argc, argv, "occupancy_image_publisher");
+    ros::init(argc, argv, "occupancy_image_saver");
     ros::NodeHandle n;
     image_transport::ImageTransport it(n);
     image_transport::Subscriber im_sub = it.subscribe(topic_name,1,imCb);
