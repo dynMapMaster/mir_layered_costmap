@@ -1,15 +1,20 @@
 #include "pmac_cell.h"
 
+#include "boost/numeric/ublas/matrix.hpp"
+#include <cmath>
+
+
 Pmac_cell::Pmac_cell()
     : occupied_count(0), free_count(0), entry(0), exit(0),
     prev_occ_prob(0.5), previous_is_occupied(false)
 {
 }
 
-void Pmac_cell::addProbability(double occ_prob)
+void Pmac_cell::addProbability(double occ_prob, double timeStamp)
 {
     double free_prob = (1 - occ_prob);
     bool current_is_occupied = occ_prob > 0.5;
+    lastObservedTime = timeStamp;
     if(current_is_occupied)
     {
         occupied_count += occ_prob;
@@ -62,12 +67,27 @@ double Pmac_cell::getLongTermOccupancyProb()
     return 1.0 / (lambda_exit + lambda_entry) * lambda_entry;
 }
 
-double Pmac_cell::getProjectedOccupancyProbability()
+double Pmac_cell::getProjectedOccupancyProbability(unsigned noOfProjections)
 {
     double lambda_entry = (entry + 1) / (free_count + 1); // a(1,2)
     double lambda_exit = (exit + 1) / (occupied_count + 1); // a(2,1)
 
-        return (1-prev_occ_prob) * (lambda_entry) + (prev_occ_prob) * (1 - lambda_exit);
+    boost::numeric::ublas::matrix<double> marchovM(2,2);
+    marchovM(0,0) = 1-lambda_exit;
+    marchovM(0,1) = lambda_exit;
+    marchovM(1,0) = lambda_entry;
+    marchovM(1,1) = 1 - lambda_entry;
+
+    boost::numeric::ublas::matrix<double> states(1,2);
+    states(0,0) = prev_occ_prob;
+    states(0,1) = 1 - prev_occ_prob;
+
+    for(unsigned i = 0; i < noOfProjections; i++){
+        states = boost::numeric::ublas::prod(states, marchovM);
+    }
+
+    //return (1-prev_occ_prob) * (lambda_entry) + (prev_occ_prob) * (1 - lambda_exit);
+    return states(0,0);
 }
 
 void Pmac_cell::init(double initialOccupancy, double initialFree)
@@ -90,3 +110,21 @@ void Pmac_cell::init(double initialOccupancy, double initialFree)
         previous_is_occupied = false;
     }
 }
+
+ double Pmac_cell::observationSum()
+ {
+     return free_count + occupied_count;
+ }
+
+ double Pmac_cell::getLastObservation()
+ {
+    return lastObservedTime;
+ }
+
+ unsigned Pmac_cell::getMixingTime()
+ {
+     double lambda_entry = (entry + 1) / (free_count + 1); // a(1,2)
+     double lambda_exit = (exit + 1) / (occupied_count + 1); // a(2,1)
+
+     return std::log(0.001*(lambda_entry/(lambda_entry+lambda_exit))) / (log(std::abs(1-lambda_exit-lambda_entry)));
+ }

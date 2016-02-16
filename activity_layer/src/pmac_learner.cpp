@@ -9,9 +9,26 @@ Pmac_learner::Pmac_learner(int sizeX=2, int sizeY =2, double resolution=2)
 bool Pmac_learner::getCellValue(int x, int y, unsigned char& cellValueOutput)
 {
     Pmac_cell* cell = grid.readCell(x,y);
-    if (cell != NULL)
+    if (cell != NULL && cell->observationSum() >= minObsValue)
     {
-        double occupancy_prob = cell->getProjectedOccupancyProbability();
+        ros::Time currentTime = ros::Time::now();
+        // Determine number of projection steps
+        unsigned steps = (unsigned) (((currentTime.toSec() - cell->getLastObservation()) /((double)UPDATE_INTERVAL / 1e9) )+0.5);
+
+        if(steps == 0)
+            steps = 1;
+
+        double occupancy_prob = 0;
+        if(steps > 10 && steps > cell->getMixingTime())
+        {
+            occupancy_prob = cell->getLongTermOccupancyProb();
+        }
+        else
+        {
+            occupancy_prob = cell->getProjectedOccupancyProbability(steps);
+        }
+
+
 
         if(occupancy_prob < 0) {
             occupancy_prob = 0;
@@ -31,9 +48,9 @@ bool Pmac_learner::getCellValue(int x, int y, unsigned char& cellValueOutput)
 void Pmac_learner::addObservationMap(Observation_interface* observation)
 {
     //ROS_ERROR("time since update %i",(ros::Time::now().toNSec() - update_time));
-    if( (ros::Time::now().toNSec()  - update_time) > UPDATE_INTERVAL)
+    ros::Time t = ros::Time::now();
+    if( (t.toNSec()  - update_time) > UPDATE_INTERVAL)
     {
-        update_time = ros::Time::now().toNSec();
         int max_x, max_y, min_y, min_x;
         observation->loadUpdateBounds( min_x,  max_x,  min_y,  max_y);
         if(max_x >= 0 && min_y >= 0 && max_y >= 0 && min_x >= 0)
@@ -43,7 +60,7 @@ void Pmac_learner::addObservationMap(Observation_interface* observation)
                     double occupancy_prob = observation->getOccupancyPrabability(x,y);
                     if (occupancy_prob >= 0) {
                         Pmac_cell* cell = grid.editCell(x,y);
-                        cell->addProbability(occupancy_prob);
+                        cell->addProbability(occupancy_prob,t.toSec());
                     }
                 }
             }

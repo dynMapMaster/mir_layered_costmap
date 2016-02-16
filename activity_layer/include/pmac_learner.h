@@ -17,6 +17,8 @@ public:
     static const uint64_t UPDATE_INTERVAL = 5e9; // in nanoseconds
     void setUpdateInterval(double time_between_updates);
     void initCell(int x, int y, Initial_values value);
+
+    static const double minObsValue = 10;
 private:    
     Grid_structure<Pmac_cell> grid;
     double update_time;
