@@ -31,6 +31,10 @@ private:
     double _laserNoiseVar;
     double _laserNoiseStdDev;
 
+    double lookUpProbabilityFromSensorModel(int relativeToGoal);
+    std::vector<double> sensorModelOccupancy;
+    int sensorModelOccupancyGoalIndex;
+
     double calculateProb(const std::vector<double>& origin, const std::vector<double>& direction, const std::vector<double>& intersectResult, int goalX, int goalY);
     std::vector<std::pair<int,int> > bresenham2Dv0(int x1, int y1, const int x2, const int y2);
     double phi(double x);

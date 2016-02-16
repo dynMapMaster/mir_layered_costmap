@@ -7,6 +7,19 @@ probabilistic_filter::probabilistic_filter(int xDim, int yDim, double resolution
     _map = new Grid_structure<Probablistic_cell>(xDim,yDim,resolution);
     _laserNoiseVar = laserStdDev * laserStdDev;
     _laserNoiseStdDev = laserStdDev;
+
+
+    // Setup sensormodel lookup table
+    sensorModelOccupancy.push_back(0);
+    sensorModelOccupancy.push_back(0);
+    sensorModelOccupancy.push_back(0);
+    sensorModelOccupancy.push_back(1);
+    sensorModelOccupancy.push_back(0.5);
+    sensorModelOccupancy.push_back(0.5);
+    sensorModelOccupancy.push_back(0.5);
+    sensorModelOccupancy.push_back(0.5);
+
+    sensorModelOccupancyGoalIndex = 3;
 }
 
 probabilistic_filter::~probabilistic_filter()
@@ -18,6 +31,7 @@ void probabilistic_filter::raytrace(int x0, int y0, int x1, int y1, bool markEnd
 {   
     std::vector<std::pair<int, int> > resultLine = bresenham2Dv0(x0, y0, x1, y1);
     std::pair<int, int> goal(x1,y1);
+    int goalIndex = resultLine.size();
     double dx= x1-x0;
     double dy = y1 - y0;
     double totalDelta = sqrt(dx*dx+dy*dy);
@@ -25,8 +39,8 @@ void probabilistic_filter::raytrace(int x0, int y0, int x1, int y1, bool markEnd
     {
         dx /= totalDelta;
         dy /= totalDelta;
-        int xExtended = x1 + dx * 6;
-        int yExtended = y1 + dy * 6;
+        int xExtended = x1 + dx * 3 * (_laserNoiseStdDev / _map->resolution());
+        int yExtended = y1 + dy * 3 * (_laserNoiseStdDev / _map->resolution());
         std::vector<std::pair<int, int> > extendedLine = bresenham2Dv0(x1, y1, xExtended, yExtended);
         resultLine.insert(resultLine.end(),extendedLine.begin(), extendedLine.end());
     }
@@ -34,56 +48,44 @@ void probabilistic_filter::raytrace(int x0, int y0, int x1, int y1, bool markEnd
     bool goalEncountered = false;
     for(int i = 0; i < (int) resultLine.size();i++)
     {
-        for(int k = -2; k < 3;k++)
-        {
-            if(i+k >= 0 && i+k < (int) resultLine.size())
-            {
-                double distToCurrent = sqrt((resultLine[i+k].first - resultLine[i].first)*(resultLine[i+k].first - resultLine[i].first)+(resultLine[i+k].second - resultLine[i].second)*(resultLine[i+k].second - resultLine[i].second));
-                double leftBound = (distToCurrent - 0.5) / _laserNoiseVar;
-                double rightBound = (distToCurrent + 0.5) / _laserNoiseVar;
-                double prob = std::abs(phi(rightBound) - phi(leftBound));
+        int cellsToGoal = goalIndex - i;
 
-                if(resultLine[i].first == x1 && resultLine[i].second == y1)
+        // lookup occupancy value
+        double occValue = lookUpProbabilityFromSensorModel(cellsToGoal);
+
+            // mark occupied
+
+            try
+            {
+                if(resultLine[i].first >= 0 && resultLine[i].first < _map->sizeX()  && resultLine[i].second >= 0 && resultLine[i].second < _map->sizeY() )
                 {
                     if(markEnd)
                     {
-                        try
-                        {
-                            if(resultLine[i+k].first >= 0 && resultLine[i+k].first < _map->sizeX()  && resultLine[i+k].second >= 0 && resultLine[i+k].second < _map->sizeY() )
-                            {
-                                 _map->editCell(resultLine[i+k].first,resultLine[i+k].second)->addMeasurement(Probablistic_cell::OBS_OCCUPIED,prob);
-                            }
-                        }
-                        catch(const char* s)
-                        {
-                            ROS_ERROR("Filter marking goal error %s", s);
-                        }
+                        _map->editCell(resultLine[i].first,resultLine[i].second)->addMeasurement(Probablistic_cell::OBS_OCCUPIED,occValue);
                     }
-                    goalEncountered = true;
-                }
-                else
-                {
-                    try
-                    {
-                        if(resultLine[i+k].first >= 0 && resultLine[i+k].first < _map->sizeX()  && resultLine[i+k].second >= 0 && resultLine[i+k].second < _map->sizeY() )
-                        {
-                            _map->editCell(resultLine[i+k].first,resultLine[i+k].second)->addMeasurement(Probablistic_cell::OBS_FREE,prob);
-                        }
-                    }
-                    catch(const char* s)
-                    {
-                        ROS_ERROR("Filter marking free error %s", s);
-                    }
+                     _map->editCell(resultLine[i].first,resultLine[i].second)->addMeasurement(Probablistic_cell::OBS_FREE,1-occValue);
                 }
 
             }
-        }
-        if(goalEncountered)
-            break;
+            catch(const char* s)
+            {
+                ROS_ERROR("Filter marking goal error %s", s);
+            }
     }
 
 }
 
+double probabilistic_filter::lookUpProbabilityFromSensorModel(int relativeToGoal)
+{
+    if(relativeToGoal + sensorModelOccupancyGoalIndex >= 0 && relativeToGoal + sensorModelOccupancyGoalIndex < sensorModelOccupancy.size())
+    {
+        return sensorModelOccupancy[relativeToGoal + sensorModelOccupancyGoalIndex];
+    }
+    else
+    {
+        return 0;
+    }
+}
 
 double probabilistic_filter::getOccupancyPrabability(int x, int y)
 {
@@ -219,3 +221,74 @@ void probabilistic_filter::resetEditLimits()
 {
     _map->resetUpdateBounds();
 }
+
+/*void raytrace(int x0, int y0, int x1, int y1, bool markEnd)
+{
+    std::vector<std::pair<int, int> > resultLine = bresenham2Dv0(x0, y0, x1, y1);
+    std::pair<int, int> goal(x1,y1);
+    double dx= x1-x0;
+    double dy = y1 - y0;
+    double totalDelta = sqrt(dx*dx+dy*dy);
+    if(totalDelta > 0)
+    {
+        dx /= totalDelta;
+        dy /= totalDelta;
+        int xExtended = x1 + dx * 6;
+        int yExtended = y1 + dy * 6;
+        std::vector<std::pair<int, int> > extendedLine = bresenham2Dv0(x1, y1, xExtended, yExtended);
+        resultLine.insert(resultLine.end(),extendedLine.begin(), extendedLine.end());
+    }
+
+    bool goalEncountered = false;
+    for(int i = 0; i < (int) resultLine.size();i++)
+    {
+        for(int k = -2; k < 3;k++)
+        {
+            if(i+k >= 0 && i+k < (int) resultLine.size())
+            {
+                double distToCurrent = sqrt((resultLine[i+k].first - resultLine[i].first)*(resultLine[i+k].first - resultLine[i].first)+(resultLine[i+k].second - resultLine[i].second)*(resultLine[i+k].second - resultLine[i].second));
+                double leftBound = (distToCurrent - 0.5) / _laserNoiseVar;
+                double rightBound = (distToCurrent + 0.5) / _laserNoiseVar;
+                double prob = std::abs(phi(rightBound) - phi(leftBound));
+
+                if(resultLine[i].first == x1 && resultLine[i].second == y1)
+                {
+                    if(markEnd)
+                    {
+                        try
+                        {
+                            if(resultLine[i+k].first >= 0 && resultLine[i+k].first < _map->sizeX()  && resultLine[i+k].second >= 0 && resultLine[i+k].second < _map->sizeY() )
+                            {
+                                 _map->editCell(resultLine[i+k].first,resultLine[i+k].second)->addMeasurement(Probablistic_cell::OBS_OCCUPIED,prob);
+                            }
+                        }
+                        catch(const char* s)
+                        {
+                            ROS_ERROR("Filter marking goal error %s", s);
+                        }
+                    }
+                    goalEncountered = true;
+                }
+                else
+                {
+                    try
+                    {
+                        if(resultLine[i+k].first >= 0 && resultLine[i+k].first < _map->sizeX()  && resultLine[i+k].second >= 0 && resultLine[i+k].second < _map->sizeY() )
+                        {
+                            _map->editCell(resultLine[i+k].first,resultLine[i+k].second)->addMeasurement(Probablistic_cell::OBS_FREE,prob);
+                        }
+                    }
+                    catch(const char* s)
+                    {
+                        ROS_ERROR("Filter marking free error %s", s);
+                    }
+                }
+
+            }
+        }
+        if(goalEncountered)
+            break;
+    }
+
+}
+*/

@@ -38,6 +38,9 @@ public:
     //  Returns the size of the grid in y direction
     int sizeY(){return _sizeY;}
 
+    // Returns the resolution i units pr cell
+    double resolution(){return _resolution;}
+
 private:
     T** _map;
     int _sizeX, _sizeY;

@@ -18,9 +18,9 @@ public:
     void initCell(int x, int y, Initial_values value);
 
     // Constants
-    static const uint64_t UPDATE_INTERVAL = 60e9;           // Time before new observations are accepted, in nanoseconds
-    static const double MIN_OBS_VALUE = 10;                 // Minimum sum of observations before cost is calculated
-    static const unsigned char OBSTACLE_THRESHOLD = 150;    // Equal or above this is obstacles
+    static const uint64_t       UPDATE_INTERVAL = 10e9;     // Time before new observations are accepted, in nanoseconds
+    static const double         MIN_OBS_VALUE = 10;         // Minimum sum of observations before cost is calculated
+    static const unsigned char  OBSTACLE_THRESHOLD = 150;   // Equal or above this is obstacles
 private:    
     Grid_structure<Pmac_cell> grid;
     double update_time;
