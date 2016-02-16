@@ -9,7 +9,7 @@ Pmac_learner::Pmac_learner(int sizeX=2, int sizeY =2, double resolution=2)
 bool Pmac_learner::getCellValue(int x, int y, unsigned char& cellValueOutput)
 {
     Pmac_cell* cell = grid.readCell(x,y);
-    if (cell != NULL && cell->observationSum() >= minObsValue)
+    if (cell != NULL && cell->observationSum() >= MIN_OBS_VALUE)
     {
         ros::Time currentTime = ros::Time::now();
         // Determine number of projection steps
@@ -27,8 +27,6 @@ bool Pmac_learner::getCellValue(int x, int y, unsigned char& cellValueOutput)
         {
             occupancy_prob = cell->getProjectedOccupancyProbability(steps);
         }
-
-
 
         if(occupancy_prob < 0) {
             occupancy_prob = 0;
@@ -51,6 +49,8 @@ void Pmac_learner::addObservationMap(Observation_interface* observation)
     ros::Time t = ros::Time::now();
     if( (t.toNSec()  - update_time) > UPDATE_INTERVAL)
     {
+        update_time = ros::Time::now().toNSec();
+        ROS_ERROR("Adding observation map");
         int max_x, max_y, min_y, min_x;
         observation->loadUpdateBounds( min_x,  max_x,  min_y,  max_y);
         if(max_x >= 0 && min_y >= 0 && max_y >= 0 && min_x >= 0)
@@ -106,5 +106,17 @@ void Pmac_learner::initCell(int x, int y, Initial_values value)
             break;
         default:
             break;
+    }
+}
+
+void Pmac_learner::translateOcc(unsigned char& value)
+{
+    if(value == 95) // Avoid making critical regions
+    {
+        value = 96;
+    }
+    else if(value >= OBSTACLE_THRESHOLD)
+    {
+        value = 224;
     }
 }
