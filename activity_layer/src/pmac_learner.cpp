@@ -53,7 +53,6 @@ void Pmac_learner::addObservationMap(Observation_interface* observation)
     if( (t.toNSec()  - update_time) > UPDATE_INTERVAL)
     {
         update_time = ros::Time::now().toNSec();
-        ROS_ERROR("Adding observation map");
         int max_x, max_y, min_y, min_x;
         observation->loadUpdateBounds( min_x,  max_x,  min_y,  max_y);
         if(max_x >= 0 && min_y >= 0 && max_y >= 0 && min_x >= 0)

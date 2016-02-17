@@ -236,7 +236,6 @@ void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& mess
         laserScanWaitingCounter++;
         if(laserScanWaitingCounter > 100)
         {
-            ROS_ERROR("Tracing laser scans");
             // Waste of time -> consider running in a timer callback
             for(size_t i = 0; i < observation_buffers_.size(); i++)
             {
@@ -296,7 +295,6 @@ void ActivityLayer::laserScanValidInfCallback(const sensor_msgs::LaserScanConstP
         laserScanWaitingCounter++;
         if(laserScanWaitingCounter > 100)
         {
-            ROS_ERROR("Tracing laser scans");
             // Waste of time -> consider running in a timer callback
             for(size_t i = 0; i < observation_buffers_.size(); i++)
             {
