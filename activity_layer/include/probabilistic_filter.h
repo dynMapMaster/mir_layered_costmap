@@ -31,8 +31,8 @@ private:
     double _laserNoiseVar;
     double _laserNoiseStdDev;
 
-    double lookUpProbabilityFromSensorModel(int relativeToGoal);
-    std::vector<double> sensorModelOccupancy;
+    std::pair<double, double> lookUpProbabilityFromSensorModel(int relativeToGoal);
+    std::vector<double> sensorModelOccupancy, sensorModelFree;
     int sensorModelOccupancyGoalIndex;
 
     double calculateProb(const std::vector<double>& origin, const std::vector<double>& direction, const std::vector<double>& intersectResult, int goalX, int goalY);
