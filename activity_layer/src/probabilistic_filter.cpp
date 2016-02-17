@@ -10,18 +10,22 @@ probabilistic_filter::probabilistic_filter(int xDim, int yDim, double resolution
 
 
     // Setup sensormodel lookup table
-  /*  sensorModelOccupancy.push_back(0.001);
-    sensorModelOccupancy.push_back(0.158);
-    sensorModelOccupancy.push_back(0.682);
-    sensorModelOccupancy.push_back(0.158);
-    sensorModelOccupancy.push_back(0.001);
-*/
-   /* sensorModelFree.push_back(1);
-    sensorModelFree.push_back(0.841);
-    sensorModelFree.push_back(0.160);
-    sensorModelFree.push_back(0.001);
-    sensorModelFree.push_back(0);
-*/
+    // standard deviation = 0.05;
+
+    // standard deviation = 0.05;
+      sensorModelOccupancy.push_back(0.0014);
+      sensorModelOccupancy.push_back(0.1573);
+      sensorModelOccupancy.push_back(0.682);
+      sensorModelOccupancy.push_back(0.1573);
+      sensorModelOccupancy.push_back(0.0014);
+
+      sensorModelFree.push_back(0.9986);
+      sensorModelFree.push_back(0.8413);
+      sensorModelFree.push_back(0.1587);
+      sensorModelFree.push_back(0.0014);
+      sensorModelFree.push_back(0);
+
+      /*
       sensorModelOccupancy.push_back(0);
       sensorModelOccupancy.push_back(0);
       sensorModelOccupancy.push_back(1);
@@ -30,9 +34,8 @@ probabilistic_filter::probabilistic_filter(int xDim, int yDim, double resolution
       sensorModelFree.push_back(1);
       sensorModelFree.push_back(1);
       sensorModelFree.push_back(0);
-;
 
-
+*/
     sensorModelOccupancyGoalIndex = 2;
 }
 
@@ -54,8 +57,8 @@ void probabilistic_filter::raytrace(int x0, int y0, int x1, int y1, bool markEnd
     {
         dx /= totalDelta;
         dy /= totalDelta;
-        int xExtended = x1 + dx * sensorModelOccupancy.size() / 2;
-        int yExtended = y1 + dy * sensorModelOccupancy.size() / 2;
+        int xExtended = x1 + dx * sensorModelOccupancy.size() ;
+        int yExtended = y1 + dy * sensorModelOccupancy.size() ;
         std::vector<std::pair<int, int> > extendedLine = bresenham2Dv0(x1, y1, xExtended, yExtended);
         resultLine.insert(resultLine.end(),extendedLine.begin(), extendedLine.end());
     }
@@ -64,7 +67,6 @@ void probabilistic_filter::raytrace(int x0, int y0, int x1, int y1, bool markEnd
     for(int i = 0; i < (int) resultLine.size();i++)
     {
         int cellsToGoal = i - goalIndex;
-
         // lookup occupancy value
         std::pair<double, double> occValue = lookUpProbabilityFromSensorModel(cellsToGoal);
 
@@ -77,7 +79,6 @@ void probabilistic_filter::raytrace(int x0, int y0, int x1, int y1, bool markEnd
                     if(markEnd && occValue.first > 0)
                     {
                         _map->editCell(resultLine[i].first,resultLine[i].second)->addMeasurement(Probablistic_cell::OBS_OCCUPIED,occValue.first);
-                        ROS_ERROR("occValue.first: %f", occValue.first);
                     }
 
                     if(occValue.second > 0)
@@ -99,8 +100,8 @@ std::pair<double,double> probabilistic_filter::lookUpProbabilityFromSensorModel(
     double free = 1;
     if(relativeToGoal + sensorModelOccupancyGoalIndex >= 0 && relativeToGoal + sensorModelOccupancyGoalIndex < sensorModelOccupancy.size())
     {
-        double occ = sensorModelOccupancy[relativeToGoal + sensorModelOccupancyGoalIndex];
-        double free = sensorModelFree[relativeToGoal + sensorModelOccupancyGoalIndex];
+        occ = sensorModelOccupancy[relativeToGoal + sensorModelOccupancyGoalIndex];
+        free = sensorModelFree[relativeToGoal + sensorModelOccupancyGoalIndex];
     }
     else if(relativeToGoal + sensorModelOccupancyGoalIndex > sensorModelOccupancy.size())
     {

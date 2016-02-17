@@ -34,7 +34,10 @@ bool Pmac_learner::getCellValue(int x, int y, unsigned char& cellValueOutput)
         else if(occupancy_prob > 1) {
             occupancy_prob = 1;
         }
-        cellValueOutput = 252 * occupancy_prob;
+        cellValueOutput = 255 * occupancy_prob;
+
+        translateOcc(cellValueOutput);
+
         return true;
     }
     else
@@ -117,6 +120,6 @@ void Pmac_learner::translateOcc(unsigned char& value)
     }
     else if(value >= OBSTACLE_THRESHOLD)
     {
-        value = 224;
+        value = 255;
     }
 }
