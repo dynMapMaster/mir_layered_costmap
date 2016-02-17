@@ -185,7 +185,7 @@ private:
     LearnerT* _map;
     int _xSize, _ySize;
     double _resolution;
-    static const double SENSOR_STD_DEV = 0.01; // in m
+    static const double SENSOR_STD_DEV = 0 ; //0.01; // in m
     std::string _global_frame;
 
 
@@ -204,6 +204,8 @@ private:
     // Determine the initial value from the received map
     Costmap_interpretator::Initial_values determineInitialValue(unsigned char val);
 
+    // counter of laser scans received since last handling
+    int laserScanWaitingCounter;
 };
 
 }  // namespace layered_costmap_2d

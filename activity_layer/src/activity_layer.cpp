@@ -60,6 +60,8 @@ namespace dynamic_map
 
 void ActivityLayer::onInitialize()
 {
+    laserScanWaitingCounter = 0;
+
     ROS_INFO("Initializing activity map");
     ros::NodeHandle nh("~/" + name_), g_nh;
 
@@ -231,18 +233,24 @@ void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& mess
         buffer->bufferCloud(cloud);
         buffer->unlock();
 
-        // Waste of time -> consider running in a timer callback
-        for(size_t i = 0; i < observation_buffers_.size(); i++)
+        laserScanWaitingCounter++;
+        if(laserScanWaitingCounter > 100)
         {
-            vector<Observation> buffer;
-            observation_buffers_[i]->lock();
-            observation_buffers_[i]->getObservations(buffer);
-            observation_buffers_[i]->unlock();
-            for(size_t o = 0; o < buffer.size(); o++)
+            ROS_ERROR("Tracing laser scans");
+            // Waste of time -> consider running in a timer callback
+            for(size_t i = 0; i < observation_buffers_.size(); i++)
             {
-                //ROS_INFO("observation: %i",o);
-                raytrace(buffer[o]);
+                vector<Observation> buffer;
+                observation_buffers_[i]->lock();
+                observation_buffers_[i]->getObservations(buffer);
+                observation_buffers_[i]->unlock();
+                for(size_t o = 0; o < buffer.size(); o++)
+                {
+                    //ROS_INFO("observation: %i",o);
+                    raytrace(buffer[o]);
+                }
             }
+            laserScanWaitingCounter = 0;
         }
     }
 }
@@ -285,18 +293,24 @@ void ActivityLayer::laserScanValidInfCallback(const sensor_msgs::LaserScanConstP
         buffer->bufferCloud(cloud);
         buffer->unlock();
 
-        // Waste of time -> consider running in a timer callback
-        for(size_t i = 0; i < observation_buffers_.size(); i++)
+        laserScanWaitingCounter++;
+        if(laserScanWaitingCounter > 100)
         {
-            vector<Observation> buffer;
-            observation_buffers_[i]->lock();
-            observation_buffers_[i]->getObservations(buffer);
-            observation_buffers_[i]->unlock();
-            for(size_t o = 0; o < buffer.size(); o++)
+            ROS_ERROR("Tracing laser scans");
+            // Waste of time -> consider running in a timer callback
+            for(size_t i = 0; i < observation_buffers_.size(); i++)
             {
-                //ROS_INFO("observation: %i",o);
-                raytrace(buffer[o]);
+                vector<Observation> buffer;
+                observation_buffers_[i]->lock();
+                observation_buffers_[i]->getObservations(buffer);
+                observation_buffers_[i]->unlock();
+                for(size_t o = 0; o < buffer.size(); o++)
+                {
+                    //ROS_INFO("observation: %i",o);
+                    raytrace(buffer[o]);
+                }
             }
+            laserScanWaitingCounter = 0;
         }
     }
 }
