@@ -26,7 +26,7 @@ void occupancyGridCb(const nav_msgs::OccupancyGrid::Ptr msg)
 {    
     // Greyscale image
     cv::Mat im(msg->info.height, msg->info.width, CV_8UC1);
-    size_t reverse_i = msg->info.height-1;
+    size_t reverse_i = msg->info.height;
     for (size_t i = 0; i < msg->info.height; ++i) {
         size_t row = (--reverse_i)*msg->info.width;
         for (size_t j = 0; j < msg->info.width; ++j) {
