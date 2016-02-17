@@ -14,10 +14,7 @@ probabilistic_filter::probabilistic_filter(int xDim, int yDim, double resolution
     sensorModelOccupancy.push_back(0);
     sensorModelOccupancy.push_back(0);
     sensorModelOccupancy.push_back(1);
-    sensorModelOccupancy.push_back(0.5);
-    sensorModelOccupancy.push_back(0.5);
-    sensorModelOccupancy.push_back(0.5);
-    sensorModelOccupancy.push_back(0.5);
+
 
     sensorModelOccupancyGoalIndex = 3;
 }
@@ -41,8 +38,8 @@ void probabilistic_filter::raytrace(int x0, int y0, int x1, int y1, bool markEnd
         dy /= totalDelta;
         int xExtended = x1 + dx * 3 * (_laserNoiseStdDev / _map->resolution());
         int yExtended = y1 + dy * 3 * (_laserNoiseStdDev / _map->resolution());
-        std::vector<std::pair<int, int> > extendedLine = bresenham2Dv0(x1, y1, xExtended, yExtended);
-        resultLine.insert(resultLine.end(),extendedLine.begin(), extendedLine.end());
+       // std::vector<std::pair<int, int> > extendedLine = bresenham2Dv0(x1, y1, xExtended, yExtended);
+       // resultLine.insert(resultLine.end(),extendedLine.begin(), extendedLine.end());
     }
 
     bool goalEncountered = false;
