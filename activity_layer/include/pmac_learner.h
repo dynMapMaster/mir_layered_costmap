@@ -16,6 +16,8 @@ public:
     void resetEditLimits();
     void setUpdateInterval(double time_between_updates);
     void initCell(int x, int y, Initial_values value);
+    std::vector<std::vector<double> > serialize();
+    void deserialize(std::vector<std::vector<double> > values);
 
     // Constants
     static const uint64_t UPDATE_INTERVAL = 30e9;           // Time before new observations are accepted, in nanoseconds

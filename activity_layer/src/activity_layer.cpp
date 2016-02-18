@@ -42,6 +42,8 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/GetMap.h>
 
+#include <fstream>;
+#include <sstream>
 
 //PLUGINLIB_EXPORT_CLASS(layered_costmap_2d::ActivityLayer, layered_costmap_2d::Layer)
 PLUGINLIB_DECLARE_CLASS(dynamic_map, ActivityLayer, dynamic_map::ActivityLayer,layered_costmap_2d::Layer)
@@ -75,6 +77,10 @@ void ActivityLayer::onInitialize()
     nh.param("pose_topic",poseTopicName,string("amcl_pose"));
     poseIsAccurate = false;
     poseSubscriber = g_nh.subscribe(poseTopicName, 50, &ActivityLayer::poseCB,this);
+
+    // Advertise asve and load services
+    saveService = g_nh.advertiseService("save_dynamicMap",&ActivityLayer::saveDynamicMap,this);
+    loadService = g_nh.advertiseService("load_dynamicMap",&ActivityLayer::loadDynamicMap,this);
 
     std::string topics_string;
     // get the topics that we'll subscribe to from the parameter server
@@ -537,6 +543,77 @@ void ActivityLayer::poseCB(geometry_msgs::PoseWithCovarianceStamped pose)
     {
         poseIsAccurate = false;
     }
+}
+
+bool ActivityLayer::saveDynamicMap(activity_layer::saveDynaicMap::Request &req, activity_layer::saveDynaicMap::Response &resp)
+{
+
+    resp.success = false;
+    try
+    {
+        std::vector<std::vector<double> > mapSerialized = _map->serialize();
+        // Create an output archive
+        std::ofstream ofs;
+        ofs.open(req.path.c_str());
+        for(int i = 0; i < mapSerialized.size();i++){
+            for(int k = 0; k < mapSerialized[i].size();k++){
+                if(i == 0)
+                {
+                    ROS_ERROR("%f",mapSerialized[i][k]);
+                }
+                // write content
+                ofs << mapSerialized[i][k];
+                ofs << " ";
+            }
+            //write newline
+            ofs << "\n";
+        }
+        resp.success = true;
+        ROS_INFO("SAVE DYNAMIC MAP - SUCCESS");
+    }
+    catch(...)
+    {
+        ROS_ERROR("SAVE DYNAMIC MAP - FAILED!");
+    }
+
+
+    return true;
+}
+
+bool ActivityLayer::loadDynamicMap(activity_layer::loadDynaicMap::Request &req, activity_layer::loadDynaicMap::Response &resp)
+{
+    resp.success = false;
+    try
+    {
+        std::ifstream ifs;
+        ifs.open(req.path.c_str());
+        std::vector<std::vector<double> > loadedObject;
+        loadedObject.push_back(std::vector<double>());
+        std::string line;
+        int i = 0;
+        while( std::getline(ifs,line))
+        {
+            std::istringstream iss(line);
+            double val;
+            while(iss >> val)
+            {
+                loadedObject[i].push_back(val);
+            }
+
+            i++;
+
+            loadedObject.push_back(std::vector<double>());
+        }
+        _map->deserialize(loadedObject);
+        resp.success = true;
+        ROS_INFO("LOAD DYNAMIC MAP - SUCCESS");
+    }
+    catch(...)
+    {
+        ROS_ERROR("LOAD DYNAMIC MAP - FAILED!");
+    }
+
+    return true;
 }
 
 }  // namespace layered_costmap_2d

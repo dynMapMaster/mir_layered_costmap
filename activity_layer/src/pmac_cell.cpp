@@ -128,3 +128,31 @@ void Pmac_cell::init(double initialOccupancy, double initialFree)
 
      return std::log(0.001*(lambda_entry/(lambda_entry+lambda_exit))) / (log(std::abs(1-lambda_exit-lambda_entry)));
  }
+
+ bool Pmac_cell::deserialize(std::vector<double> values)
+ {
+     bool returnVal = false;
+     if(values.size() == 5)
+     {
+         occupied_count = values[0];
+         free_count = values[1];
+         entry = values[2];
+         exit = values[3];
+         prev_occ_prob = values[4];
+         previous_is_occupied = (prev_occ_prob > 0.5) ? true : false;
+         lastObservedTime = 0;
+         returnVal = true;
+     }
+     return returnVal;
+ }
+
+ std::vector<double> Pmac_cell::serialize()
+ {
+     std::vector<double> result(5);
+     result[0] = occupied_count;
+     result[1] = free_count;
+     result[2] = entry;
+     result[3] = exit;
+     result[4] = prev_occ_prob;
+     return result;
+ }

@@ -44,6 +44,7 @@
 #include <layered_costmap_2d/observation_buffer.h>
 
 #include <nav_msgs/OccupancyGrid.h>
+#include <std_msgs/String.h>
 
 #include <sensor_msgs/LaserScan.h>
 #include <laser_geometry/laser_geometry.h>
@@ -58,11 +59,13 @@
 
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 
-
 #include <observation_interface.h>
 #include <costmap_interpretator.h>
 #include <pmac_learner.h>
 #include <probabilistic_filter.h>
+
+#include "activity_layer/loadDynaicMap.h"
+#include "activity_layer/saveDynaicMap.h"
 
 namespace dynamic_map
 {
@@ -206,6 +209,13 @@ private:
 
     // counter of laser scans received since last handling
     int laserScanWaitingCounter;
+
+    // Services for saving and loading
+    ros::ServiceServer saveService;
+    ros::ServiceServer loadService;
+
+    bool saveDynamicMap(activity_layer::saveDynaicMap::Request &req, activity_layer::saveDynaicMap::Response &resp);
+    bool loadDynamicMap(activity_layer::loadDynaicMap::Request &req, activity_layer::loadDynaicMap::Response &resp);
 };
 
 }  // namespace layered_costmap_2d

@@ -1,6 +1,6 @@
 #ifndef PMAC_CELL_H
 #define PMAC_CELL_H
-
+#include <vector>
 
 class Pmac_cell
 {
@@ -14,6 +14,8 @@ public:
     double getLastObservation();
     unsigned getMixingTime();
 
+    bool deserialize(std::vector<double> values);
+    std::vector<double> serialize();
 
 private:
     static const int NO_INTIAL_UPDATES = 100;
@@ -23,7 +25,6 @@ private:
     double entry, exit;
     double prev_occ_prob;
     bool previous_is_occupied;
-    double inital_occupied;
     double lastObservedTime;
 };
 
