@@ -2,6 +2,7 @@ build/
 bin/
 lib/
 msg_gen/
+srv_gen/
 docs/
 *.dox
 *~
@@ -12,5 +13,6 @@ cfg/*.py
 msg/*.py
 layered_costmap_2d/src/layered_costmap_2d
 layered_costmap_2d/cfg/cpp/
+activity_layer/src/activity_layer/
 *.autosave
 .swp

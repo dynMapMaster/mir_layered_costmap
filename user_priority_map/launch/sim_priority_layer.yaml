@@ -19,6 +19,17 @@ footprint_padding: 0.1
 plugins:
 - {name: activity_layer,       type: "dynamic_map/ActivityLayer"}
 - {name: priority_layer,       type: "user_priority_map/UserPriorityLayer"}
+- {name: static_layer,       type: "layered_costmap_2d/StaticLayer"}
+
+static_layer:
+  map_topic: /blue_print_map
+  first_map_only: false
+  subsribe_to_updates: false
+  track_unknown_space: true
+  use_maximum: true # just for test else false
+  lethal_cost_threshold: 100
+  unknown_cost_value: -1
+  trinary_costmap: true
 
 activity_layer:
   transform_tolerance: 0.2  

@@ -4,6 +4,12 @@
 
 	<include file="$(find mirCommon)/launch/mir_bringup.launch"/>
 
+	<node pkg="tf" type="static_transform_publisher" name="initial_pose_link_broadcaster" args="0. 0. 0 0 0 0 map blue_print_map 20" />   
+
+	<node name="ros_map_server" pkg="map_server" type="map_server" args="$(find sim_dynamic_world)/world/navigation_simulation_with_features.yaml">
+		<remap from="/map" to="/blue_print_map" />
+	</node>
+
   <node name="costmap" pkg="layered_costmap_2d" type="costmap_2d_node" output="screen" >
 		<rosparam file="$(find user_priority_map)/launch/sim_priority_layer.yaml" command="load" ns="costmap"/> 
 		<remap from="/costmap/costmap/costmap" to="dynamic_map" />
