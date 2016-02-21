@@ -22,10 +22,6 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #uncomment if you have defined services
 rosbuild_gensrv()
 
-#common commands for building c++ executables and libraries
-#rosbuild_add_library(${PROJECT_NAME} src/activityLayer.cpp src/activityMap.cpp src/activityMapComponent.cpp)
-#include_directories(include ${layered_costmap_2d})
-#target_link_libraries(${PROJECT_NAME} layered_costmap_2d)
 
 rosbuild_add_library(activity_layer
   src/activity_layer.cpp
@@ -33,10 +29,17 @@ rosbuild_add_library(activity_layer
   src/probablistic_cell.cpp
   src/probabilistic_filter.cpp
   src/pmac_learner.cpp
- # src/activityMap.cpp
-  #src/activityMapComponent.cpp
+  src/bayes_cell.cpp
+  src/bayes_learner.cpp
+  #include/pmac_cell.h
+  #include/pmac_learner.h
+  #include/activity_layer.h
+  #include/probablistic_cell.h
+  #include/probabilistic_filter.h
+  #include/bayes_cell.h
+  #include/bayes_learner.h
 )
-include_directories(include 
+include_directories(include
   ${layered_costmap_2d}
 )
 target_link_libraries(activity_layer 
@@ -44,8 +47,8 @@ target_link_libraries(activity_layer
 )
 
 # Compiler flags
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11 -Wall -Wextra" HAS_FLAGS)
-if(HAS_FLAGS)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
-endif()
+#include(CheckCXXCompilerFlag)
+#CHECK_CXX_COMPILER_FLAG("-std=c++11 -Wall -Wextra" HAS_FLAGS)
+#if(HAS_FLAGS)
+#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
+#endif()

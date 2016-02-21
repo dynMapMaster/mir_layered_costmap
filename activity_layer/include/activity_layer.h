@@ -63,6 +63,7 @@
 #include <costmap_interpretator.h>
 #include <pmac_learner.h>
 #include <probabilistic_filter.h>
+#include <bayes_learner.h>
 
 #include "activity_layer/loadDynaicMap.h"
 #include "activity_layer/saveDynaicMap.h"

@@ -547,7 +547,7 @@ void ActivityLayer::poseCB(geometry_msgs::PoseWithCovarianceStamped pose)
 
 bool ActivityLayer::saveDynamicMap(activity_layer::saveDynaicMap::Request &req, activity_layer::saveDynaicMap::Response &resp)
 {
-
+    /*
     resp.success = false;
     try
     {
@@ -576,12 +576,13 @@ bool ActivityLayer::saveDynamicMap(activity_layer::saveDynaicMap::Request &req, 
         ROS_ERROR("SAVE DYNAMIC MAP - FAILED!");
     }
 
-
+*/
     return true;
 }
 
 bool ActivityLayer::loadDynamicMap(activity_layer::loadDynaicMap::Request &req, activity_layer::loadDynaicMap::Response &resp)
 {
+    /*
     resp.success = false;
     try
     {
@@ -612,7 +613,7 @@ bool ActivityLayer::loadDynamicMap(activity_layer::loadDynaicMap::Request &req, 
     {
         ROS_ERROR("LOAD DYNAMIC MAP - FAILED!");
     }
-
+*/
     return true;
 }
 

@@ -25,7 +25,7 @@ public:
     static const unsigned char OBSTACLE_THRESHOLD = 200;    // Equal or above this is obstacles
 private:    
     Grid_structure<Pmac_cell> grid;
-    double update_time;
+    uint64_t update_time;
     void translateOcc(unsigned char &value);
 };
 
