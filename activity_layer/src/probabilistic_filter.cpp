@@ -55,22 +55,6 @@ void Probabilistic_filter::raytrace(int x0, int y0, int x1, int y1, bool markEnd
     bresenham2Dv0(x0,y0,x1,y1,markEnd);
 }
 
-
-
-double Probabilistic_filter::lookUpProbabilityFromSensorModel(int relativeToGoal)
-{
-    double occ = 0;
-    if(relativeToGoal + _sensor_model_occupancy_goal_index >= int(0) && relativeToGoal + _sensor_model_occupancy_goal_index < (int)_sensor_model.size())
-    {
-        occ = _sensor_model[relativeToGoal + _sensor_model_occupancy_goal_index];
-    }
-    else if(relativeToGoal + _sensor_model_occupancy_goal_index > (int)_sensor_model.size())
-    {
-        occ = 0;
-    }
-    return occ;
-}
-
 double Probabilistic_filter::getOccupancyPrabability(int x, int y)
 {
     Probablistic_cell* cell = _map->readCell(x,y);
@@ -83,58 +67,10 @@ double Probabilistic_filter::getOccupancyPrabability(int x, int y)
     return result;
 }
 
-double Probabilistic_filter::calculateProb(const std::vector<double>& origin, const std::vector<double>& direction, const std::vector<double>& intersectResult, int goalX, int goalY)
-{
-    double firstX = (goalX+0.5) - (origin[0] + direction[0] * intersectResult[0]);
-    double firstY = (goalY+0.5) - (origin[1] + direction[1] * intersectResult[0]);
-    double firstDist = sqrt(firstX*firstX + firstY * firstY);
-
-    double secondX = (goalX+0.5) - (origin[0] + direction[0] * intersectResult[1]);
-    double secondY = (goalY+0.5) - (origin[1] + direction[1] * intersectResult[1]);
-    double secondDist = sqrt(secondX*secondX + secondY * secondY);
-    if((firstX < 0 && secondX >= 0) || ((firstX >= 0 && secondX < 0)))
-    {
-        secondDist *= -1;
-    }
-
-
-    double v1 = phi(secondDist / (_laser_noise_var));
-    double v2 = phi(firstDist / (_laser_noise_var));
-
-    return std::abs(v2 - v1);
-}
-
 void Probabilistic_filter::loadUpdateBounds(int& xMin, int& xMax, int& yMin, int& yMax)
 {
     _map->loadUpdateBounds(xMin,xMax,yMin,yMax);
 }
-
-
-double Probabilistic_filter::phi(double x)
-{
-    // constants
-    double a1 =  0.254829592;
-    double a2 = -0.284496736;
-    double a3 =  1.421413741;
-    double a4 = -1.453152027;
-    double a5 =  1.061405429;
-    double p  =  0.3275911;
-
-    // Save the sign of x
-    int sign = 1;
-    if (x < 0)
-        sign = -1;
-    x = fabs(x)/sqrt(2.0);
-
-    // A&S formula 7.1.26
-    double t = 1.0/(1.0 + p*x);
-    double y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t*exp(-x*x);
-
-    return 0.5*(1.0 + sign*y);
-}
-
-
-
 
 inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, bool markEnd)
 {

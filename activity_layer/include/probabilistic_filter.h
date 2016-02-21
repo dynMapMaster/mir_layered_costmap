@@ -31,16 +31,12 @@ private:
     double _laser_noise_var;
     double _laser_noise_std_dev;
 
-    double lookUpProbabilityFromSensorModel(int relativeToGoal);
     bool enforceBounds(int& x, int& y);
-    //const size_t sensor_model_size = 5;
     std::vector<double> _sensor_model;
     const static double _LOG_ODDS_FREE = -11.5129354649202;
     int _sensor_model_occupancy_goal_index;
 
-    double calculateProb(const std::vector<double>& origin, const std::vector<double>& direction, const std::vector<double>& intersectResult, int goalX, int goalY);
     inline void bresenham2Dv0(int x1, int y1, int x2, int y2, bool markEnd = true);
-    double phi(double x);
 };
 
 #endif // PROBABILISTIC_FILTER_H
