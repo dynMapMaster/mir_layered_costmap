@@ -14,7 +14,7 @@ public:
     double getLastObservation();
     unsigned getMixingTime();
 
-    bool deserialize(std::vector<double> values);
+    bool deserialize(const std::vector<double> &values);
     std::vector<double> serialize();
 
 private:

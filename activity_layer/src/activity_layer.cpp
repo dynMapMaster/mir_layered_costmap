@@ -378,7 +378,7 @@ void ActivityLayer::updateCosts(layered_costmap_2d::Costmap2D& master_grid, int 
         //ROS_INFO("j=%i",j);
         unsigned int it = j * span + min_i;
         for (int i = min_i; i < max_i; i++)
-        {
+        {            
             if (_map->getCellValue(i,j,val)){
                 unsigned char old_cost = master_array[it];
                 //if (old_cost == NO_INFORMATION || old_cost < val)

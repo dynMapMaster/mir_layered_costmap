@@ -8,11 +8,11 @@
 #include <utility>
 
 
-class probabilistic_filter : public Observation_interface
+class Probabilistic_filter : public Observation_interface
 {
 public:
-    probabilistic_filter(int xDim, int yDim, double resolution, double laserStdDev);
-    ~probabilistic_filter();
+    Probabilistic_filter(int xDim, int yDim, double resolution, double laserStdDev);
+    ~Probabilistic_filter();
 
     // Traces a ray to x1,y1. All positions are written with a gaussian kernel based on lasernoise
     void raytrace(int x0, int y0, int x1, int y1, bool markEnd);
@@ -28,15 +28,18 @@ public:
 
 private:
     Grid_structure<Probablistic_cell>* _map;
-    double _laserNoiseVar;
-    double _laserNoiseStdDev;
+    double _laser_noise_var;
+    double _laser_noise_std_dev;
 
-    std::pair<double, double> lookUpProbabilityFromSensorModel(int relativeToGoal);
-    std::vector<double> sensorModelOccupancy, sensorModelFree;
-    int sensorModelOccupancyGoalIndex;
+    double lookUpProbabilityFromSensorModel(int relativeToGoal);
+    bool enforceBounds(int& x, int& y);
+    //const size_t sensor_model_size = 5;
+    std::vector<double> _sensor_model;
+    const static double _LOG_ODDS_FREE = -11.5129354649202;
+    int _sensor_model_occupancy_goal_index;
 
     double calculateProb(const std::vector<double>& origin, const std::vector<double>& direction, const std::vector<double>& intersectResult, int goalX, int goalY);
-    std::vector<std::pair<int,int> > bresenham2Dv0(int x1, int y1, const int x2, const int y2);
+    inline void bresenham2Dv0(int x1, int y1, int x2, int y2, bool markEnd = true);
     double phi(double x);
 };
 

@@ -5,13 +5,12 @@
 class Probablistic_cell
 {
 public:
-    const static int OBS_FREE = 0, OBS_OCCUPIED = 1;
     Probablistic_cell();
-    void addMeasurement(int measurement, double prob);
+    void addMeasurement(double log_odds_update);
     double getProbForOccupied();
     void resetCell();
 private:
-    double occupied_count, free_count;
+    double log_odds;
 };
 
 #endif // PROBABLISTIC_CELL_H

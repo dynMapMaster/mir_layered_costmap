@@ -85,16 +85,11 @@ double Pmac_cell::getProjectedOccupancyProbability(unsigned noOfProjections)
     for(unsigned i = 0; i < noOfProjections; i++){
         states = boost::numeric::ublas::prod(states, marchovM);
     }
-
-    //return (1-prev_occ_prob) * (lambda_entry) + (prev_occ_prob) * (1 - lambda_exit);
     return states(0,0);
 }
 
 void Pmac_cell::init(double initialOccupancy, double initialFree)
 {
-
-
-
     if(initialOccupancy > initialFree)
     {
         occupied_count = initialOccupancy;
@@ -129,7 +124,7 @@ void Pmac_cell::init(double initialOccupancy, double initialFree)
      return std::log(0.001*(lambda_entry/(lambda_entry+lambda_exit))) / (log(std::abs(1-lambda_exit-lambda_entry)));
  }
 
- bool Pmac_cell::deserialize(std::vector<double> values)
+ bool Pmac_cell::deserialize(const std::vector<double>& values)
  {
      bool returnVal = false;
      if(values.size() == 5)

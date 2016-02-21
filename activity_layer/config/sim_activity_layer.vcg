@@ -1,96 +1,34 @@
 Background\ ColorB=0.498039
 Background\ ColorG=0.498039
 Background\ ColorR=0.498039
-Camera\ Config=71.779 1.07425 -0.185116 0
+Camera\ Config=138.124 5.06153 2.66306 6.285
 Camera\ Type=rviz::FixedOrientationOrthoViewController
 Fixed\ Frame=/map
-Grid.Alpha=0.5
-Grid.Cell\ Size=1
-Grid.ColorB=0
-Grid.ColorG=0
-Grid.ColorR=0
-Grid.Enabled=1
-Grid.Line\ Style=0
-Grid.Line\ Width=0.03
-Grid.Normal\ Cell\ Count=0
-Grid.OffsetX=0
-Grid.OffsetY=0
-Grid.OffsetZ=0
-Grid.Plane=0
-Grid.Plane\ Cell\ Count=10
-Grid.Reference\ Frame=/odom
 Image.Enabled=0
 Image.Image\ Topic=/occupancy_image_color
 Image.Queue\ Size=2
 Image.Transport\ Hint=raw
-LaserScan..AxisColorAutocompute\ Value\ Bounds=1
-LaserScan..AxisColorAxis=2
-LaserScan..AxisColorMax\ Value=10
-LaserScan..AxisColorMin\ Value=-10
-LaserScan..AxisColorUse\ Fixed\ Frame=1
-LaserScan..FlatColorColorB=1
-LaserScan..FlatColorColorG=1
-LaserScan..FlatColorColorR=1
-LaserScan..IntensityAutocompute\ Intensity\ Bounds=1
-LaserScan..IntensityChannel\ Name=intensity
-LaserScan..IntensityMax\ ColorB=1
-LaserScan..IntensityMax\ ColorG=1
-LaserScan..IntensityMax\ ColorR=1
-LaserScan..IntensityMax\ Intensity=1
-LaserScan..IntensityMin\ ColorB=0
-LaserScan..IntensityMin\ ColorG=0
-LaserScan..IntensityMin\ ColorR=0
-LaserScan..IntensityMin\ Intensity=1
-LaserScan..IntensityUse\ full\ RGB\ spectrum=1
-LaserScan.Alpha=1
-LaserScan.Billboard\ Size=0.01
-LaserScan.Color\ Transformer=Intensity
-LaserScan.Decay\ Time=0
-LaserScan.Enabled=1
-LaserScan.Position\ Transformer=XYZ
-LaserScan.Queue\ Size=10
-LaserScan.Selectable=1
-LaserScan.Style=1
-LaserScan.Topic=/base_scan0
-LaserScan2..AxisColorAutocompute\ Value\ Bounds=1
-LaserScan2..AxisColorAxis=2
-LaserScan2..AxisColorMax\ Value=10
-LaserScan2..AxisColorMin\ Value=-10
-LaserScan2..AxisColorUse\ Fixed\ Frame=1
-LaserScan2..FlatColorColorB=1
-LaserScan2..FlatColorColorG=1
-LaserScan2..FlatColorColorR=1
-LaserScan2..IntensityAutocompute\ Intensity\ Bounds=1
-LaserScan2..IntensityChannel\ Name=intensity
-LaserScan2..IntensityMax\ ColorB=1
-LaserScan2..IntensityMax\ ColorG=1
-LaserScan2..IntensityMax\ ColorR=1
-LaserScan2..IntensityMax\ Intensity=1
-LaserScan2..IntensityMin\ ColorB=0
-LaserScan2..IntensityMin\ ColorG=0
-LaserScan2..IntensityMin\ ColorR=0
-LaserScan2..IntensityMin\ Intensity=1
-LaserScan2..IntensityUse\ full\ RGB\ spectrum=0
-LaserScan2.Alpha=1
-LaserScan2.Billboard\ Size=0.01
-LaserScan2.Color\ Transformer=Intensity
-LaserScan2.Decay\ Time=0
-LaserScan2.Enabled=1
-LaserScan2.Position\ Transformer=XYZ
-LaserScan2.Queue\ Size=10
-LaserScan2.Selectable=1
-LaserScan2.Style=1
-LaserScan2.Topic=/base_scan1
+InteractiveMarker.Enabled=1
+InteractiveMarker.Show\ Axes=0
+InteractiveMarker.Show\ Descriptions=0
+InteractiveMarker.Show\ Tool\ Tips=0
+InteractiveMarker.Update\ Topic=/interactive/positions/update
 Map.Alpha=0.7
 Map.Draw\ Behind=1
-Map.Enabled=1
+Map.Enabled=0
 Map.New\ map\ range=1
 Map.Topic=/costmap/costmap/costmap
 Map2.Alpha=0.7
 Map2.Draw\ Behind=1
-Map2.Enabled=1
+Map2.Enabled=0
 Map2.New\ map\ range=1
 Map2.Topic=/map
+Path.Alpha=1
+Path.ColorB=0
+Path.ColorG=1
+Path.ColorR=0.1
+Path.Enabled=1
+Path.Topic=/move_base_node/global_plan
 PointCloud..AxisColorAutocompute\ Value\ Bounds=1
 PointCloud..AxisColorAxis=2
 PointCloud..AxisColorMax\ Value=10
@@ -109,6 +47,7 @@ PointCloud..IntensityMin\ ColorB=0
 PointCloud..IntensityMin\ ColorG=0
 PointCloud..IntensityMin\ ColorR=0
 PointCloud..IntensityMin\ Intensity=0
+PointCloud..IntensityUse\ channel\ as\ z-values=1
 PointCloud..IntensityUse\ full\ RGB\ spectrum=0
 PointCloud.Alpha=1
 PointCloud.Billboard\ Size=0.05
@@ -120,53 +59,57 @@ PointCloud.Queue\ Size=1
 PointCloud.Selectable=1
 PointCloud.Style=1
 PointCloud.Topic=/activity_marked_cloud
-Property\ Grid\ Splitter=487,78
-Property\ Grid\ State=expanded=.Global Options,Grid.Enabled,TF.Enabled,TF.Status,TF.Tree,TF.Tree./map,TF.Tree./odom,TF.Tree./base_footprint,TF.Tree./base_link,Map.Enabled,LaserScan.Enabled,LaserScan2.Enabled,Map2.Enabled,Image.Enabled,PointCloud.Enabled;splitterratio=0.5
-QMainWindow=000000ff00000000fd0000000300000000000001e900000287fc0200000002fb000000100044006900730070006c006100790073010000001d00000287000000ee00fffffffb0000000a0049006d0061006700650000000352000000d20000001900ffffff000000010000013100000287fc0200000003fb0000001e0054006f006f006c002000500072006f0070006500720074006900650073010000001d000000a70000006700fffffffb0000000a0056006900650077007301000000ca0000012d000000bb00fffffffb0000001200530065006c0065006300740069006f006e01000001fd000000a70000006700ffffff00000003000005150000003efc0100000001fb0000000800540069006d0065010000000000000515000002bf00ffffff000001ef0000028700000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+Property\ Grid\ Splitter=907,78
+Property\ Grid\ State=expanded=.Global Options,TF.Enabled,Map.Enabled,Map2.Enabled,Image.Enabled,Path.Enabled,RobotModel.Enabled,PointCloud.Enabled,InteractiveMarker.Enabled;splitterratio=0.5
+QMainWindow=000000ff00000000fd0000000300000000000002440000042bfc0200000002fb000000100044006900730070006c006100790073010000001d0000042b000000ee00fffffffb0000000a0049006d0061006700650000000352000000d20000001900ffffff00000001000001310000042bfc0200000003fb0000001e0054006f006f006c002000500072006f007000650072007400690065007303000006ae0000001d0000013100000115fb0000000a0056006900650077007302000003fd000000c300000139000002abfb0000001200530065006c0065006300740069006f006e03000006ae00000018000000d20000042000000003000007df0000003efc0100000001fb0000000800540069006d00650100000000000007df000002bf00ffffff000005950000042b00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+Robot\:\ RobotModel\ Link\ base_linkAlpha=1
+Robot\:\ RobotModel\ Link\ base_linkEnabled=1
+Robot\:\ RobotModel\ Link\ base_linkShow\ Axes=0
+Robot\:\ RobotModel\ Link\ base_linkShow\ Trail=0
+RobotModel.Alpha=1
+RobotModel.Collision\ Enabled=0
+RobotModel.Enabled=1
+RobotModel.Robot\ Description=robot_description
+RobotModel.TF\ Prefix=
+RobotModel.Update\ Interval=0
+RobotModel.Visual\ Enabled=1
 TF.All\ Enabled=1
-TF.Enabled=1
+TF.Enabled=0
 TF.Frame\ Timeout=15
 TF.Marker\ Scale=1
 TF.Show\ Arrows=1
 TF.Show\ Axes=1
 TF.Show\ Names=1
 TF.Update\ Interval=0
-Target\ Frame=<Fixed Frame>
+Target\ Frame=/map
 Tool\ 2D\ Nav\ GoalTopic=/move_base_simple/goal
 Tool\ 2D\ Pose\ EstimateTopic=initialpose
 [Display0]
-ClassName=rviz::GridDisplay
-Name=Grid
-[Display1]
 ClassName=rviz::TFDisplay
 Name=TF
-[Display2]
+[Display1]
 ClassName=rviz::MapDisplay
 Name=Map
-[Display3]
-ClassName=rviz::LaserScanDisplay
-Name=LaserScan
-[Display4]
-ClassName=rviz::LaserScanDisplay
-Name=LaserScan2
-[Display5]
+[Display2]
 ClassName=rviz::MapDisplay
 Name=Map2
-[Display6]
+[Display3]
 ClassName=rviz::ImageDisplay
 Name=Image
-[Display7]
+[Display4]
+ClassName=rviz::PathDisplay
+Name=Path
+[Display5]
+ClassName=rviz::RobotModelDisplay
+Name=RobotModel
+[Display6]
 ClassName=rviz::PointCloudDisplay
 Name=PointCloud
-[TF.Frames.]
-base_footprint.Enabled=1
-base_laser_link0.Enabled=1
-base_laser_link1.Enabled=1
-base_link.Enabled=1
-map.Enabled=1
-odom.Enabled=1
+[Display7]
+ClassName=rviz::InteractiveMarkerDisplay
+Name=InteractiveMarker
 [Window]
-Height=744
-Width=1301
-X=1914
+Height=1200
+Width=2031
+X=1900
 Y=-240

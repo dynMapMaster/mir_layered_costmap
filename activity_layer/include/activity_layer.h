@@ -71,7 +71,7 @@ namespace dynamic_map
 {
 
 typedef Pmac_learner LearnerT;
-typedef probabilistic_filter FilterT;
+typedef Probabilistic_filter FilterT;
 
 class ActivityLayer : public layered_costmap_2d::Layer
 {

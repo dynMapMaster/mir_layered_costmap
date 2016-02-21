@@ -1,42 +1,23 @@
 #include "probablistic_cell.h"
-
+#include <cmath>
 Probablistic_cell::Probablistic_cell()
-    : occupied_count(0), free_count(0)
+    : log_odds(0)
 {
-
 }
 
-void Probablistic_cell::addMeasurement(int measurement, double prob)
+inline void Probablistic_cell::addMeasurement(double log_odds_update)
 {
-    if(measurement == Probablistic_cell::OBS_FREE)
-    {
-        free_count += prob;
-    }
-    else if (measurement == Probablistic_cell::OBS_OCCUPIED)
-    {
-        occupied_count += prob;
-    }
+    log_odds += log_odds_update;
 }
 
 double Probablistic_cell::getProbForOccupied()
 {
-    double denum = occupied_count + free_count;
-    double occupiedness;
-    if(denum > 0)
-    {
-        occupiedness = occupied_count / denum;
-    }
-    else
-    {
-        occupiedness = -1;
-    }
-    free_count = 0;
-    occupied_count = 0;
-    return occupiedness;
+    double occupied_prob = 1 - 1 / (1 + std::exp(log_odds));
+    log_odds = 0;
+    return occupied_prob;
 }
 
 void Probablistic_cell::resetCell()
 {
-    occupied_count = 0;
-    free_count = 0;
+    log_odds = 0;
 }

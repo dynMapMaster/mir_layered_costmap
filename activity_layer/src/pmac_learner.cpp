@@ -154,7 +154,7 @@ std::vector<std::vector<double> > Pmac_learner::serialize()
     return result;
 }
 
-void Pmac_learner::deserialize(std::vector<std::vector<double> > values)
+void Pmac_learner::deserialize(const std::vector<std::vector<double> >& values)
 {
     if(values.size() < 1 || values[0].size() < 3)
     {
