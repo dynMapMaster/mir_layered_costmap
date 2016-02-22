@@ -13,5 +13,4 @@
 	 <node name="recorder" pkg="rosbag" type="record" args="amcl_pose tf base_scan1 ba_scan2 /costmap/costmap/footprint map dynamic_map odom" /> 
 
 
-	</node>
 </launch>
