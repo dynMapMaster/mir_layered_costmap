@@ -40,7 +40,7 @@
 #include <ros/ros.h>
 #include <layered_costmap_2d/costmap_2d.h>
 #include <nav_msgs/OccupancyGrid.h>
-#include <map_msgs/OccupancyGridUpdate.h>
+#include <mirMsgs/OccupancyGridUpdate.h>
 #include <tf/transform_datatypes.h>
 
 namespace layered_costmap_2d

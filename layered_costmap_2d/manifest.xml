@@ -26,6 +26,7 @@
   <depend package="common_rosdeps"/>
   <depend package="map_msgs" />
   <rosdep name="eigen" />
+  <depend name="mirMsgs"/>
   <!-- http://docs.ros.org/independent/api/rospkg/html/manifest_xml.html#export-cpp -->
   <export>
       <cpp cflags="-I${prefix}/cfg/cpp -I${prefix}/include `rosboost-cfg --cflags`" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib `rosboost-cfg --lflags thread` -llayered_costmap_2d"/>
