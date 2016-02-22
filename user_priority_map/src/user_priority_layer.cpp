@@ -201,7 +201,7 @@ namespace user_priority_map
         }
     }
 
-    void UserPriorityLayer::incomingUpdate(const map_msgs::OccupancyGridUpdateConstPtr& update)
+    void UserPriorityLayer::incomingUpdate(const mirMsgs::OccupancyGridUpdateConstPtr& update)
     {
         unsigned int di = 0;
         for (unsigned int y = 0; y < update->height ; y++)

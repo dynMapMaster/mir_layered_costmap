@@ -24,6 +24,7 @@
   <depend package="dynamic_reconfigure"/>
   <depend package="common_rosdeps"/>
   <depend package="map_msgs" />
+  <depend package="mirMsgs" />
 <depend package="layered_costmap_2d" />
   <depend package="pluginlib" />
 <export>
