@@ -11,7 +11,4 @@
 
 	
 	<node name="recorder" pkg="rosbag" type="record" args="amcl_pose tf f_scan b_scan /costmap/costmap/footprint map dynamic_map odom" /> 
-
-	<node name="occupancy_publisher" pkg="occupancy_image_publish" type="occupancy_image_publish_node" >
-	</node>
 </launch>
