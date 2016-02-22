@@ -104,7 +104,7 @@ void Pmac_learner::initCell(int x, int y, Initial_values value)
         case Unknown:
             break;
         case Obstacle:
-            grid.editCell(x,y)->init(200,0);
+            grid.editCell(x,y)->init(50,0);
             break;
         default:
             break;
