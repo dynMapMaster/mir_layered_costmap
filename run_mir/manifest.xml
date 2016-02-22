@@ -1,0 +1,14 @@
+<package>
+  <description brief="run_mir">
+
+     run_mir
+
+  </description>
+  <author>Anders</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/run_mir</url>
+
+</package>
+
+

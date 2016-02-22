@@ -1,0 +1,10 @@
+<!-- -->
+<launch>
+
+  <node name="costmap" pkg="layered_costmap_2d" type="costmap_2d_node" output="screen" >
+		<rosparam file="$(find run_mir)/launch/activity_layer.yaml" command="load" ns="costmap"/> 
+		<remap from="/costmap/costmap/costmap" to="dynamic_map" />
+  </node>
+	
+	<!-- <node name="recorder" pkg="rosbag" type="record" args="-a" /> -->
+</launch>
