@@ -212,7 +212,7 @@ void StaticLayer::incomingMap(const nav_msgs::OccupancyGridConstPtr& new_map)
   }
 }
 
-void StaticLayer::incomingUpdate(const map_msgs::OccupancyGridUpdateConstPtr& update)
+void StaticLayer::incomingUpdate(const mirMsgs::OccupancyGridUpdateConstPtr& update)
 {
   unsigned int di = 0;
   for (unsigned int y = 0; y < update->height ; y++)

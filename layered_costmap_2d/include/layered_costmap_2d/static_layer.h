@@ -44,7 +44,7 @@
 #include <layered_costmap_2d/GenericPluginConfig.h>
 #include <dynamic_reconfigure/server.h>
 #include <nav_msgs/OccupancyGrid.h>
-#include <map_msgs/OccupancyGridUpdate.h>
+#include <mirMsgs/OccupancyGridUpdate.h>
 #include <message_filters/subscriber.h>
 
 namespace layered_costmap_2d
@@ -74,7 +74,7 @@ private:
    * static map are overwritten.
    */
   void incomingMap(const nav_msgs::OccupancyGridConstPtr& new_map);
-  void incomingUpdate(const map_msgs::OccupancyGridUpdateConstPtr& update);
+  void incomingUpdate(const mirMsgs::OccupancyGridUpdateConstPtr& update);
   void reconfigureCB(layered_costmap_2d::GenericPluginConfig &config, uint32_t level);
 
   unsigned char interpretValue(unsigned char value);
