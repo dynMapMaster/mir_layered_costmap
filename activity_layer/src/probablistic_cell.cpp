@@ -5,7 +5,7 @@ Probablistic_cell::Probablistic_cell()
 {
 }
 
-inline void Probablistic_cell::addMeasurement(double log_odds_update)
+void Probablistic_cell::addMeasurement(double log_odds_update)
 {
     log_odds += log_odds_update;
 }
