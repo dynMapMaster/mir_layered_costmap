@@ -11,8 +11,8 @@ resolution: 0.05
 origin_x: -5.0
 origin_y: -2.5
 publish_cost_grid: true
-update_frequency: 10.0
-publish_frequency: 0.2
+update_frequency: 0.01
+publish_frequency: 0.01
 
 footprint_padding: 0.1
 
@@ -31,8 +31,7 @@ static_layer:
   unknown_cost_value: -1
   trinary_costmap: true
 
-activity_layer:
-  transform_tolerance: 0.2  
+activity_layer: 
   global_frame: /map
   robot_base_frame: /base_link
   map_type: costmap 
