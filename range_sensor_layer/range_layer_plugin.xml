@@ -1,0 +1,8 @@
+<!-- -->
+<class_libraries>
+  <library path="lib/librange_sensor_layer">
+    <class name="range_sensor_layer/RangeSensorLayer" type="range_sensor_layer::RangeSensorLayer"  base_class_type="layered_costmap_2d::Layer">
+      <description>A range-sensor (sonar, IR) based obstacle layer for costmap_2d</description>
+    </class>
+  </library>
+</class_libraries>

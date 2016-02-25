@@ -1,0 +1,8 @@
+<!-- -->
+<class_libraries>
+  <library path="lib/librange_sensor_layer">
+    <class name="range_layer/RangeSensorLayer" type="range_sensor_layer::RangeSensorLayer"  base_class_type="layered_costmap_2d::Layer">
+      <description>Updates map with dynamic obstacles</description>
+    </class>
+  </library>
+</class_libraries>
