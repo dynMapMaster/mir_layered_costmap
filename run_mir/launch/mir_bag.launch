@@ -10,8 +10,10 @@
 		<remap from="/costmap/costmap/costmap" to="dynamic_map" />
   </node>
 
-	<node name="player" pkg="rosbag" type="play" args="--rate 15 --keep-alive --pause --clock --skip-empty=10 /home/anders/edited_bags/scan1.bag /home/anders/edited_bags/scan2.bag /home/anders/edited_bags/scan3.bag /home/anders/edited_bags/scan4.bag /home/anders/edited_bags/scan5.bag /home/anders/edited_bags/scan6.bag" output="screen">
-		<remap from="dynamic_map" to="bag_map" />
+
+	<node name="player" pkg="rosbag" type="play" args="--rate 25  --pause --start=265 --clock --skip-empty=10 --loop /media/Data/scan2016-02-23/Trimmed/scan1.bag /media/Data/scan2016-02-23/Trimmed/scan2.bag /media/Data/scan2016-02-23/Trimmed/scan3.bag /media/Data/scan2016-02-23/Trimmed/scan4.bag /media/Data/scan2016-02-23/Trimmed/scan5.bag /media/Data/scan2016-02-23/Trimmed/scan6.bag" output="screen">
+		<remap from="dynamic_map" to="bag_map" />		
+
 		<remap from="/costmap/costmap/footprint" to="/unused_footprint" /> 
 	</node> 
 	
