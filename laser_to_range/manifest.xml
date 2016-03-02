@@ -1,0 +1,18 @@
+<package>
+  <description brief="laser_to_range">
+
+     laser_to_range
+
+  </description>
+  <author>Anders</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/laser_to_range</url>
+  <depend package="roscpp"/>
+  <depend package="sensor_msgs"/>
+  <depend package="tf"/>
+	<depend package="geometry_msgs" />
+	<depend package="message_filters" />
+</package>
+
+

@@ -66,6 +66,8 @@ private:
     std::vector<ros::Subscriber> range_subs_;
     double min_x_, min_y_, max_x_, max_y_;
 
+    void coneRayTrace(double ox, double oy, double tx, double ty, double range, bool clear_sensor_cone);
+
     //dynamic_reconfigure::Server<range_sensor_layer::RangeSensorLayerConfig> *dsrv_;
 };
 }

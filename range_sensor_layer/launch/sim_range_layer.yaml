@@ -1,0 +1,29 @@
+# Costmap parameters
+global_frame: /map
+robot_base_frame: /base_link
+transform_tolerance: 0.2
+rolling_window: false
+track_unknown_space: true
+always_send_full_costmap: true
+width: 5.0
+height: 5.0
+resolution: 0.05
+origin_x: -2.5
+origin_y: -2.5
+publish_cost_grid: true
+update_frequency: 5.0
+publish_frequency: 0.2
+
+footprint_padding: 0.1
+
+plugins:
+#- {name: priority_layer, type: "user_priority_map/UserPriorityLayer"}
+- {name: sonar,   type: "range_sensor_layer/RangeSensorLayer"}
+
+sonar:
+  topics: ['/range_scan']
+
+priority_layer:
+  map_topic: /map
+  first_map_only: true
+  subscribe_to_updates: false

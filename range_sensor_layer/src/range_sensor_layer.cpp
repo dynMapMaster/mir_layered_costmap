@@ -274,32 +274,8 @@ namespace range_sensor_layer
         updateCostmap(range_message, clear_sensor_cone);
     }
 
-    void RangeSensorLayer::updateCostmap(sensor_msgs::Range& range_message, bool clear_sensor_cone)
+    void RangeSensorLayer::coneRayTrace(double ox, double oy, double tx, double ty, double range, bool clear_sensor_cone)
     {
-        max_angle_ = range_message.field_of_view/2;
-
-        geometry_msgs::PointStamped in, out;
-        in.header.stamp = range_message.header.stamp;
-        in.header.frame_id = range_message.header.frame_id;
-
-        if(!tf_->waitForTransform(global_frame_, in.header.frame_id,
-                                  in.header.stamp, ros::Duration(0.1)) ) {
-            ROS_ERROR_THROTTLE(1.0, "Range sensor layer can't transform from %s to %s at %f",
-                               global_frame_.c_str(), in.header.frame_id.c_str(),
-                               in.header.stamp.toSec());
-            return;
-        }
-
-        tf_->transformPoint (global_frame_, in, out);
-
-        double ox = out.point.x, oy = out.point.y;
-
-        in.point.x = range_message.range;
-
-        tf_->transformPoint(global_frame_, in, out);
-
-        double tx = out.point.x, ty = out.point.y;
-
         // calculate target props
         double dx = tx-ox, dy = ty-oy,
                 theta = atan2(dy,dx), d = sqrt(dx*dx+dy*dy);
@@ -311,6 +287,7 @@ namespace range_sensor_layer
         worldToMapNoBounds(ox, oy, bx0, by0);
         bx1 = bx0;
         by1 = by0;
+        // update bounds limits
         touch(ox, oy, &min_x_, &min_y_, &max_x_, &max_y_);
 
         // Update Map with Target Point
@@ -354,10 +331,37 @@ namespace range_sensor_layer
             for(unsigned int y=by0; y<=(unsigned int)by1; y++){
                 double wx, wy;
                 mapToWorld(x,y,wx,wy);
-                update_cell(ox, oy, theta, range_message.range, wx, wy, clear_sensor_cone);
+                update_cell(ox, oy, theta, range, wx, wy, clear_sensor_cone);
             }
         }
+    }
 
+    void RangeSensorLayer::updateCostmap(sensor_msgs::Range& range_message, bool clear_sensor_cone)
+    {
+        max_angle_ = range_message.field_of_view/2;
+
+        geometry_msgs::PointStamped in, out;
+        in.header.stamp = range_message.header.stamp;
+        in.header.frame_id = range_message.header.frame_id;
+
+        if(!tf_->waitForTransform(global_frame_, in.header.frame_id,
+                                  in.header.stamp, ros::Duration(0.1)) ) {
+            ROS_ERROR_THROTTLE(1.0, "Range sensor layer can't transform from %s to %s at %f",
+                               global_frame_.c_str(), in.header.frame_id.c_str(),
+                               in.header.stamp.toSec());
+            return;
+        }
+
+        tf_->transformPoint (global_frame_, in, out);
+
+        double ox = out.point.x, oy = out.point.y;
+
+        in.point.x = range_message.range;
+
+        tf_->transformPoint(global_frame_, in, out);
+
+        double tx = out.point.x, ty = out.point.y;          
+        coneRayTrace(ox, oy, tx, ty, range_message.range, clear_sensor_cone);
         buffered_readings_++;
         last_reading_time_ = ros::Time::now();
     }
@@ -388,6 +392,7 @@ namespace range_sensor_layer
     void RangeSensorLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x,
                                         double* min_y, double* max_x, double* max_y)
     {
+        //ROS_INFO("Range layer is updating bounds");
         if (layered_costmap_->isRolling())
             updateOrigin(robot_x - getSizeInMetersX() / 2, robot_y - getSizeInMetersY() / 2);
 
@@ -424,8 +429,9 @@ namespace range_sensor_layer
     void RangeSensorLayer::updateCosts(layered_costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i,
                                        int max_j)
     {
-        if (!enabled_)
-            return;
+        //ROS_INFO("Range layer is updating cost");
+        //if (!enabled_)
+        //    return;
 
         unsigned char* master_array = master_grid.getCharMap();
         unsigned int span = master_grid.getSizeInCellsX();
@@ -437,6 +443,8 @@ namespace range_sensor_layer
             for (int i = min_i; i < max_i; i++)
             {
                 unsigned char prob = costmap_[it];
+                master_array[it] = prob;
+                /*
                 unsigned char current;
                 if(prob==layered_costmap_2d::NO_INFORMATION){
                     it++;
@@ -454,7 +462,11 @@ namespace range_sensor_layer
                 unsigned char old_cost = master_array[it];
 
                 if (old_cost == NO_INFORMATION || old_cost < current)
-                    master_array[it] = current;
+                {
+                   // master_array[it] = current;
+                    //ROS_INFO("added value=%i at [%i, %i]", master_array[it], j, i);
+                }
+                */
                 it++;
             }
         }
