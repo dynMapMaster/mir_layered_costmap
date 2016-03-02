@@ -16,3 +16,4 @@ layered_costmap_2d/cfg/cpp/
 activity_layer/src/activity_layer/
 *.autosave
 .swp
+*.vcg
