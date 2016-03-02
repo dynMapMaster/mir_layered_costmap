@@ -1,23 +1,22 @@
 <!-- -->
 <launch> 
-	<param name="use_sim_time" value="true" />
+  <param name="use_sim_time" value="true" />
 
   <node name="map_server" pkg="mirMapServer" type="map_server">
   </node>
 
   <node name="costmap" pkg="layered_costmap_2d" type="costmap_2d_node" output="screen" >
-		<rosparam file="$(find run_mir)/launch/activity_layer.yaml" command="load" ns="costmap"/> 
-		<remap from="/costmap/costmap/costmap" to="dynamic_map" />
+	  <rosparam file="$(find run_mir)/launch/activity_layer.yaml" command="load" ns="costmap"/> 
+	  <remap from="/costmap/costmap/costmap" to="dynamic_map" />
   </node>
 
-
-	<node name="player" pkg="rosbag" type="play" args="--rate 25  --pause --start=265 --clock --skip-empty=10 --loop /media/Data/scan2016-02-23/Trimmed/scan1.bag /media/Data/scan2016-02-23/Trimmed/scan2.bag /media/Data/scan2016-02-23/Trimmed/scan3.bag /media/Data/scan2016-02-23/Trimmed/scan4.bag /media/Data/scan2016-02-23/Trimmed/scan5.bag /media/Data/scan2016-02-23/Trimmed/scan6.bag" output="screen">
+	<node name="player" pkg="rosbag" type="play" args="--rate 25  --pause --start=265 --clock --skip-empty=10 --loop $(find run_mir)/launch/bags/scan1.bag $(find run_mir)/launch/bags/scan2.bag $(find run_mir)/launch/bags/scan3.bag $(find run_mir)/launch/bags/scan4.bag $(find run_mir)/launch/bags/scan5.bag $(find run_mir)/launch/bags/scan6.bag" output="screen">
 		<remap from="dynamic_map" to="bag_map" />		
 
 		<remap from="/costmap/costmap/footprint" to="/unused_footprint" /> 
 	</node> 
 	
-<node name="occupancy_publisher" pkg="occupancy_image_publish" type="occupancy_image_publish_node" output="screen" >
+  <node name="occupancy_publisher" pkg="occupancy_image_publish" type="occupancy_image_publish_node" output="screen" >
 	</node>
 
   <node name="visulizer" pkg="rviz" type="rviz" args="-d $(find activity_layer)/config/sim_activity_layer.vcg"/>
@@ -25,3 +24,5 @@
   <param name="robot_description" textfile="$(find mirCommon)/urdf/mir.urdf" />
 
 </launch>
+
+
