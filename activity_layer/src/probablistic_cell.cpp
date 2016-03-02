@@ -10,10 +10,11 @@ void Probablistic_cell::addMeasurement(double log_odds_update)
     log_odds += log_odds_update;
 }
 
-double Probablistic_cell::getProbForOccupied()
+double Probablistic_cell::getProbForOccupied(const bool reset)
 {
     double occupied_prob = 1 - 1 / (1 + std::exp(log_odds));
-    log_odds = 0;
+    if(reset)
+        log_odds = 0;
     return occupied_prob;
 }
 

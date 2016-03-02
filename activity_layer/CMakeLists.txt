@@ -33,8 +33,9 @@ rosbuild_add_library(activity_layer
   src/probablistic_cell.cpp
   src/probabilistic_filter.cpp
   src/pmac_learner.cpp
+	src/bayes_learner.cpp
  # src/activityMap.cpp
-  #src/activityMapComponent.cpp
+  #src/activityMapComponent.cpp	
 )
 include_directories(include 
   ${layered_costmap_2d}

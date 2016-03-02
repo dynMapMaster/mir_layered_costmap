@@ -13,9 +13,9 @@ define static_obstacle model
 define topsick ranger
 (
 	sensor( 			
-    range [ 0.0  15.0 ]
-    fov 270
-   samples 512
+    range [ 0.0  25.0 ]
+    fov 180
+   samples 100
   )
 
   # generic model properties
@@ -26,9 +26,9 @@ define topsick ranger
 define botsick ranger
 (
 	sensor( 			
-    range [ 0.0  15.0 ]
-    fov 270
-   samples 512
+    range [ 0.0  25.0 ]
+    fov 180
+   samples 100
   )
 
   # generic model properties
@@ -83,13 +83,13 @@ window
 )
 
 # throw in a robot
-mir( pose [ 0 0 0 0 ] name "mir" color "blue")
+mir( pose [ -1.5 0 0 0 ] name "mir" color "blue")
 # Dynamic obstacles
 dynamic_obstacle(name "upper_dyn_obs" pose [ -1.5 1.5 0 0.0 ] color "red")
 dynamic_obstacle(name "lower_dyn_obs" pose [ 1.5 -1.5 0 0.0 ] color "red")
 # static obstacles
-static_obstacle( pose [ 0.75 0.5 0 0.0 ] name "static_block" color "green")
-static_obstacle( pose [ -0.75 -0.5 0 0.0 ] name "static_block" color "green")
+static_obstacle( pose [ 0.75 2.0 0 90.0 ] name "static_block" color "green")
+static_obstacle( pose [ 0.75 -1.53 0 90.0 ] name "static_block" color "green")
 # load an environment bitmap
 floorplan
 ( 

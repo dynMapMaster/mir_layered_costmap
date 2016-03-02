@@ -24,6 +24,7 @@ int main(int argc, char** argv)
 
 void occupancyGridCb(const nav_msgs::OccupancyGrid::Ptr msg)
 {    
+    ROS_INFO_NAMED("occupancy_image_publisher","recieved map");
     // Greyscale image
     cv::Mat im(msg->info.height, msg->info.width, CV_8UC1);
     size_t reverse_i = msg->info.height;

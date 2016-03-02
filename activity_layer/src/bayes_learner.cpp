@@ -14,7 +14,7 @@ bool Bayes_learner::getCellValue(int x, int y, unsigned char & cellValueOutput)
     Probablistic_cell* cell = _grid.readCell(x,y);
     if(cell)
     {
-        double prob = cell->getProbForOccupied();
+        double prob = cell->getProbForOccupied(false);
         cellValueOutput = 255 * prob;
         return true;
     }
@@ -45,7 +45,7 @@ void Bayes_learner::addObservationMap(Observation_interface* observation)
                         // calculate log odds
                         double log_odds = std::log(occupancy_prob / (1 - occupancy_prob));
                         Probablistic_cell* cell = _grid.editCell(x,y);
-                       // cell->addMeasurement(log_odds);
+                       cell->addMeasurement(log_odds);
                     }
                 }
             }
@@ -61,21 +61,32 @@ void Bayes_learner::resetEditLimits()
 
 void Bayes_learner::initCell(int x, int y, Initial_values value)
 {
+    /*
     switch(value)
     {
     case Free:
-       // _grid.editCell(x,y)->addMeasurement(_LOG_ODDS_FREE);
+        _grid.editCell(x,y)->addMeasurement(_LOG_ODDS_FREE);
         break;
     case Unknown:
-       // _grid.editCell(x,y)->addMeasurement(0);
+        _grid.editCell(x,y)->addMeasurement(0);
         break;
     case Obstacle:
-       // _grid.editCell(x,y)->addMeasurement(std::log(_INITIAL_OCCUPIED_PORBABILITY / (1- _INITIAL_OCCUPIED_PORBABILITY)));
+        _grid.editCell(x,y)->addMeasurement(std::log(_INITIAL_OCCUPIED_PORBABILITY / (1- _INITIAL_OCCUPIED_PORBABILITY)));
         break;
     default:
         ROS_ERROR("UNKNOWN INITIAL VALUE - BAYES LEARNER");
         break;
     }
+    */
+    _grid.editCell(x,y)->addMeasurement(0.5);
+}
 
-    _grid.editCell(x,y)->addMeasurement(value);
+void Bayes_learner::deserialize(const std::vector<std::vector<double> >& values)
+{
+
+}
+
+std::vector<std::vector<double> > Bayes_learner::serialize()
+{
+    return std::vector<std::vector<double> >();
 }

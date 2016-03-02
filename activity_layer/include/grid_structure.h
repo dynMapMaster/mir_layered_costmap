@@ -9,7 +9,7 @@ template<class T> class Grid_structure
 {
 public:
     // Defines number of cells and resolution in m/cell
-    Grid_structure(int sizeX, int sizeY, double resolution);
+    Grid_structure(int sizeX, int sizeY, double resolution, double origin_x=0, double origin_y=0);
 
     ~Grid_structure();
 
@@ -41,24 +41,31 @@ public:
     // Returns the resolution i units pr cell
     double resolution(){return _resolution;}
 
+    // mx and my is grid index for wx and wy after call
+    bool worldToMap(double wx, double wy, int& mx, int& my) const;
+    // mx and my is grid index for wx and wy where mx is constrained to be within the map after call
+    void worldToMapEnforceBounds(double wx, double wy, int& mx, int& my) const;
+    // wx and wy is world coordinates for mx and my after call
+    void mapToWorld(int mx, int my, double& wx, double& wy) const;
 private:
     T** _map;
     int _sizeX, _sizeY;
     int _editMinX, _editMaxX, _editMinY, _editMaxY; // to be sat to -1 for reset
     double _resolution;
+    double _origin_x, _origin_y;
 
     void updateEditLimits(int x, int y);
 
 };
 
-
 template<class T>
-Grid_structure<T>::Grid_structure(int sizeX=2,int sizeY =2, double resolution = 0.05)
+Grid_structure<T>::Grid_structure(int sizeX=2,int sizeY =2, double resolution = 0.05, double origin_x, double origin_y)
 {
     _sizeX = sizeX;
     _sizeY = sizeY;
     _resolution = resolution;
-
+    _origin_x = origin_x;
+    _origin_y = origin_y;
     _map = new T*[sizeX * sizeY];
 
     // initialize pointers to null
@@ -80,12 +87,67 @@ Grid_structure<T>::~Grid_structure()
 }
 
 template<class T>
+void Grid_structure<T>::mapToWorld(int mx, int my, double& wx, double& wy) const
+{
+    wx = _origin_x + (mx + 0.5) * _resolution;
+    wy = _origin_y + (my + 0.5) * _resolution;
+}
+
+template<class T>
 void Grid_structure<T>::resetUpdateBounds()
 {
     _editMaxX = -1;
     _editMaxY = -1;
     _editMinX = -1;
     _editMinY = -1;
+}
+
+template<class T>
+bool Grid_structure<T>::worldToMap(double wx, double wy, int &mx, int &my) const
+{
+    if (wx < _origin_x || wy < _origin_y)
+      return false;
+
+    mx = (int)((wx - _origin_x) / _resolution);
+    my = (int)((wy - _origin_y) / _resolution);
+
+    if (mx < _sizeX && my < _sizeY)
+      return true;
+
+    return false;
+}
+
+template<class T>
+void Grid_structure<T>::worldToMapEnforceBounds(double wx, double wy, int& mx, int& my) const
+{
+    // Here we avoid doing any math to wx,wy before comparing them to
+    // the bounds, so their values can go out to the max and min values
+    // of double floating point.
+    if (wx < _origin_x)
+    {
+      mx = 0;
+    }
+    else if (wx > _resolution * _sizeY + _origin_x)
+    {
+      mx = _sizeY - 1;
+    }
+    else
+    {
+      mx = (int)((wx - _origin_x) / _resolution);
+    }
+
+    if (wy < _origin_y)
+    {
+      my = 0;
+    }
+    else if (wy > _resolution * _sizeY + _origin_y)
+    {
+      my = _sizeY - 1;
+    }
+    else
+    {
+      my = (int)((wy - _origin_y) / _resolution);
+    }
 }
 
 template<class T>
@@ -148,7 +210,6 @@ void Grid_structure<T>::updateEditLimits(int x, int y)
 
     if(_editMaxY < y || _editMaxY < 0)
         _editMaxY = y;
-
 
 }
 

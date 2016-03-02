@@ -61,7 +61,9 @@
 
 #include <observation_interface.h>
 #include <costmap_interpretator.h>
+// Learners
 #include <pmac_learner.h>
+#include <bayes_learner.h>
 #include <probabilistic_filter.h>
 
 #include "activity_layer/loadDynaicMap.h"
@@ -70,7 +72,7 @@
 namespace dynamic_map
 {
 
-typedef Pmac_learner LearnerT;
+typedef Bayes_learner LearnerT;
 typedef Probabilistic_filter FilterT;
 
 class ActivityLayer : public layered_costmap_2d::Layer
@@ -197,7 +199,7 @@ private:
 
     static const double POSE_POS_STDDEV = 0.3162; //sqrt(0.1)
     static const double POSE_ORI_STDDEV = 0.1732; // sqrt(0.03)
-
+    double _angle_std_dev;
     // Pose callback
     void poseCB(geometry_msgs::PoseWithCovarianceStamped pose);
 

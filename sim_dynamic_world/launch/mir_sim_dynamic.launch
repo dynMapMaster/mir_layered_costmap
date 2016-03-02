@@ -4,7 +4,7 @@
 
 	<include file="$(find mirCommon)/launch/mir_bringup.launch"/>
 
-	<node pkg="tf" type="static_transform_publisher" name="initial_pose_link_broadcaster" args="0. 0. 0 0 0 0 map blue_print_map 20" />   
+	<node pkg="tf" type="static_transform_publisher" name="blue_print_link_broadcaster" args="0. 0. 0 0 0 0 map blue_print_map 20" />   
 
 	<node name="ros_map_server" pkg="map_server" type="map_server" args="$(find sim_dynamic_world)/world/navigation_simulation_with_features.yaml">
 		<remap from="/map" to="/blue_print_map" />
@@ -40,15 +40,9 @@
     </rosparam>
   </node>
 
-
-
-	<node name="cloud_visualizer" pkg="visualize_activity_layer" type="occupancy_cloud" />
   <node name="visulizer" pkg="rviz" type="rviz" args="-d $(find activity_layer)/config/sim_activity_layer.vcg"/>
 
   <param name="robot_description" textfile="$(find mirCommon)/urdf/mir.urdf" />
-  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"  />
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" >
-      <param name="publish_frequency" value="100"/>
-  </node>
+
 
 </launch>

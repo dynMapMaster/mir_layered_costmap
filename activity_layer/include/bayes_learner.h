@@ -14,9 +14,10 @@ public:
     virtual void addObservationMap(Observation_interface* observation);
     virtual void resetEditLimits();
     virtual void initCell(int x, int y, Initial_values value);
-
+    virtual void deserialize(const std::vector<std::vector<double> >& values) ;
+    virtual std::vector<std::vector<double> > serialize();
     static const uint64_t UPDATE_INTERVAL = 30e9;           // Time before new observations are accepted, in nanoseconds
-    const static double _LOG_ODDS_FREE = -11.5129354649202;
+    const static double _LOG_ODDS_FREE = -5;//-11.5129354649202;
     const static double _INITIAL_OCCUPIED_PORBABILITY = 0.9;
 private:
     Grid_structure<Probablistic_cell> _grid;

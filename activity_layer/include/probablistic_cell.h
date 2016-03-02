@@ -7,7 +7,7 @@ class Probablistic_cell
 public:
     Probablistic_cell();
     void addMeasurement(double log_odds_update);
-    double getProbForOccupied();
+    double getProbForOccupied(const bool reset=true);
     void resetCell();
 private:
     double log_odds;

@@ -5,20 +5,20 @@ transform_tolerance: 0.2
 rolling_window: false
 track_unknown_space: true
 always_send_full_costmap: true
-width: 10.0
+width: 5.0
 height: 5.0
 resolution: 0.05
-origin_x: -5.0
+origin_x: -2.5
 origin_y: -2.5
 publish_cost_grid: true
-update_frequency: 5.0
+update_frequency: 0.2
 publish_frequency: 0.2
 
 footprint_padding: 0.1
 
 plugins:
 - {name: activity_layer,       type: "dynamic_map/ActivityLayer"}
-- {name: priority_layer,       type: "user_priority_map/UserPriorityLayer"}
+#- {name: priority_layer,       type: "user_priority_map/UserPriorityLayer"}
 #- {name: static_layer,       type: "layered_costmap_2d/StaticLayer"}
 
 static_layer:

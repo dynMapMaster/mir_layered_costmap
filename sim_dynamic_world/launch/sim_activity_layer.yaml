@@ -10,14 +10,14 @@ height: 5.0
 resolution: 0.05
 origin_x: -2.5
 origin_y: -2.5
+publish_cost_grid: true
+update_frequency: 1.0
+publish_frequency: 1.0
 
-update_frequency: 5.0
-publish_frequency: 2.0
+footprint_padding: 0.1
 
-footprint_padding: 0.01
-
-plugins: 
-  - {name: activity_layer,       type: "dynamic_map/ActivityLayer"}
+plugins:
+- {name: activity_layer,       type: "dynamic_map/ActivityLayer"}
 
 activity_layer:
   transform_tolerance: 0.2  
