@@ -17,4 +17,3 @@ activity_layer/src/activity_layer/
 *.autosave
 .swp
 *.vcg
-run_mir/launch/mir_bag.launch
