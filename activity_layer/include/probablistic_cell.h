@@ -11,6 +11,7 @@ public:
     void resetCell();
 private:
     double log_odds;
+    long hit_count;
 };
 
 #endif // PROBABLISTIC_CELL_H

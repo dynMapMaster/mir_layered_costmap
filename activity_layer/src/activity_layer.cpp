@@ -443,10 +443,7 @@ void ActivityLayer::raytrace(const Observation& observation)
             master->worldToMapEnforceBounds(observation.cloud_->points[i].x,observation.cloud_->points[i].y,x1,y1);
 
             try
-            {
-                _observation_map->_angle_std_dev = _angle_std_dev;
-                _observation_map->raytrace(x0,y0,x1,y1,true);
-                /*
+            {              
 #if SENSOR_MODEL_TYPE == LINE_MODEL
                 _observation_map->raytrace(x0,y0,x1,y1,true);
 #elif SENSOR_MODEL_TYPE == KERNEL_MODEL
@@ -464,7 +461,7 @@ void ActivityLayer::raytrace(const Observation& observation)
                 _observation_map->coneRayTrace(observation.origin_.x, observation.origin_.y,
                                            observation.cloud_->points[i].x, observation.cloud_->points[i].y, 1*_angle_std_dev);
 #endif
-*/
+
             }
             catch(const char* s)
             {

@@ -195,9 +195,9 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
                     double theta_norm = angles::normalize_angle(theta_t); // theta -> [-pi,+pi]
                     double phi = sqrt(dx*dx+dy*dy);
 #if SENSOR_MODEL_TYPE == KERNEL_MODEL
-                   double sensor = gaussian_sensor_model(d,phi,theta_norm);
-#elif SENSOR_MODEL_TYPE == CONE_MODEL
                    double sensor = kernel_sensor_model(d,phi,theta_norm);
+#elif SENSOR_MODEL_TYPE == CONE_MODEL
+                   double sensor = gaussian_sensor_model(d,phi,theta_norm);
 #else
                     double sensor = 0;
 #endif
