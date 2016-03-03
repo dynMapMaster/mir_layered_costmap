@@ -45,7 +45,7 @@ void Bayes_learner::addObservationMap(Observation_interface* observation)
                         // calculate log odds
                         double log_odds = std::log(occupancy_prob / (1 - occupancy_prob));
                         Probablistic_cell* cell = _grid.editCell(x,y);
-                       cell->addMeasurement(log_odds);
+                       cell->addMeasurement(log_odds,false);
                     }
                 }
             }

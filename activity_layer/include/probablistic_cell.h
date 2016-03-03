@@ -6,12 +6,11 @@ class Probablistic_cell
 {
 public:
     Probablistic_cell();
-    void addMeasurement(double log_odds_update);
+    void addMeasurement(double log_odds_update, bool override=true);
     double getProbForOccupied(const bool reset=true);
     void resetCell();
 private:
     double log_odds;
-    long hit_count;
 };
 
 #endif // PROBABLISTIC_CELL_H

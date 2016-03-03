@@ -17,7 +17,7 @@
 #define USE_RANGE_AND_NOISE_DECAY 1
 
 #if SENSOR_MODEL_TYPE == KERNEL_MODEL
-    #define RAY_END_BEFORE 2
+    #define RAY_END_BEFORE 1
 #else
     #define RAY_END_BEFORE 0
 #endif

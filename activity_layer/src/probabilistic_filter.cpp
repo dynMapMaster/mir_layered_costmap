@@ -26,7 +26,7 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     #endif
 #endif
 
-    _max_angle = 5 * M_PI/180.0;
+    _max_angle = 15 * M_PI/180.0;
     _angle_std_dev = _max_angle;
     ROS_INFO("max angle: %f", _max_angle);
 }
@@ -78,7 +78,7 @@ double Probabilistic_filter::delta(double phi)
 double Probabilistic_filter::gaussian_sensor_model(double r, double phi, double theta)
 {
     double sigma_r = 0.025;
-    double span = 0.3, min_prob = (1-span)/2;    
+    double span = 0.5, min_prob = (1-span)/2;
 #if USE_RANGE_AND_NOISE_DECAY
     double free_weight = 1 - std::min(2*_max_angle*phi,1.0);
 #else
@@ -102,7 +102,6 @@ double Probabilistic_filter::gaussian_sensor_model(double r, double phi, double 
 double Probabilistic_filter::kernel_sensor_model(double r, double phi, double theta)
 {
     double sigma_r = 0.025;
-    double span = 0.3, min_prob = (1-span)/2;
 #if USE_RANGE_AND_NOISE_DECAY
     double free_weight = 1 - std::min(2*_max_angle*phi,1.0);
 #else
@@ -141,7 +140,6 @@ double Probabilistic_filter::sensor_model(double r, double phi, double theta)
 void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double ty, double angle_std_dev)
 {
     _max_angle = angle_std_dev;
-    //ROS_INFO("angle std=%f",angle_std_dev);
     // calculate target props
     double dx = tx-ox, dy = ty-oy,
             theta = atan2(dy,dx), d = sqrt(dx*dx+dy*dy);

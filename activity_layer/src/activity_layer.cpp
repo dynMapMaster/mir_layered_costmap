@@ -215,7 +215,7 @@ void ActivityLayer::reconfigureCB(layered_costmap_2d::ObstaclePluginConfig &conf
 
 void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& message,
                                       const boost::shared_ptr<ObservationBuffer>& buffer)
-{
+{    
     //if(poseIsAccurate)
     {
         // project the laser into a point cloud
@@ -263,6 +263,7 @@ void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& mess
         ROS_WARN("Skipping update of dynamic map since robot pose is too inaccurate");
     }
     */
+    _map->addObservationMap(_observation_map);
 }
 
 void ActivityLayer::laserScanValidInfCallback(const sensor_msgs::LaserScanConstPtr& raw_message,
@@ -342,7 +343,7 @@ void ActivityLayer::pointCloud2Callback(const sensor_msgs::PointCloud2ConstPtr& 
 void ActivityLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x,
                                           double* min_y, double* max_x, double* max_y)
 {
-    _map->addObservationMap(_observation_map);
+    //_map->addObservationMap(_observation_map);
 
     //ROS_INFO("Updating bound from activity layer");
     int layerMinX, layerMaxX, layerMinY, layerMaxY;
@@ -433,7 +434,7 @@ bool ActivityLayer::getClearingObservations(std::vector<Observation>& clearing_o
 int update_count = 0;
 void ActivityLayer::raytrace(const Observation& observation)
 {
-    //if(update_count++ < 2)
+    //if(update_count++ < 1)
     {
         Costmap2D* master = layered_costmap_->getCostmap();
         for(size_t i = 0; i < observation.cloud_->size();i++){
