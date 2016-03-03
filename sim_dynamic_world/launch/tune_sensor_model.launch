@@ -1,0 +1,23 @@
+<!-- -->
+<launch> 
+  <param name="use_sim_time" value="true" />
+
+  <node name="map_server" pkg="mirMapServer" type="map_server">
+  </node>
+
+  <node name="costmap" pkg="layered_costmap_2d" type="costmap_2d_node" output="screen" >
+	  <rosparam file="$(find sim_dynamic_world)/launch/sim_activity_layer.yaml" command="load" ns="costmap"/> 
+	  <remap from="/costmap/costmap/costmap" to="dynamic_map" />
+  </node>
+
+	<node name="player" pkg="rosbag" type="play" args="--rate 2 --pause --clock --skip-empty=10 --loop $(find run_mir)/launch/bags/scan_map_run_no_noise.bag" output="screen">
+	</node> 
+	
+  <node name="occupancy_publisher" pkg="occupancy_image_publish" type="occupancy_image_publish_node" output="screen" >
+	</node>
+
+  <node name="visulizer" pkg="rviz" type="rviz" args="-d $(find activity_layer)/config/sim_activity_layer.vcg"/>
+
+  <param name="robot_description" textfile="$(find mirCommon)/urdf/mir.urdf" />
+
+</launch>
