@@ -13,9 +13,9 @@ define static_obstacle model
 define topsick ranger
 (
 	sensor( 			
-    range [ 0.0  30.0 ]
-    fov 270
-   samples 540
+    range [ 0.0  25.0 ]
+    fov 180
+   samples 10
   )
 
   # generic model properties
@@ -26,9 +26,9 @@ define topsick ranger
 define botsick ranger
 (
 	sensor( 			
-    range [ 0.0  30.0 ]
-    fov 270
-   samples 540
+    range [ 0.0  25.0 ]
+    fov 180
+   samples 10
   )
 
   # generic model properties
@@ -47,8 +47,8 @@ define mir position
   #localization "odom"
   #odom_error [0.01 0.01 0.00 0.05]
 
-  topsick(pose [  0.3250  0.270 0.0  45.0 ])# ctrl "lasernoise_1")
-  botsick(pose [ -0.3250 -0.270 0.0 -135.0 ])# ctrl "lasernoise_1")
+  topsick(pose [  0.3250  0.270 0.0  45.0 ] ctrl "lasernoise_1")
+  botsick(pose [ -0.3250 -0.270 0.0 -135.0 ] ctrl "lasernoise_1")
 )
 
 define floorplan model
@@ -76,14 +76,16 @@ interval_sim 100  # simulation timestep in milliseconds
 
 window
 ( 
-  size [ 500 500 ] 
+  size [ 500 500 ]
+ 
 
   rotate [ 0.0 0.0 ]
-  scale 100
+  pose [ 75 75 0 0.0 ]  
+  scale 15
 )
 
 # throw in a robot
-mir( pose [ -1.5 0 0 0 ] name "mir" color "blue")
+mir( pose [72.733 9.959 0 0 ] name "mir" color "blue")
 # Dynamic obstacles
 dynamic_obstacle(name "upper_dyn_obs" pose [ -1.5 1.5 0 0.0 ] color "red")
 dynamic_obstacle(name "lower_dyn_obs" pose [ 1.5 -1.5 0 0.0 ] color "red")
@@ -93,9 +95,10 @@ static_obstacle( pose [ 0.75 -1.53 0 90.0 ] name "static_block" color "green")
 # load an environment bitmap
 floorplan
 ( 
-  name "small_box"
-  bitmap "feature_100.png"
-  size [5 5 1.0]
-  pose [ 0 0 0 0.0 ]
+  name "scan_map"
+  bitmap "scan_hector.png"
+  resolution 0.05
+  size [150 150 1.0]
+  pose [ 74.975 29.975002 0 0.0 ]  
 )
 
