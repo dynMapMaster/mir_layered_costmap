@@ -10,9 +10,9 @@
 #define KERNEL_MODEL 0
 #define CONE_MODEL 1
 #define LINE_MODEL 2
-#define SENSOR_MODEL_TYPE CONE_MODEL
+#define SENSOR_MODEL_TYPE 2
 
-#define USE_IDEAL_LINE_SENSOR_MODEL 0
+#define USE_IDEAL_LINE_SENSOR_MODEL 1
 
 #define USE_RANGE_AND_NOISE_DECAY 1
 
@@ -40,7 +40,7 @@ public:
     // Resets the grid structures update limits    
     void resetEditLimits();
     // raytrace with a sonar model
-    void coneRayTrace(double ox, double oy, double tx, double ty, double angle_std_dev);    
+    void coneRayTrace(double ox, double oy, double tx, double ty, double angle_std_dev, bool mark_end);
     double _angle_std_dev;
 private:
     Grid_structure<Probablistic_cell>* _map;
@@ -67,6 +67,7 @@ private:
     // half of field of view
     double _max_angle;
     double _phi_v;
+    static const double _sigma_r = 0.025;
 };
 
 #endif // PROBABILISTIC_FILTER_H

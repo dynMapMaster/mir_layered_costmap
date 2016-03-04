@@ -213,25 +213,36 @@ void ActivityLayer::reconfigureCB(layered_costmap_2d::ObstaclePluginConfig &conf
 
 }
 
-void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& message,
+void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& raw_message,
                                       const boost::shared_ptr<ObservationBuffer>& buffer)
 {    
     //if(poseIsAccurate)
-    {
+    {        
+        sensor_msgs::LaserScan message = *raw_message;
+        message.range_max = 2;
+        vector<bool> mark_ends(message.ranges.size(),true);
+        for (size_t i = 0; i < message.ranges.size(); i++)
+        {
+          float range = message.ranges[ i ];
+          if (range >= message.range_max && range > 0)
+          {
+            message.ranges[ i ] = message.range_max;
+            mark_ends[i] = false;
+          }
+        }
         // project the laser into a point cloud
         sensor_msgs::PointCloud2 cloud;
-        cloud.header = message->header;
-
+        cloud.header = message.header;
         // project the scan into a point cloud
         try
         {
-          projector_.transformLaserScanToPointCloud(message->header.frame_id, *message, cloud, *tf_);
+          projector_.transformLaserScanToPointCloud(message.header.frame_id, message, cloud, *tf_);
         }
         catch (tf::TransformException &ex)
         {
           ROS_WARN("High fidelity enabled, but TF returned a transform exception to frame %s: %s", _global_frame.c_str(),
                    ex.what());
-          projector_.projectLaser(*message, cloud);
+          projector_.projectLaser(message, cloud);
         }
 
         // buffer the point cloud
@@ -250,9 +261,8 @@ void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& mess
                 observation_buffers_[i]->getObservations(buffer);
                 observation_buffers_[i]->unlock();
                 for(size_t o = 0; o < buffer.size(); o++)
-                {
-                    //ROS_INFO("observation: %i",o);
-                    raytrace(buffer[o]);
+                {                    
+                    raytrace(buffer[o], mark_ends);
                 }
             }
             laserScanWaitingCounter = 0;
@@ -317,7 +327,7 @@ void ActivityLayer::laserScanValidInfCallback(const sensor_msgs::LaserScanConstP
                 for(size_t o = 0; o < buffer.size(); o++)
                 {
                     //ROS_INFO("observation: %i",o);
-                    raytrace(buffer[o]);
+                    raytrace(buffer[o],vector<bool>());
                 }
             }
             laserScanWaitingCounter = 0;
@@ -432,37 +442,30 @@ bool ActivityLayer::getClearingObservations(std::vector<Observation>& clearing_o
 }
 
 int update_count = 0;
-void ActivityLayer::raytrace(const Observation& observation)
+void ActivityLayer::raytrace(const Observation& observation, const vector<bool>& mark_end_lst)
 {
-    //if(update_count++ < 1)
+    //if(update_count++ < 6)
     {
         Costmap2D* master = layered_costmap_->getCostmap();
         for(size_t i = 0; i < observation.cloud_->size();i++){
             int x0,y0, x1, y1;
-
             master->worldToMapEnforceBounds(observation.origin_.x,observation.origin_.y,x0,y0);
             master->worldToMapEnforceBounds(observation.cloud_->points[i].x,observation.cloud_->points[i].y,x1,y1);
-
+            bool mark_end = mark_end_lst[i];
             try
-            {              
+            {
+                _observation_map->_angle_std_dev = _angle_std_dev;
 #if SENSOR_MODEL_TYPE == LINE_MODEL
-                _observation_map->raytrace(x0,y0,x1,y1,true);
+                _observation_map->raytrace(x0,y0,x1,y1,mark_end);
 #elif SENSOR_MODEL_TYPE == KERNEL_MODEL
-                if(_angle_std_dev < 1*M_PI/180.0)
-                {
-                    _observation_map->_angle_std_dev = _angle_std_dev;
-                    _observation_map->raytrace(x0,y0,x1,y1,false);
-                }
-                else
-                {
+                _observation_map->raytrace(x0,y0,x1,y1,false);
+                if(mark_end)
                     _observation_map->coneRayTrace(observation.origin_.x, observation.origin_.y,
-                                               observation.cloud_->points[i].x, observation.cloud_->points[i].y, 1*_angle_std_dev);
-                }
+                                           observation.cloud_->points[i].x, observation.cloud_->points[i].y, 1*_angle_std_dev, mark_end);
 #elif SENSOR_MODEL_TYPE == CONE_MODEL
                 _observation_map->coneRayTrace(observation.origin_.x, observation.origin_.y,
-                                           observation.cloud_->points[i].x, observation.cloud_->points[i].y, 1*_angle_std_dev);
+                                           observation.cloud_->points[i].x, observation.cloud_->points[i].y, 1*_angle_std_dev, mark_end);
 #endif
-
             }
             catch(const char* s)
             {

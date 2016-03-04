@@ -102,7 +102,7 @@ public:
    * @param message The message returned from a message notifier
    * @param buffer A pointer to the observation buffer to update
    */
-  void laserScanCallback(const sensor_msgs::LaserScanConstPtr& message,
+  void laserScanCallback(const sensor_msgs::LaserScanConstPtr& raw_message,
                          const boost::shared_ptr<layered_costmap_2d::ObservationBuffer>& buffer);
 
    /**
@@ -158,7 +158,7 @@ protected:
    * @param max_x
    * @param max_y
    */
-  virtual void raytrace(const layered_costmap_2d::Observation& observation);
+  virtual void raytrace(const layered_costmap_2d::Observation& observation, const std::vector<bool>& mark_end_lst);
 
   void updateRaytraceBounds(double ox, double oy, double wx, double wy, double range, double* min_x, double* min_y,
                             double* max_x, double* max_y);

@@ -76,8 +76,7 @@ double Probabilistic_filter::delta(double phi)
 }
 
 double Probabilistic_filter::gaussian_sensor_model(double r, double phi, double theta)
-{
-    double sigma_r = 0.025;
+{    
     double span = 0.5, min_prob = (1-span)/2;
 #if USE_RANGE_AND_NOISE_DECAY
     double free_weight = 1 - std::min(2*_max_angle*phi,1.0);
@@ -86,12 +85,12 @@ double Probabilistic_filter::gaussian_sensor_model(double r, double phi, double 
 #endif
     double lbda = gamma(theta)*free_weight;
     double prob;
-    if(phi < r - 2 * sigma_r)
+    if(phi < r - 2 * _sigma_r)
         prob = min_prob + (1 - lbda) * (0.5)*span;
-    else if(phi < r - sigma_r)
-        prob = span * (lbda * 0.5 * std::pow((phi - (r - 2*sigma_r))/(sigma_r), 2)+(1-lbda)*.5) + min_prob;
-    else if(phi < r + sigma_r) {
-        double J = (r-phi)/(sigma_r);
+    else if(phi < r - _sigma_r)
+        prob = span * (lbda * 0.5 * std::pow((phi - (r - 2*_sigma_r))/(_sigma_r), 2)+(1-lbda)*.5) + min_prob;
+    else if(phi < r + _sigma_r) {
+        double J = (r-phi)/(_sigma_r);
         prob = span * (lbda * ((1 - (0.5)*std::pow(J,2)) - 0.5) + 0.5) + min_prob;
     }
     else
@@ -137,9 +136,9 @@ double Probabilistic_filter::sensor_model(double r, double phi, double theta)
         return 0.5;
 }
 
-void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double ty, double angle_std_dev)
+void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double ty, double angle_std_dev, bool mark_end)
 {
-    _max_angle = angle_std_dev;
+    //_max_angle = angle_std_dev;
     // calculate target props
     double dx = tx-ox, dy = ty-oy,
             theta = atan2(dy,dx), d = sqrt(dx*dx+dy*dy);
@@ -180,10 +179,11 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
     bx1 = std::min((int)_map->sizeX(), bx1);
     by1 = std::min((int)_map->sizeY(), by1);
     //ROS_INFO("%i,%i,%i,%i",bx0,by0,bx1,by1);
+    int inserted_values = 0;
     for(int x=bx0; x<=bx1; x++){
         for(int y=by0; y<=by1; y++){
             double wx, wy;
-            _map->mapToWorld(x,y,wx,wy);
+            _map->mapToWorld(x,y,wx,wy);            
             //update_cell(ox, oy, theta, range, wx, wy, clear_sensor_cone);
             {
                 int x_t, y_t;
@@ -200,12 +200,39 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
                     double sensor = 0;
 #endif
                     double log_odds = std::log(sensor / (1 - sensor));
-                    _map->editCell(x_t,y_t)->addMeasurement(log_odds);
-                    //ROS_INFO("(%i,%i)=%f,%f", x,y,log_odds,sensor);
+                    if(std::abs(theta_norm) < _max_angle)
+                        inserted_values++;
+                    if(mark_end)
+                        _map->editCell(x_t,y_t)->addMeasurement(log_odds);
+                    else if(phi < d - 2 * _sigma_r * d)
+                    {
+                        _map->editCell(x_t,y_t)->addMeasurement(log_odds);
+                        if(log_odds > 0)
+                            ROS_INFO("log_odds=,%f",log_odds);
+                    }
                 }
             }
         }
     }
+#if SENSOR_MODEL_TYPE == CONE_MODEL
+    int min_line_size = std::abs(bx1-bx0)+std::abs(by1-by0);;
+    if(inserted_values < min_line_size)
+    {
+        _map->worldToMap(ox,oy,bx0,by0);
+        _map->worldToMap(tx,ty,bx1,by1);
+        bresenham2Dv0(bx0,by0,bx1,by1,mark_end);
+    }
+#elif SENSOR_MODEL_TYPE == KERNEL_MODEL
+    // Update Map with Target Point
+    /*
+    int aa, ab;
+    if(_map->worldToMap(tx, ty, aa, ab)){
+        _map->worldToMap(ox,oy,bx0,by0);
+        double end_value = getRangeWeight(aa,ab,bx0,by0)*(-_LOG_ODDS_FREE);
+        _map->editCell(aa,ab)->addMeasurement(end_value);
+    }
+    */
+#endif
 }
 
 void Probabilistic_filter::raytrace(int x0, int y0, int x1, int y1, bool markEnd)
