@@ -192,6 +192,7 @@ private:
     double _resolution;
     static const double SENSOR_STD_DEV = 0 ; //0.01; // in m
     std::string _global_frame;
+    double _max_range;
 
 
     bool poseIsAccurate;

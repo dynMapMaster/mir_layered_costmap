@@ -227,7 +227,8 @@ void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& raw_
           if (range >= message.range_max && range > 0)
           {
             message.ranges[ i ] = message.range_max;
-            mark_ends[i] = false;
+            _max_range = message.range_max;
+            //mark_ends[i] = false;
           }
         }
         // project the laser into a point cloud
@@ -448,10 +449,14 @@ void ActivityLayer::raytrace(const Observation& observation, const vector<bool>&
     {
         Costmap2D* master = layered_costmap_->getCostmap();
         for(size_t i = 0; i < observation.cloud_->size();i++){
+            //calculate range
+            double range = sqrt(pow(observation.origin_.x - observation.cloud_->points[i].x,2)+pow(observation.origin_.y - observation.cloud_->points[i].y,2));
+            bool mark_end = (abs(range-_max_range) < 0.1 ? false : true);
+
             int x0,y0, x1, y1;
             master->worldToMapEnforceBounds(observation.origin_.x,observation.origin_.y,x0,y0);
             master->worldToMapEnforceBounds(observation.cloud_->points[i].x,observation.cloud_->points[i].y,x1,y1);
-            bool mark_end = mark_end_lst[i];
+            //bool mark_end = mark_end_lst[i];
             try
             {
                 _observation_map->_angle_std_dev = _angle_std_dev;
