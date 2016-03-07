@@ -158,7 +158,7 @@ protected:
    * @param max_x
    * @param max_y
    */
-  virtual void raytrace(const layered_costmap_2d::Observation& observation, const std::vector<bool>& mark_end_lst);
+  virtual void raytrace(const layered_costmap_2d::Observation& observation);
 
   void updateRaytraceBounds(double ox, double oy, double wx, double wy, double range, double* min_x, double* min_y,
                             double* max_x, double* max_y);

@@ -7,9 +7,6 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _laser_noise_var = laserStdDev * laserStdDev;
     _laser_noise_std_dev = laserStdDev;
     // Setup sensormodel lookup table
-    ROS_INFO("LOG odds free=%f",_LOG_ODDS_FREE);
-
-#if SENSOR_MODEL_TYPE == LINE_MODEL
     #if USE_IDEAL_LINE_SENSOR_MODEL > 0
     double free_log = _LOG_ODDS_FREE;
     _sensor_model.push_back(free_log);
@@ -24,7 +21,6 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _sensor_model.push_back(0.000318349321477128);
     _sensor_model_occupancy_goal_index = 2;
     #endif
-#endif
 
     _max_angle = 15 * M_PI/180.0;
     _angle_std_dev = _max_angle;
@@ -138,7 +134,8 @@ double Probabilistic_filter::sensor_model(double r, double phi, double theta)
 
 void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double ty, double angle_std_dev, bool mark_end)
 {
-    //_max_angle = angle_std_dev;
+
+    _max_angle = angle_std_dev;
     // calculate target props
     double dx = tx-ox, dy = ty-oy,
             theta = atan2(dy,dx), d = sqrt(dx*dx+dy*dy);
@@ -207,15 +204,13 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
                     else if(phi < d - 2 * _sigma_r * d)
                     {
                         _map->editCell(x_t,y_t)->addMeasurement(log_odds);
-                        if(log_odds > 0)
-                            ROS_INFO("log_odds=,%f",log_odds);
                     }
                 }
             }
         }
     }
 #if SENSOR_MODEL_TYPE == CONE_MODEL
-    int min_line_size = std::abs(bx1-bx0)+std::abs(by1-by0);;
+    int min_line_size = std::abs(bx1-bx0)+std::abs(by1-by0);
     if(inserted_values < min_line_size)
     {
         _map->worldToMap(ox,oy,bx0,by0);

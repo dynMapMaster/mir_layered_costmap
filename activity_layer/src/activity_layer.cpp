@@ -219,16 +219,12 @@ void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& raw_
     //if(poseIsAccurate)
     {        
         sensor_msgs::LaserScan message = *raw_message;
-        message.range_max = 2;
-        vector<bool> mark_ends(message.ranges.size(),true);
         for (size_t i = 0; i < message.ranges.size(); i++)
         {
           float range = message.ranges[ i ];
           if (range >= message.range_max && range > 0)
           {
-            message.ranges[ i ] = message.range_max;
             _max_range = message.range_max;
-            //mark_ends[i] = false;
           }
         }
         // project the laser into a point cloud
@@ -263,7 +259,7 @@ void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& raw_
                 observation_buffers_[i]->unlock();
                 for(size_t o = 0; o < buffer.size(); o++)
                 {                    
-                    raytrace(buffer[o], mark_ends);
+                    raytrace(buffer[o]);
                 }
             }
             laserScanWaitingCounter = 0;
@@ -328,7 +324,7 @@ void ActivityLayer::laserScanValidInfCallback(const sensor_msgs::LaserScanConstP
                 for(size_t o = 0; o < buffer.size(); o++)
                 {
                     //ROS_INFO("observation: %i",o);
-                    raytrace(buffer[o],vector<bool>());
+                    raytrace(buffer[o]);
                 }
             }
             laserScanWaitingCounter = 0;
@@ -443,7 +439,7 @@ bool ActivityLayer::getClearingObservations(std::vector<Observation>& clearing_o
 }
 
 int update_count = 0;
-void ActivityLayer::raytrace(const Observation& observation, const vector<bool>& mark_end_lst)
+void ActivityLayer::raytrace(const Observation& observation)
 {
     //if(update_count++ < 6)
     {
@@ -451,12 +447,11 @@ void ActivityLayer::raytrace(const Observation& observation, const vector<bool>&
         for(size_t i = 0; i < observation.cloud_->size();i++){
             //calculate range
             double range = sqrt(pow(observation.origin_.x - observation.cloud_->points[i].x,2)+pow(observation.origin_.y - observation.cloud_->points[i].y,2));
-            bool mark_end = (abs(range-_max_range) < 0.1 ? false : true);
+            bool mark_end = (abs(range-_max_range) < 0.001 ? false : true);
 
             int x0,y0, x1, y1;
             master->worldToMapEnforceBounds(observation.origin_.x,observation.origin_.y,x0,y0);
             master->worldToMapEnforceBounds(observation.cloud_->points[i].x,observation.cloud_->points[i].y,x1,y1);
-            //bool mark_end = mark_end_lst[i];
             try
             {
                 _observation_map->_angle_std_dev = _angle_std_dev;
