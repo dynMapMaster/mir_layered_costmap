@@ -212,13 +212,20 @@ void ActivityLayer::reconfigureCB(layered_costmap_2d::ObstaclePluginConfig &conf
 {
 
 }
-
+double prev_recive_time;
 void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& raw_message,
                                       const boost::shared_ptr<ObservationBuffer>& buffer)
 {    
     //if(poseIsAccurate)
     {        
         sensor_msgs::LaserScan message = *raw_message;
+        ros::Time recive_time = message.header.stamp;
+        double now = recive_time.toSec();
+        if( (now - prev_recive_time) > 0.1)
+        {
+            ROS_WARN("Time between scans: %f",now - prev_recive_time);
+        }
+        prev_recive_time = now;
         for (size_t i = 0; i < message.ranges.size(); i++)
         {
           float range = message.ranges[ i ];
@@ -522,7 +529,7 @@ void ActivityLayer::matchSize()
             for(int y = 0; y < grid.info.height; y++){
                 Costmap_interpretator::Initial_values val = determineInitialValue(grid.data[y * grid.info.width + x]);
                 u_char learned_value;
-                if(_map->getCellValue(x,y,learned_value) )
+                if(_map->getCellValue(x,y,learned_value) == false )
                     _map->initCell(x,y,val);
             }
         }

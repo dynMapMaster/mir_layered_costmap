@@ -1,26 +1,27 @@
 #include "probabilistic_filter.h"
 #include <cmath>
 #include <angles/angles.h>
+#include <cfloat>
 Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution, double laserStdDev, double origin_x, double origin_y)
 {
     _map = new Grid_structure<Probablistic_cell>(xDim,yDim,resolution, origin_x, origin_y);
     _laser_noise_var = laserStdDev * laserStdDev;
     _laser_noise_std_dev = laserStdDev;
     // Setup sensormodel lookup table
-    #if USE_IDEAL_LINE_SENSOR_MODEL > 0
+#if USE_IDEAL_LINE_SENSOR_MODEL > 0
     double free_log = _LOG_ODDS_FREE;
     _sensor_model.push_back(free_log);
     _sensor_model.push_back(free_log);
     _sensor_model.push_back(0.4055);
     _sensor_model_occupancy_goal_index = 2;
-    #else
+#else
     _sensor_model.push_back(-1.09818644066980);
     _sensor_model.push_back(-0.811877413304292);
     _sensor_model.push_back(0.724863718358982);
     _sensor_model.push_back(0.206581098035374);
     _sensor_model.push_back(0.000318349321477128);
     _sensor_model_occupancy_goal_index = 2;
-    #endif
+#endif
 
     _max_angle = 15 * M_PI/180.0;
     _angle_std_dev = _max_angle;
@@ -180,7 +181,7 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
     for(int x=bx0; x<=bx1; x++){
         for(int y=by0; y<=by1; y++){
             double wx, wy;
-            _map->mapToWorld(x,y,wx,wy);            
+            _map->mapToWorld(x,y,wx,wy);
             //update_cell(ox, oy, theta, range, wx, wy, clear_sensor_cone);
             {
                 int x_t, y_t;
@@ -188,22 +189,28 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
                     double dx = wx-ox, dy = wy-oy;
                     double theta_t = atan2(dy, dx) - theta;
                     double theta_norm = angles::normalize_angle(theta_t); // theta -> [-pi,+pi]
-                    double phi = sqrt(dx*dx+dy*dy);
-#if SENSOR_MODEL_TYPE == KERNEL_MODEL
-                   double sensor = kernel_sensor_model(d,phi,theta_norm);
-#elif SENSOR_MODEL_TYPE == CONE_MODEL
-                   double sensor = gaussian_sensor_model(d,phi,theta_norm);
-#else
-                    double sensor = 0;
-#endif
-                    double log_odds = std::log(sensor / (1 - sensor));
                     if(std::abs(theta_norm) < _max_angle)
-                        inserted_values++;
-                    if(mark_end)
-                        _map->editCell(x_t,y_t)->addMeasurement(log_odds);
-                    else if(phi < d - 2 * _sigma_r * d)
                     {
-                        _map->editCell(x_t,y_t)->addMeasurement(log_odds);
+                        inserted_values++;
+                        double phi = sqrt(dx*dx+dy*dy);
+#if SENSOR_MODEL_TYPE == KERNEL_MODEL
+                        double sensor = kernel_sensor_model(d,phi,theta_norm);
+#elif SENSOR_MODEL_TYPE == CONE_MODEL
+                        double sensor = gaussian_sensor_model(d,phi,theta_norm);
+#else
+                        double sensor = 0;
+#endif
+                        double log_odds = std::log(sensor / (1 - sensor));
+
+                        if(std::abs(log_odds) > FLT_MIN)
+                        {
+                            if(mark_end)
+                                _map->editCell(x_t,y_t)->addMeasurement(log_odds);
+                            else if(phi < d - 2 * _sigma_r * d)
+                            {
+                                _map->editCell(x_t,y_t)->addMeasurement(log_odds);
+                            }
+                        }
                     }
                 }
             }
@@ -296,7 +303,7 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
 
         while (x1 != pre_kernel_goal)
         {
-            double weight = getRangeWeight(x1,y1,ori_x,ori_y);            
+            double weight = getRangeWeight(x1,y1,ori_x,ori_y);
             // Mark Position clear
             try // remove to improve performance
             {
@@ -304,8 +311,8 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
             }
             catch(const char* s)
             {
-               ROS_ERROR("Filter marking goal error %s", s);
-               return;
+                ROS_ERROR("Filter marking goal error %s", s);
+                return;
             }
 
             if ((error >= 0) && (error || (ix > 0)))
@@ -317,7 +324,7 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
 
             error += delta_y;
             x1 += ix;
-        }        
+        }
         double weight = getRangeWeight(x1,y1,ori_x,ori_y);
         if(!out_of_bounds && markEnd)
         {
@@ -367,8 +374,8 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
             }
             catch(const char* s)
             {
-               ROS_ERROR("Filter marking goal error %s", s);
-               return;
+                ROS_ERROR("Filter marking goal error %s", s);
+                return;
             }
 
             if ((error >= 0) && (error || (iy > 0)))
