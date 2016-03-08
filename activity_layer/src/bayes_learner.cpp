@@ -78,15 +78,77 @@ void Bayes_learner::initCell(int x, int y, Initial_values value)
         break;
     }
     */
-    _grid.editCell(x,y)->addMeasurement(0.5);
+    _grid.editCell(x,y)->addMeasurement(0.0);
 }
 
 void Bayes_learner::deserialize(const std::vector<std::vector<double> >& values)
 {
+    if(values.size() < 1 || values[0].size() < 3)
+    {
+        ROS_ERROR("Pmac_learner - FIRST LINE IN WRONG FORMAT!!");
+        return;
+    }
+    // create gridstructure in correct size
 
+    // Make sure grid sizes match
+    if(_grid.sizeX() != (int)values[0][0] || _grid.sizeY() != (int)values[0][1] || std::abs(_grid.resolution()-values[0][2]) > 0.01)
+    {
+        ROS_ERROR("LOADED MAP AND ORIGINAL DOES NOT MATCH IN SIZE OR RESOLUTION %f %f %f ",values[0][0], values[0][1],  values[0][2]);
+        ROS_ERROR("CURRENT %i %i %f ",_grid.sizeX(), _grid.sizeY(), _grid.resolution());
+        return;
+    }
+
+    for(int i = 1; i < values.size();i++){
+        if(values[i].size() == 1)
+        {
+            // calculate x-y Value
+            int y = (i-1) / _grid.sizeX();
+            int x = (i-1) % _grid.sizeX();
+            Probablistic_cell* cell = _grid.editCell(x,y);
+            if(cell)
+                cell->deserialize(values[i]);
+            else
+                ROS_ERROR("CELL WAS NULL!");
+        }
+        else if(values[i].size() == 1)
+        {
+
+        }
+        else
+        {
+            ROS_ERROR("LOADED CELL WRONG SIZE %i", values[i].size());
+        }
+
+    }
 }
 
 std::vector<std::vector<double> > Bayes_learner::serialize()
 {
-    return std::vector<std::vector<double> >();
+    std::vector<std::vector<double> > result;
+    result.reserve(_grid.sizeX()*_grid.sizeY()+1);
+    // Store size of grid and resolution
+    std::vector<double> size;
+    size.push_back(_grid.sizeX());
+    size.push_back(_grid.sizeY());
+    size.push_back(_grid.resolution());
+    result.push_back(size);
+
+    // Store grid values
+    for(int y = 0; y < _grid.sizeY();y++){
+        for(int x = 0; x < _grid.sizeX();x++){
+            Probablistic_cell* cell = _grid.readCell(x,y);
+            std::vector<double> cellVal;
+            if(cell)
+            {
+                cellVal = cell->serialize();
+            }
+            else
+            {
+                // OBS IF SINGLE VECTOR SERIALIZATION - CONSIDER
+                cellVal.push_back(0);
+            }
+            result.push_back(cellVal);
+        }
+    }
+    return result;
 }

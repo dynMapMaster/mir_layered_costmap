@@ -15,11 +15,20 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _sensor_model.push_back(0.4055);
     _sensor_model_occupancy_goal_index = 2;
 #else
+    /* // init = 0.5, free=0.25 , occ=0.67
     _sensor_model.push_back(-1.09818644066980);
     _sensor_model.push_back(-0.811877413304292);
     _sensor_model.push_back(0.724863718358982);
     _sensor_model.push_back(0.206581098035374);
     _sensor_model.push_back(0.000318349321477128);
+    _sensor_model_occupancy_goal_index = 2;
+    */
+    // init = 2, free=0.4, occ=0.57
+    _sensor_model.push_back(-0.405332476533774);
+    _sensor_model.push_back(-0.310520726438271);
+    _sensor_model.push_back(0.269715849124419);
+    _sensor_model.push_back(0.0557912684728211);
+    _sensor_model.push_back(7.89868804542252e-05);
     _sensor_model_occupancy_goal_index = 2;
 #endif
 
@@ -76,7 +85,7 @@ double Probabilistic_filter::gaussian_sensor_model(double r, double phi, double 
 {    
     double span = 0.5, min_prob = (1-span)/2;
 #if USE_RANGE_AND_NOISE_DECAY
-    double free_weight = 1 - std::min(2*_max_angle*phi,1.0);
+    double free_weight = 1 - std::min(2*2*_max_angle*phi,1.0);
 #else
     double free_weight = 1;
 #endif
