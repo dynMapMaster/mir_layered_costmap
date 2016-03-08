@@ -16,7 +16,7 @@ int main(int argc, char** argv)
     ros::NodeHandle n;
     ros::Subscriber sub = n.subscribe<nav_msgs::OccupancyGrid::Ptr>("/dynamic_map", 1, &occupancyGridCb);
     image_transport::ImageTransport it(n);
-    image_pub = it.advertise("occupancy_image", 1);
+    image_pub = it.advertise("occupancy_image", 1, true);
     color_image_pub = it.advertise("occupancy_image_color", 1,true);
     ros::spin();
     return 0;
