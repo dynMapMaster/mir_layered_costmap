@@ -10,31 +10,37 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     // Setup sensormodel lookup table
 #if USE_IDEAL_LINE_SENSOR_MODEL > 0
     double free_log = _LOG_ODDS_FREE;
-    _sensor_model.push_back(free_log);
-    _sensor_model.push_back(free_log);
-    _sensor_model.push_back(0.4055);
-    _sensor_model_occupancy_goal_index = 2;
+    _sensor_model_org.push_back(free_log);
+    _sensor_model_org.push_back(free_log);
+    _sensor_model_org.push_back(0.4055);
+    _sensor_model_occupancy_goal_index_org = 2;
 #else
     /* // init = 0.5, free=0.25 , occ=0.67
-    _sensor_model.push_back(-1.09818644066980);
-    _sensor_model.push_back(-0.811877413304292);
-    _sensor_model.push_back(0.724863718358982);
-    _sensor_model.push_back(0.206581098035374);
-    _sensor_model.push_back(0.000318349321477128);
-    _sensor_model_occupancy_goal_index = 2;
+    _sensor_model_org.push_back(-1.09818644066980);
+    _sensor_model_org.push_back(-0.811877413304292);
+    _sensor_model_org.push_back(0.724863718358982);
+    _sensor_model_org.push_back(0.206581098035374);
+    _sensor_model_org.push_back(0.000318349321477128);
+    _sensor_model_occupancy_goal_index_org = 2;
     */
     // init = 2, free=0.4, occ=0.57
-    _sensor_model.push_back(-0.405332476533774);
-    _sensor_model.push_back(-0.310520726438271);
-    _sensor_model.push_back(0.269715849124419);
-    _sensor_model.push_back(0.0557912684728211);
-    _sensor_model.push_back(7.89868804542252e-05);
-    _sensor_model_occupancy_goal_index = 2;
+    _sensor_model_org.push_back(-0.405332476533774);
+    _sensor_model_org.push_back(-0.310520726438271);
+    _sensor_model_org.push_back(0.269715849124419);
+    _sensor_model_org.push_back(0.0557912684728211);
+    _sensor_model_org.push_back(7.89868804542252e-05);
+    _sensor_model_occupancy_goal_index_org = 2;
 #endif
 
     _max_angle = 15 * M_PI/180.0;
     _angle_std_dev = _max_angle;
     ROS_INFO("max angle: %f", _max_angle);
+
+#if USE_POSISITION_NOISE == 0
+    _LOG_ODDS_FREE = _LOG_ODDS_FREE_ORG;
+    _sensor_model = _sensor_model_org;
+    _sensor_model_occupancy_goal_index = _sensor_model_occupancy_goal_index_org;
+#endif
 }
 
 Probabilistic_filter::~Probabilistic_filter()
@@ -152,13 +158,16 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
     // Integer Bounds of Update
     int bx0, by0, bx1, by1;
 
+#if USE_POSISITION_NOISE
     // calcualtions to incorporate position error
     // error in ray direction
     double rayNorm = sqrt(pow(dx,2)+pow(dy,2));
     double ray_direction_error = std::abs(_x_std_dev * (dx / rayNorm) + _y_std_dev * (dy / rayNorm));
     double ray_cross_error = std::abs(_x_std_dev * (-dy / rayNorm) + _y_std_dev * (dx / rayNorm));
      _sigma_r = ray_direction_error;
-    //_sigma_r = 0.025;
+#else
+    _sigma_r = 0.025;
+#endif
     // Bounds includes the origin
     _map->worldToMap(ox,oy,bx0,by0);
     bx1 = bx0;
@@ -307,6 +316,34 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
 
     // Enforce bounds OBS ON X2 Y2
     bool out_of_bounds = enforceBounds(x2,y2);
+
+#if USE_POSISITION_NOISE
+    // Stretch sensor model based on ray direction uncertainty
+        // calcualtions to incorporate position error
+        // error in ray direction
+        double rayNorm = sqrt(pow(delta_x,2)+pow(delta_y,2));
+        double ray_direction_error = std::abs(_x_std_dev * (delta_x / rayNorm) + _y_std_dev * (delta_y / rayNorm));
+        double ray_cross_error = std::abs(_x_std_dev * (-delta_y / rayNorm) + _y_std_dev * (delta_x / rayNorm));
+    int stretchFactor = ((int)(ray_direction_error / _map->resolution()) + 0.5);
+    if(ray_direction_error > 1 && USE_POSISITION_NOISE){
+        _sensor_model.clear();
+        for(int i = 0; i < _sensor_model_org.size(); i++)
+        {
+            for(int s = 0; s < stretchFactor ; s++){
+                _sensor_model.push_back(_sensor_model_org[i] / (double)stretchFactor);
+            }
+        }
+        _sensor_model_occupancy_goal_index = _sensor_model_occupancy_goal_index_org * stretchFactor + (stretchFactor / 2);
+        _LOG_ODDS_FREE = _LOG_ODDS_FREE_ORG / stretchFactor;
+    }
+    else
+    {
+        _LOG_ODDS_FREE = _LOG_ODDS_FREE_ORG;
+        _sensor_model = _sensor_model_org;
+        _sensor_model_occupancy_goal_index = _sensor_model_occupancy_goal_index_org;
+    }
+#endif
+
 
     int ori_x = x1, ori_y = y1;
 
