@@ -82,7 +82,8 @@ double Probabilistic_filter::delta(double phi)
 }
 
 double Probabilistic_filter::gaussian_sensor_model(double r, double phi, double theta)
-{    
+{
+    //_sigma_r = ray_dir_error;
     double span = 0.5, min_prob = (1-span)/2;
 #if USE_RANGE_AND_NOISE_DECAY
     double free_weight = 1 - std::min(2*2*_max_angle*phi,1.0);
@@ -91,7 +92,7 @@ double Probabilistic_filter::gaussian_sensor_model(double r, double phi, double 
 #endif
     double lbda = gamma(theta)*free_weight;
     double prob;
-    if(phi < r - 2 * _sigma_r)
+    if(phi < r - 2 * _sigma_r )
         prob = min_prob + (1 - lbda) * (0.5)*span;
     else if(phi < r - _sigma_r)
         prob = span * (lbda * 0.5 * std::pow((phi - (r - 2*_sigma_r))/(_sigma_r), 2)+(1-lbda)*.5) + min_prob;
@@ -144,7 +145,6 @@ double Probabilistic_filter::sensor_model(double r, double phi, double theta)
 
 void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double ty, double angle_std_dev, bool mark_end)
 {
-
     _max_angle = angle_std_dev;
     // calculate target props
     double dx = tx-ox, dy = ty-oy,
@@ -152,6 +152,13 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
     // Integer Bounds of Update
     int bx0, by0, bx1, by1;
 
+    // calcualtions to incorporate position error
+    // error in ray direction
+    double rayNorm = sqrt(pow(dx,2)+pow(dy,2));
+    double ray_direction_error = std::abs(_x_std_dev * (dx / rayNorm) + _y_std_dev * (dy / rayNorm));
+    double ray_cross_error = std::abs(_x_std_dev * (-dy / rayNorm) + _y_std_dev * (dx / rayNorm));
+     _sigma_r = ray_direction_error;
+    //_sigma_r = 0.025;
     // Bounds includes the origin
     _map->worldToMap(ox,oy,bx0,by0);
     bx1 = bx0;
@@ -197,7 +204,7 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
                 if(_map->worldToMap(wx, wy, x_t, y_t)){
                     double dx = wx-ox, dy = wy-oy;
                     double theta_t = atan2(dy, dx) - theta;
-                    double theta_norm = angles::normalize_angle(theta_t); // theta -> [-pi,+pi]
+                     double theta_norm = angles::normalize_angle(theta_t); // theta -> [-pi,+pi]
                     if(std::abs(theta_norm) < _max_angle)
                     {
                         inserted_values++;

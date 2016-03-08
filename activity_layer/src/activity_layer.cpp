@@ -62,6 +62,9 @@ namespace dynamic_map
 
 void ActivityLayer::onInitialize()
 {
+    _x_std_dev = -1;
+    _y_std_dev = -1;
+
     laserScanWaitingCounter = 0;
 
     ROS_INFO("Initializing activity map");
@@ -462,6 +465,11 @@ void ActivityLayer::raytrace(const Observation& observation)
             try
             {
                 _observation_map->_angle_std_dev = _angle_std_dev;
+                if(_x_std_dev < 0 || _y_std_dev < 0) // debug
+                    return;
+
+                _observation_map->_x_std_dev = _x_std_dev;
+                _observation_map->_y_std_dev = _y_std_dev;
 #if SENSOR_MODEL_TYPE == LINE_MODEL
                 _observation_map->raytrace(x0,y0,x1,y1,mark_end);
 #elif SENSOR_MODEL_TYPE == KERNEL_MODEL
@@ -581,6 +589,8 @@ void ActivityLayer::reset()
 
 void ActivityLayer::poseCB(geometry_msgs::PoseWithCovarianceStamped pose)
 {
+    _x_std_dev = std::sqrt(pose.pose.covariance[0]);
+    _y_std_dev = std::sqrt(pose.pose.covariance[7]);
     _angle_std_dev = std::sqrt(pose.pose.covariance[35]);
     if(pose.pose.covariance[0] < POSE_POS_STDDEV && pose.pose.covariance[7] < POSE_POS_STDDEV && pose.pose.covariance[35] < POSE_ORI_STDDEV)
     {

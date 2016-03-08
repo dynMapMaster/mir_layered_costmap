@@ -201,6 +201,7 @@ private:
     static const double POSE_POS_STDDEV = 0.3162; //sqrt(0.1)
     static const double POSE_ORI_STDDEV = 0.1732; // sqrt(0.03)
     double _angle_std_dev;
+    double _x_std_dev, _y_std_dev;
     // Pose callback
     void poseCB(geometry_msgs::PoseWithCovarianceStamped pose);
 
