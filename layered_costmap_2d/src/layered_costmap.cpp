@@ -51,7 +51,7 @@ LayeredCostmap::LayeredCostmap(std::string global_frame, bool rolling_window, bo
     costmap_(), global_frame_(global_frame), rolling_window_(rolling_window), initialized_(false), size_locked_(false)
 {
   if (track_unknown)
-    costmap_.setDefaultValue(255);
+    costmap_.setDefaultValue(127);
   else
     costmap_.setDefaultValue(0);
 }
