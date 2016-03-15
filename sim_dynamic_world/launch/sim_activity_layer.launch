@@ -1,12 +1,12 @@
 <!-- -->
 <launch>  
 <param name="use_sim_time" value="true" />
-	<node name="ros_map_server" pkg="map_server" type="map_server" args="$(find sim_dynamic_world)/world/feature_100.yaml"/>   
+	<node name="ros_map_server" pkg="map_server" type="map_server" args="$(find sim_dynamic_world)/world/empty_200.yaml"/>   
   <node pkg="stage" type="mir_stageros" name="stage_ros" args="-m $(find sim_dynamic_world)/world/sim_activity_layer.world"/> 
 
 	<node pkg="tf" type="static_transform_publisher" name="blue_print_map_link_broadcaster" args="0. 0. 0 0 0 0 map blue_print_map 20" />   
 
-	<node name="ros_blueprint_server" pkg="map_server" type="map_server" args="$(find sim_dynamic_world)/world/feature_100.yaml" ns="blue_print">
+	<node name="ros_blueprint_server" pkg="map_server" type="map_server" args="$(find sim_dynamic_world)/world/empty_200.yaml" ns="blue_print">
 		<remap from="/map" to="/blue_print_map" />
 	</node>
 	

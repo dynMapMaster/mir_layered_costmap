@@ -10,9 +10,10 @@
 #define KERNEL_MODEL 0
 #define CONE_MODEL 1
 #define LINE_MODEL 2
-#define SENSOR_MODEL_TYPE 2
+#define POSE_ARRAY 3
+#define SENSOR_MODEL_TYPE 3
 
-#define USE_IDEAL_LINE_SENSOR_MODEL 0
+#define USE_IDEAL_LINE_SENSOR_MODEL 1
 
 #define USE_RANGE_AND_NOISE_DECAY 1
 
@@ -45,6 +46,7 @@ public:
     void coneRayTrace(double ox, double oy, double tx, double ty, double angle_std_dev, bool mark_end);
     double _angle_std_dev;
     double _y_std_dev, _x_std_dev;
+    double _raytrace_weight;
 private:
     Grid_structure<Probablistic_cell>* _map;
     double _laser_noise_var;

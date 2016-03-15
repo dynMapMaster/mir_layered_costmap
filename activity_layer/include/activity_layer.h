@@ -58,6 +58,7 @@
 #include <layered_costmap_2d/footprint.h>
 
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <geometry_msgs/PoseArray.h>
 
 #include <observation_interface.h>
 #include <costmap_interpretator.h>
@@ -193,17 +194,20 @@ private:
     static const double SENSOR_STD_DEV = 0 ; //0.01; // in m
     std::string _global_frame;
     double _max_range;
-
+    std::string _sensor_frame_id;
 
     bool poseIsAccurate;
     ros::Subscriber poseSubscriber;
+    ros::Subscriber poseArraySubscriber;
+    geometry_msgs::PoseArray _pose_array;
 
     static const double POSE_POS_STDDEV = 0.3162; //sqrt(0.1)
     static const double POSE_ORI_STDDEV = 0.1732; // sqrt(0.03)
     double _angle_std_dev;
     double _x_std_dev, _y_std_dev;
     // Pose callback
-    void poseCB(geometry_msgs::PoseWithCovarianceStamped pose);
+    void poseCB(geometry_msgs::PoseWithCovarianceStamped pose);    
+    void poseArrayCB(geometry_msgs::PoseArray pose);
 
     // Request a map for initialization from mapserver
     nav_msgs::OccupancyGrid requestMap();
@@ -220,6 +224,8 @@ private:
 
     bool saveDynamicMap(activity_layer::saveDynaicMap::Request &req, activity_layer::saveDynaicMap::Response &resp);
     bool loadDynamicMap(activity_layer::loadDynaicMap::Request &req, activity_layer::loadDynaicMap::Response &resp);
+
+    ros::Time cloud_recive_time;
 };
 
 }  // namespace layered_costmap_2d

@@ -6,7 +6,7 @@ class Probablistic_cell
 {
 public:
     Probablistic_cell();
-    void addMeasurement(double log_odds_update, bool override=true);
+    void addMeasurement(double log_odds_update, bool override=false);
     double getProbForOccupied(const bool reset=true);
     void resetCell();
     bool deserialize(const std::vector<double>& values);

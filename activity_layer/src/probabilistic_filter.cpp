@@ -7,6 +7,7 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _map = new Grid_structure<Probablistic_cell>(xDim,yDim,resolution, origin_x, origin_y);
     _laser_noise_var = laserStdDev * laserStdDev;
     _laser_noise_std_dev = laserStdDev;
+    _LOG_ODDS_FREE = _LOG_ODDS_FREE_ORG;
     // Setup sensormodel lookup table
 #if USE_IDEAL_LINE_SENSOR_MODEL > 0
     double free_log = _LOG_ODDS_FREE;
@@ -32,7 +33,7 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _sensor_model_occupancy_goal_index_org = 2;
 #endif
 
-    _max_angle = 15 * M_PI/180.0;
+    _max_angle = 2 * M_PI/180.0;
     _angle_std_dev = _max_angle;
     ROS_INFO("max angle: %f", _max_angle);
 
@@ -41,6 +42,7 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _sensor_model = _sensor_model_org;
     _sensor_model_occupancy_goal_index = _sensor_model_occupancy_goal_index_org;
 #endif
+    _raytrace_weight = 0;
 }
 
 Probabilistic_filter::~Probabilistic_filter()
@@ -92,7 +94,7 @@ double Probabilistic_filter::gaussian_sensor_model(double r, double phi, double 
     //_sigma_r = ray_dir_error;
     double span = 0.5, min_prob = (1-span)/2;
 #if USE_RANGE_AND_NOISE_DECAY
-    double free_weight = 1 - std::min(2*2*_max_angle*phi,1.0);
+    double free_weight = 1 - std::min(2*_max_angle*phi,1.0);
 #else
     double free_weight = 1;
 #endif
@@ -164,7 +166,7 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
     double rayNorm = sqrt(pow(dx,2)+pow(dy,2));
     double ray_direction_error = std::abs(_x_std_dev * (dx / rayNorm) + _y_std_dev * (dy / rayNorm));
     double ray_cross_error = std::abs(_x_std_dev * (-dy / rayNorm) + _y_std_dev * (dx / rayNorm));
-     _sigma_r = ray_direction_error;
+     _sigma_r = ray_direction_error;     
 #else
     _sigma_r = 0.025;
 #endif
@@ -290,9 +292,9 @@ inline double Probabilistic_filter::getRangeWeight(int x1, int y1, int ori_x, in
     const double dx = x1 - ori_x;
     const double dy = y1 - ori_y;
     const double dist = _map->resolution()*sqrt(dx*dx+dy*dy);
-    return 1-std::min(2*_angle_std_dev*dist,1.0);
+    return (1-std::min(2*_angle_std_dev*dist,1.0))*_raytrace_weight;
 #else
-    return 1;
+    return 1*_raytrace_weight;
 #endif
 }
 

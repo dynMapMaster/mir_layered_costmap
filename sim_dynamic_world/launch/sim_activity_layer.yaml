@@ -5,14 +5,14 @@ transform_tolerance: 0.2
 rolling_window: false
 track_unknown_space: true
 always_send_full_costmap: true
-width: 5.0
-height: 5.0
+width: 10.0
+height: 10.0
 resolution: 0.05
-origin_x: -2.5
-origin_y: -2.5
+origin_x: -5
+origin_y: -5
 publish_cost_grid: true
-update_frequency: 0.01
-publish_frequency: 0.01
+update_frequency: 0.5
+publish_frequency: 0.5
 
 footprint_padding: 0.1
 
@@ -33,7 +33,7 @@ activity_layer:
   obstacle_range: 50.0
   raytrace_range: 50.0  
 
-  observation_sources: base_scan0 base_scan1
+  observation_sources: base_scan0 #base_scan1
   base_scan0: {
       data_type: LaserScan,
       sensor_frame: /base_laser_link0,

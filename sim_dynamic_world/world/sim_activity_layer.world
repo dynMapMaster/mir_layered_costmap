@@ -14,8 +14,8 @@ define topsick ranger
 (
 	sensor( 			
     range [ 0.0  30.0 ]
-    fov 270
-   samples 540
+    fov 10 # 270
+   samples 2 #540
   )
 
   # generic model properties
@@ -27,8 +27,8 @@ define botsick ranger
 (
 	sensor( 			
     range [ 0.0  30.0 ]
-    fov 270
-   samples 540
+    fov 10 #270
+   samples 2 #540
   )
 
   # generic model properties
@@ -94,8 +94,8 @@ static_obstacle( pose [ 0.75 -1.53 0 90.0 ] name "static_block" color "green")
 floorplan
 ( 
   name "small_box"
-  bitmap "feature_100.png"
-  size [5 5 1.0]
+  bitmap "empty_200.png"
+  size [10 10 1.0]
   pose [ 0 0 0 0.0 ]
 )
 
