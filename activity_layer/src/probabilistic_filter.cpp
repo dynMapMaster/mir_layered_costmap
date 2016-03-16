@@ -2,11 +2,18 @@
 #include <cmath>
 #include <angles/angles.h>
 #include <cfloat>
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/vector_expression.hpp>
+#include <boost/numeric/ublas/operation.hpp>
+#include <boost/numeric/ublas/assignment.hpp>
+
+
 Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution, double laserStdDev, double origin_x, double origin_y)
 {
     _map = new Grid_structure<Probablistic_cell>(xDim,yDim,resolution, origin_x, origin_y);
     _laser_noise_var = laserStdDev * laserStdDev;
     _laser_noise_std_dev = laserStdDev;
+    _LOG_ODDS_FREE = _LOG_ODDS_FREE_ORG;
     // Setup sensormodel lookup table
 #if USE_IDEAL_LINE_SENSOR_MODEL > 0
     double free_log = _LOG_ODDS_FREE;
@@ -87,12 +94,12 @@ double Probabilistic_filter::delta(double phi)
     return 1;//1 - (1+tanh(2*(phi-_phi_v)))/2;
 }
 
-double Probabilistic_filter::gaussian_sensor_model(double r, double phi, double theta)
+double Probabilistic_filter::gaussian_sensor_model(double r, double phi, double theta, double cross_error)
 {
     //_sigma_r = ray_dir_error;
     double span = 0.5, min_prob = (1-span)/2;
 #if USE_RANGE_AND_NOISE_DECAY
-    double free_weight = 1 - std::min(2*2*_max_angle*phi,1.0);
+    double free_weight = 1 - (std::min(2*_max_angle*phi+cross_error,1.0));
 #else
     double free_weight = 1;
 #endif
@@ -153,7 +160,7 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
 {
     _max_angle = angle_std_dev;
     // calculate target props
-    double dx = tx-ox, dy = ty-oy,
+    double dx = tx-ox, dy = ty-oy, dist = 0,
             theta = atan2(dy,dx), d = sqrt(dx*dx+dy*dy);
     // Integer Bounds of Update
     int bx0, by0, bx1, by1;
@@ -163,8 +170,29 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
     // error in ray direction
     double rayNorm = sqrt(pow(dx,2)+pow(dy,2));
     double ray_direction_error = std::abs(_x_std_dev * (dx / rayNorm) + _y_std_dev * (dy / rayNorm));
-    double ray_cross_error = std::abs(_x_std_dev * (-dy / rayNorm) + _y_std_dev * (dx / rayNorm));
-     _sigma_r = ray_direction_error;
+    double ray_cross_error = std::abs(_x_std_dev * (-dy / rayNorm)) + abs(_y_std_dev * (dx / rayNorm));
+
+    // min for errors
+    ray_cross_error = (ray_cross_error < 0.025) ? 0.025 : ray_cross_error;
+    ray_direction_error = ray_direction_error < 0.025 ? 0.025 : ray_direction_error;
+
+    using namespace boost::numeric::ublas;
+    boost::numeric::ublas::vector<double> cross_unit_vector_left(2);
+    cross_unit_vector_left <<= -dy / rayNorm, dx / rayNorm;
+    boost::numeric::ublas::vector<double> origin(2);
+    origin <<= ox, oy;
+    boost::numeric::ublas::vector<double> target(2);
+    target <<= tx, ty;
+    boost::numeric::ublas::vector<double> ray_unit(2);
+    ray_unit <<= (dx / rayNorm), (dy / rayNorm);
+    boost::numeric::ublas::vector<double> error_projected_max = target + ray_direction_error * ray_unit;
+    _sigma_r = ray_direction_error;
+    // calculate side origins
+    boost::numeric::ublas::vector<double> deltaOrigin = ray_cross_error * cross_unit_vector_left;
+    boost::numeric::ublas::vector<double> left_side_origin = origin + ray_cross_error * cross_unit_vector_left;
+    boost::numeric::ublas::vector<double> right_side_origin = origin + -1 * ray_cross_error * cross_unit_vector_left;
+
+
 #else
     _sigma_r = 0.025;
 #endif
@@ -178,22 +206,64 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
     int a, b;
 
     // Update left side of sonar cone
+#if USE_POSISITION_NOISE
+    double angle_adjusted = (theta+_max_angle);
+    mx = left_side_origin[0] + cos(angle_adjusted) * d * 1.2;
+    my = left_side_origin[1] + sin(angle_adjusted) * d * 1.2;
+#else
     mx = ox + cos(theta-_max_angle) * d * 1.2;
     my = oy + sin(theta-_max_angle) * d * 1.2;
-    _map->worldToMap(mx, my, a, b);
+#endif
+    _map->worldToMapEnforceBounds(mx, my, a, b);
     bx0 = std::min(bx0, a);
     bx1 = std::max(bx1, a);
     by0 = std::min(by0, b);
     by1 = std::max(by1, b);
 
     // Update right side of sonar cone
+#if USE_POSISITION_NOISE
+    angle_adjusted = (theta-_max_angle);
+    mx = right_side_origin[0] + cos(angle_adjusted) * d * 1.2;
+    my = right_side_origin[1] + sin(angle_adjusted) * d * 1.2;
+#else
     mx = ox + cos(theta+_max_angle) * d * 1.2;
     my = oy + sin(theta+_max_angle) * d * 1.2;
-    _map->worldToMap(mx, my, a, b);
+#endif
+    _map->worldToMapEnforceBounds(mx, my, a, b);
+
     bx0 = std::min(bx0, a);
     bx1 = std::max(bx1, a);
     by0 = std::min(by0, b);
     by1 = std::max(by1, b);
+
+#if USE_POSISITION_NOISE
+
+    _map->worldToMapEnforceBounds(right_side_origin[0], right_side_origin[1], a, b);
+    bx0 = std::min(bx0, a);
+    bx1 = std::max(bx1, a);
+    by0 = std::min(by0, b);
+    by1 = std::max(by1, b);
+
+    _map->worldToMapEnforceBounds(left_side_origin[0], left_side_origin[1], a, b);
+    bx0 = std::min(bx0, a);
+    bx1 = std::max(bx1, a);
+    by0 = std::min(by0, b);
+    by1 = std::max(by1, b);
+
+    _map->worldToMapEnforceBounds(tx, ty, a, b);
+    bx0 = std::min(bx0, a);
+    bx1 = std::max(bx1, a);
+    by0 = std::min(by0, b);
+    by1 = std::max(by1, b);
+
+
+    _map->worldToMapEnforceBounds(error_projected_max[0], error_projected_max[1], a, b);
+    bx0 = std::min(bx0, a);
+    bx1 = std::max(bx1, a);
+    by0 = std::min(by0, b);
+    by1 = std::max(by1, b);
+
+#endif
 
     // Limit Bounds to Grid
     bx0 = std::max(0, bx0);
@@ -201,7 +271,6 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
 
     bx1 = std::min((int)_map->sizeX(), bx1);
     by1 = std::min((int)_map->sizeY(), by1);
-    //ROS_INFO("%i,%i,%i,%i",bx0,by0,bx1,by1);
     int inserted_values = 0;
     for(int x=bx0; x<=bx1; x++){
         for(int y=by0; y<=by1; y++){
@@ -211,27 +280,91 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
             {
                 int x_t, y_t;
                 if(_map->worldToMap(wx, wy, x_t, y_t)){
+                   // ROS_INFO("MAP: %i,%i",x_t,y_t);
+ #if USE_POSISITION_NOISE
+                    double phi=0;
+                    // determine the section (left_side, center, right_side, outside
+                    double angle_to_left = atan2(wy-left_side_origin[1],wx-left_side_origin[0]);
+                    double angle_to_right = atan2(wy-right_side_origin[1],wx-right_side_origin[0]);
+                    double theta_norm = DBL_MAX;
+
+                    double dx, dy;
+                    if(angle_to_right - theta > 0 && angle_to_left - theta < 0 && angle_to_left - theta < 2 * M_PI && angle_to_right - theta < 2 * M_PI )
+                    {
+                        // center
+                        // calculate angle between origin line and point
+                       //std::cout << "\t CENTER " << std::endl;
+                        dx = wx-ox; dy = wy-oy;
+                        double angle = (dx * cross_unit_vector_left[0] + dy * cross_unit_vector_left[1]) / (hypot(dx,dy) * norm_2(cross_unit_vector_left));
+                        //phi = std::abs(hypot(dx,dy) * sin(angle));
+                        double theta_t = atan2(dy, dx) - theta;
+                        theta_norm = angles::normalize_angle(theta_t); // theta -> [-pi,+pi]
+                        phi = hypot(dx,dy) * cos(theta_norm);
+                        theta_norm = 0;
+                    }
+                    else
+                    {
+                        if(fabs(angle_to_right - theta) <= _max_angle || fabs(angle_to_left-theta) <= _max_angle)
+                        {
+                            double distTOLeft = fabs(angles::shortest_angular_distance(theta,angle_to_left));
+                            double distToRight = fabs(angles::shortest_angular_distance(theta,angle_to_right));
+                            if(distTOLeft < distToRight)
+                            {
+                                //std::cout << "\t LEFT " << std::endl;
+                                // left side
+                                theta_norm = angles::normalize_angle(angle_to_left - theta);
+                                dx = wx - left_side_origin[0];
+                                dy = wy - left_side_origin[1];
+
+                                //std::cout << "Theta norm: " << theta_norm * 180 / M_PI << std::endl;
+                            }
+                            else
+                            {
+
+                                //std::cout << "\t RIGHT " << std::endl;
+                                // right side
+                                theta_norm = angles::normalize_angle(angle_to_right - theta);
+                                dx = wx - right_side_origin[0];
+                                dy = wy - right_side_origin[1];
+                            }
+                        }
+                        phi = hypot(dx,dy);
+                        // outside
+                    }
+                    dist = d;
+#else
                     double dx = wx-ox, dy = wy-oy;
                     double theta_t = atan2(dy, dx) - theta;
-                     double theta_norm = angles::normalize_angle(theta_t); // theta -> [-pi,+pi]
-                    if(std::abs(theta_norm) < _max_angle)
+                    double theta_norm = angles::normalize_angle(theta_t); // theta -> [-pi,+pi]
+                    dist = d;
+#endif
+                    if(std::fabs(theta_norm) < _max_angle)
                     {
                         inserted_values++;
+#if USE_POSISITION_NOISE == 0
                         double phi = sqrt(dx*dx+dy*dy);
+#endif
+
 #if SENSOR_MODEL_TYPE == KERNEL_MODEL
-                        double sensor = kernel_sensor_model(d,phi,theta_norm);
+                        double sensor = kernel_sensor_model(dist,phi,theta_norm);
 #elif SENSOR_MODEL_TYPE == CONE_MODEL
-                        double sensor = gaussian_sensor_model(d,phi,theta_norm);
+#if USE_POSISITION_NOISE
+                        double sensor = gaussian_sensor_model(dist,phi,theta_norm,ray_cross_error);
+#else
+                        double sensor = gaussian_sensor_model(dist,phi,theta_norm);
+#endif
 #else
                         double sensor = 0;
 #endif
                         double log_odds = std::log(sensor / (1 - sensor));
 
-                        if(std::abs(log_odds) > FLT_MIN)
+                        //std::cout << "\t LOG ODDS: " << log_odds << std::endl;
+
+                        if(std::fabs(log_odds) > FLT_MIN)
                         {
                             if(mark_end)
                                 _map->editCell(x_t,y_t)->addMeasurement(log_odds);
-                            else if(phi < d - 2 * _sigma_r * d)
+                            else if(phi < dist - 2 * _sigma_r * dist)
                             {
                                 _map->editCell(x_t,y_t)->addMeasurement(log_odds);
                             }

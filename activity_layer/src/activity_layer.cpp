@@ -451,7 +451,7 @@ bool ActivityLayer::getClearingObservations(std::vector<Observation>& clearing_o
 int update_count = 0;
 void ActivityLayer::raytrace(const Observation& observation)
 {
-    //if(update_count++ < 6)
+    //if(update_count++ < 1)
     {
         Costmap2D* master = layered_costmap_->getCostmap();
         for(size_t i = 0; i < observation.cloud_->size();i++){
@@ -472,6 +472,7 @@ void ActivityLayer::raytrace(const Observation& observation)
                 _observation_map->_y_std_dev = _y_std_dev;
 #if SENSOR_MODEL_TYPE == LINE_MODEL
                 _observation_map->raytrace(x0,y0,x1,y1,mark_end);
+                //_observation_map->raytrace(0,0,0,4,true);
 #elif SENSOR_MODEL_TYPE == KERNEL_MODEL
                 _observation_map->raytrace(x0,y0,x1,y1,false);
                 if(mark_end)

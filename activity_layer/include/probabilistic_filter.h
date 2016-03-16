@@ -10,13 +10,13 @@
 #define KERNEL_MODEL 0
 #define CONE_MODEL 1
 #define LINE_MODEL 2
-#define SENSOR_MODEL_TYPE 2
+#define SENSOR_MODEL_TYPE 1
 
-#define USE_IDEAL_LINE_SENSOR_MODEL 0
+#define USE_IDEAL_LINE_SENSOR_MODEL 1
 
 #define USE_RANGE_AND_NOISE_DECAY 1
 
-#define USE_POSISITION_NOISE 0
+#define USE_POSISITION_NOISE 1
 
 #if SENSOR_MODEL_TYPE == KERNEL_MODEL
     #define RAY_END_BEFORE 1
@@ -68,7 +68,7 @@ private:
     // help to raytrace with a sonar model
     double delta(double phi);
     double sensor_model(double r, double phi, double theta);
-    double gaussian_sensor_model(double r, double phi, double theta);
+    double gaussian_sensor_model(double r, double phi, double theta, double cross_error = 0);
     double kernel_sensor_model(double r, double phi, double theta);
     double gamma(double theta);
     // half of field of view
