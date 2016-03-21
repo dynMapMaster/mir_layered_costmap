@@ -11,7 +11,7 @@ void Probablistic_cell::addMeasurement(double log_odds_update,bool override)
 {
     if(override)
     {
-        if(std::abs(log_odds_update) > std::abs(log_odds))
+        if(std::fabs(log_odds_update) > std::fabs(log_odds))
             log_odds = log_odds_update;
     }
     else

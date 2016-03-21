@@ -224,10 +224,12 @@ void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& raw_
         sensor_msgs::LaserScan message = *raw_message;
         ros::Time recive_time = message.header.stamp;
         double now = recive_time.toSec();
+        /*
         if( (now - prev_recive_time) > 0.1)
         {
             ROS_WARN("Time between scans: %f",now - prev_recive_time);
         }
+        */
         prev_recive_time = now;
         for (size_t i = 0; i < message.ranges.size(); i++)
         {
@@ -457,7 +459,7 @@ void ActivityLayer::raytrace(const Observation& observation)
         for(size_t i = 0; i < observation.cloud_->size();i++){
             //calculate range
             double range = sqrt(pow(observation.origin_.x - observation.cloud_->points[i].x,2)+pow(observation.origin_.y - observation.cloud_->points[i].y,2));
-            bool mark_end = (abs(range-_max_range) < 0.001 ? false : true);
+            bool mark_end = (fabs(range-_max_range) < 0.001 ? false : true);
 
             int x0,y0, x1, y1;
             master->worldToMapEnforceBounds(observation.origin_.x,observation.origin_.y,x0,y0);

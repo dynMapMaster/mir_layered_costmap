@@ -121,7 +121,7 @@ void Pmac_cell::init(double initialOccupancy, double initialFree)
      double lambda_entry = (entry + 1) / (free_count + 1); // a(1,2)
      double lambda_exit = (exit + 1) / (occupied_count + 1); // a(2,1)
 
-     return std::log(0.001*(lambda_entry/(lambda_entry+lambda_exit))) / (log(std::abs(1-lambda_exit-lambda_entry)));
+     return std::log(0.001*(lambda_entry/(lambda_entry+lambda_exit))) / (log(std::fabs(1-lambda_exit-lambda_entry)));
  }
 
  bool Pmac_cell::deserialize(const std::vector<double>& values)

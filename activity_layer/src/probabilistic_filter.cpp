@@ -7,6 +7,7 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _map = new Grid_structure<Probablistic_cell>(xDim,yDim,resolution, origin_x, origin_y);
     _laser_noise_var = laserStdDev * laserStdDev;
     _laser_noise_std_dev = laserStdDev;
+    _LOG_ODDS_FREE = _LOG_ODDS_FREE_ORG;
     // Setup sensormodel lookup table
 #if USE_IDEAL_LINE_SENSOR_MODEL > 0
     double free_log = _LOG_ODDS_FREE;
@@ -15,6 +16,14 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _sensor_model_org.push_back(0.4055);
     _sensor_model_occupancy_goal_index_org = 2;
 #else
+    // init 1,0, std_dev=1cm
+    _sensor_model_org.push_back(-12.9047000000000);
+    _sensor_model_org.push_back(-5.07541925179800);
+    _sensor_model_org.push_back(4.66682501997290);
+    _sensor_model_org.push_back(0.0124194902846168);
+    _sensor_model_org.push_back(-1.27786670134364e-13);
+    _LOG_ODDS_FREE = -12.9047000000000;
+    _sensor_model_occupancy_goal_index_org = 3;
     /* // init = 0.5, free=0.25 , occ=0.67
     _sensor_model_org.push_back(-1.09818644066980);
     _sensor_model_org.push_back(-0.811877413304292);
@@ -22,7 +31,7 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _sensor_model_org.push_back(0.206581098035374);
     _sensor_model_org.push_back(0.000318349321477128);
     _sensor_model_occupancy_goal_index_org = 2;
-    */
+
     // init = 2, free=0.4, occ=0.57
     _sensor_model_org.push_back(-0.405332476533774);
     _sensor_model_org.push_back(-0.310520726438271);
@@ -30,6 +39,26 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _sensor_model_org.push_back(0.0557912684728211);
     _sensor_model_org.push_back(7.89868804542252e-05);
     _sensor_model_occupancy_goal_index_org = 2;
+
+    // Elfes log odds 1cm, 1, 0.33
+    _LOG_ODDS_FREE = -0.708185057924486;
+   // _sensor_model_org.push_back(-0.708185057924486);
+   // _sensor_model_org.push_back(-0.708185057924486);
+   // _sensor_model_org.push_back(-0.708185057924486);
+    //_sensor_model_org.push_back(-0.699175920526121);
+    _sensor_model_org.push_back(-0.525447909912355);
+    _sensor_model_org.push_back(0.0132618727086882);
+    _sensor_model_org.push_back(0.571074458811191);
+    _sensor_model_org.push_back(0.445244292480427);
+    _sensor_model_org.push_back(0.117106084265983);
+    //_sensor_model_org.push_back(0.0117959584511817);
+    //_sensor_model_org.push_back(0.000456089356655302);
+    //_sensor_model_org.push_back(6.68140887498114e-06);
+    //_sensor_model_org.push_back(-7.59582495773146e-08);
+
+    _sensor_model_occupancy_goal_index_org = 3;
+    */
+    // TOO big a sensor model -> bresenham not hitting its end point and goes out of bounds instead!!
 #endif
 
     _max_angle = 15 * M_PI/180.0;
@@ -162,9 +191,9 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
     // calcualtions to incorporate position error
     // error in ray direction
     double rayNorm = sqrt(pow(dx,2)+pow(dy,2));
-    double ray_direction_error = std::abs(_x_std_dev * (dx / rayNorm) + _y_std_dev * (dy / rayNorm));
-    double ray_cross_error = std::abs(_x_std_dev * (-dy / rayNorm) + _y_std_dev * (dx / rayNorm));
-     _sigma_r = ray_direction_error;
+    double ray_direction_error = std::fabs(_x_std_dev * (dx / rayNorm) + _y_std_dev * (dy / rayNorm));
+    double ray_cross_error = std::fabs(_x_std_dev * (-dy / rayNorm) + _y_std_dev * (dx / rayNorm));
+    _sigma_r = ray_direction_error;
 #else
     _sigma_r = 0.025;
 #endif
@@ -213,8 +242,8 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
                 if(_map->worldToMap(wx, wy, x_t, y_t)){
                     double dx = wx-ox, dy = wy-oy;
                     double theta_t = atan2(dy, dx) - theta;
-                     double theta_norm = angles::normalize_angle(theta_t); // theta -> [-pi,+pi]
-                    if(std::abs(theta_norm) < _max_angle)
+                    double theta_norm = angles::normalize_angle(theta_t); // theta -> [-pi,+pi]
+                    if(std::fabs(theta_norm) < _max_angle)
                     {
                         inserted_values++;
                         double phi = sqrt(dx*dx+dy*dy);
@@ -227,7 +256,7 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
 #endif
                         double log_odds = std::log(sensor / (1 - sensor));
 
-                        if(std::abs(log_odds) > FLT_MIN)
+                        if(std::fabs(log_odds) > FLT_MIN)
                         {
                             if(mark_end)
                                 _map->editCell(x_t,y_t)->addMeasurement(log_odds);
@@ -263,7 +292,7 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
 }
 
 void Probabilistic_filter::raytrace(int x0, int y0, int x1, int y1, bool markEnd)
-{   
+{
     bresenham2Dv0(x0,y0,x1,y1,markEnd);
 }
 
@@ -290,7 +319,7 @@ inline double Probabilistic_filter::getRangeWeight(int x1, int y1, int ori_x, in
     const double dx = x1 - ori_x;
     const double dy = y1 - ori_y;
     const double dist = _map->resolution()*sqrt(dx*dx+dy*dy);
-    return 1-std::min(2*_angle_std_dev*dist,1.0);
+    return 1-std::min(_angle_std_dev*dist,1.0);
 #else
     return 1;
 #endif
@@ -319,11 +348,11 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
 
 #if USE_POSISITION_NOISE
     // Stretch sensor model based on ray direction uncertainty
-        // calcualtions to incorporate position error
-        // error in ray direction
-        double rayNorm = sqrt(pow(delta_x,2)+pow(delta_y,2));
-        double ray_direction_error = std::abs(_x_std_dev * (delta_x / rayNorm) + _y_std_dev * (delta_y / rayNorm));
-        double ray_cross_error = std::abs(_x_std_dev * (-delta_y / rayNorm) + _y_std_dev * (delta_x / rayNorm));
+    // calcualtions to incorporate position error
+    // error in ray direction
+    double rayNorm = sqrt(pow(delta_x,2)+pow(delta_y,2));
+    double ray_direction_error = std::abs(_x_std_dev * (delta_x / rayNorm) + _y_std_dev * (delta_y / rayNorm));
+    double ray_cross_error = std::abs(_x_std_dev * (-delta_y / rayNorm) + _y_std_dev * (delta_x / rayNorm));
     int stretchFactor = ((int)(ray_direction_error / _map->resolution()) + 0.5);
     if(ray_direction_error > 1 && USE_POSISITION_NOISE){
         _sensor_model.clear();
@@ -364,7 +393,7 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
             }
             catch(const char* s)
             {
-                ROS_ERROR("Filter marking goal error %s", s);
+                ROS_ERROR("Filter marking goal error 1 %s", s);
                 return;
             }
 
@@ -391,7 +420,15 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
                 }
 
                 // Mark Position occupied by sensor model
-                _map->editCell(x1,y1)->addMeasurement( weight*(*sensor_ite));
+                try // remove to improve performance
+                {
+                    _map->editCell(x1,y1)->addMeasurement( weight*(*sensor_ite));
+                }
+                catch(const char* s)
+                {
+                    ROS_ERROR("Filter marking goal error 2 %s", s);
+                    return;
+                }
 
                 if ((error >= 0) && (error || (ix > 0)))
                 {
@@ -406,8 +443,16 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
         }
         else
         {
-            // Mark Position clear if no obstacle at target ie max range
-            _map->editCell(x1,y1)->addMeasurement(weight*_LOG_ODDS_FREE);
+            try // remove to improve performance
+            {
+                // Mark Position clear if no obstacle at target ie max range
+                _map->editCell(x1,y1)->addMeasurement(weight*_LOG_ODDS_FREE);
+            }
+            catch(const char* s)
+            {
+                ROS_ERROR("Filter marking goal error 3 %s", s);
+                return;
+            }
         }
     }
     else
@@ -427,7 +472,7 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
             }
             catch(const char* s)
             {
-                ROS_ERROR("Filter marking goal error %s", s);
+                ROS_ERROR("Filter marking goal error 4 %s", s);
                 return;
             }
 
@@ -454,8 +499,15 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
                 }
 
                 // Mark Position occupied by sensor model
-                _map->editCell(x1,y1)->addMeasurement(weight*(*sensor_ite));
-
+                try // remove to improve performance
+                {
+                    _map->editCell(x1,y1)->addMeasurement(weight*(*sensor_ite));
+                }
+                catch(const char* s)
+                {
+                    ROS_ERROR("Filter marking goal error 5 %s", s);
+                    return;
+                }
                 if ((error >= 0) && (error || (iy > 0)))
                 {
                     error -= delta_y;
@@ -469,8 +521,16 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
         }
         else
         {
-            // Mark Position clear if no obstacle at target ie max range
-            _map->editCell(x1,y1)->addMeasurement(weight*_LOG_ODDS_FREE);
+            try // remove to improve performance
+            {
+                // Mark Position clear if no obstacle at target ie max range
+                _map->editCell(x1,y1)->addMeasurement(weight*_LOG_ODDS_FREE);
+            }
+            catch(const char* s)
+            {
+                ROS_ERROR("Filter marking goal error 6 %s", s);
+                return;
+            }
         }
     }
 }

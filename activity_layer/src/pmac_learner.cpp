@@ -165,7 +165,7 @@ void Pmac_learner::deserialize(const std::vector<std::vector<double> >& values)
     //grid = Grid_structure<Pmac_cell>(values[0][0],values[0][1],values[0][2]);
 
     // Make sure grid sizes match
-    if(grid.sizeX() != (int)values[0][0] || grid.sizeY() != (int)values[0][1] || std::abs(grid.resolution()-values[0][2]) > 0.01)
+    if(grid.sizeX() != (int)values[0][0] || grid.sizeY() != (int)values[0][1] || std::fabs(grid.resolution()-values[0][2]) > 0.01)
     {
         ROS_ERROR("LOADED MAP AND ORIGINAL DOES NOT MATCH IN SIZE OR RESOLUTION %f %f %f ",values[0][0], values[0][1],  values[0][2]);
         ROS_ERROR("CURRENT %i %i %f ",grid.sizeX(), grid.sizeY(), grid.resolution());

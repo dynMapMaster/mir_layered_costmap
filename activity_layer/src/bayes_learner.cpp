@@ -91,7 +91,7 @@ void Bayes_learner::deserialize(const std::vector<std::vector<double> >& values)
     // create gridstructure in correct size
 
     // Make sure grid sizes match
-    if(_grid.sizeX() != (int)values[0][0] || _grid.sizeY() != (int)values[0][1] || std::abs(_grid.resolution()-values[0][2]) > 0.01)
+    if(_grid.sizeX() != (int)values[0][0] || _grid.sizeY() != (int)values[0][1] || std::fabs(_grid.resolution()-values[0][2]) > 0.01)
     {
         ROS_ERROR("LOADED MAP AND ORIGINAL DOES NOT MATCH IN SIZE OR RESOLUTION %f %f %f ",values[0][0], values[0][1],  values[0][2]);
         ROS_ERROR("CURRENT %i %i %f ",_grid.sizeX(), _grid.sizeY(), _grid.resolution());
