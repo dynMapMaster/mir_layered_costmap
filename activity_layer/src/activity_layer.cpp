@@ -227,9 +227,9 @@ void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& raw_
         sensor_msgs::LaserScan message = *raw_message;
         ros::Time recive_time = message.header.stamp;
         double now = recive_time.toSec();
-        if( (now - prev_recive_time) > 0.1)
+        if( (now - prev_recive_time) > 0.11)
         {
-            //ROS_WARN("Time between scans: %f",now - prev_recive_time);
+            ROS_WARN("Time between scans: %f",now - prev_recive_time);
         }
         prev_recive_time = now;
         for (size_t i = 0; i < message.ranges.size(); i++)
@@ -454,7 +454,7 @@ int update_count = 0;
 void ActivityLayer::raytrace(const Observation& observation)
 {
 
-    //if(update_count++ < 1)
+    //if(_pose_array.poses.size() > 0 && update_count < 1)
     {
         Costmap2D* master = layered_costmap_->getCostmap();
 #if SENSOR_MODEL_TYPE == POSE_ARRAY
@@ -477,6 +477,8 @@ void ActivityLayer::raytrace(const Observation& observation)
                      _global_frame.c_str(), "base_link", ex.what());
             return;
         }
+        update_count++;
+        ROS_INFO("Updating with scan");
         tf::Transform tf_robot_to_map = tf_map_to_robot.inverse();
         // create a measurement cloud position wrt. the robot's base
         pcl::PointCloud<pcl::PointXYZ>::Ptr mesurement_cloud_in_robot_frame(new pcl::PointCloud<pcl::PointXYZ>());
@@ -690,9 +692,10 @@ void ActivityLayer::poseArrayCB(geometry_msgs::PoseArray pose)
 {
     //ROS_INFO("Pose array recived");
     std::sort(pose.poses.begin(), pose.poses.end(), weightMore());
-    int used_weights = 5;
+    int used_weights = 30;
     pose.poses.resize(used_weights);
     // normalize weights
+    /*
     double total_weight = 0;
     for (int i = 0; i < pose.poses.size(); ++i) {
         total_weight += pose.poses[i].position.z;
@@ -700,6 +703,7 @@ void ActivityLayer::poseArrayCB(geometry_msgs::PoseArray pose)
     for (int i = 0; i < pose.poses.size(); ++i) {
         pose.poses[i].position.z /= total_weight;
     }
+    */
     _pose_array = pose;
     cloud_recive_time = ros::Time::now();
 }

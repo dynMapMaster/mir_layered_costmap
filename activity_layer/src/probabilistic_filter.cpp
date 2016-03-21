@@ -10,27 +10,54 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _LOG_ODDS_FREE = _LOG_ODDS_FREE_ORG;
     // Setup sensormodel lookup table
 #if USE_IDEAL_LINE_SENSOR_MODEL > 0
-    double free_log = _LOG_ODDS_FREE;
-    _sensor_model_org.push_back(free_log);
-    _sensor_model_org.push_back(free_log);
+
     _sensor_model_org.push_back(0.4055);
-    _sensor_model_occupancy_goal_index_org = 2;
+    _sensor_model_occupancy_goal_index_org = 0;
+    /*
+    _LOG_ODDS_FREE = -0.4055;
+    _sensor_model_org.push_back(2.9444);
+
+    _LOG_ODDS_FREE = -1.383;
+    _sensor_model_org.push_back(2.9444);
+    //_sensor_model_org.push_back(4.5951);
+    _sensor_model_occupancy_goal_index_org = 0;
+    */
 #else
-    /* // init = 0.5, free=0.25 , occ=0.67
+    /*
+     // init = 0.5, free=0.25 , occ=0.67
     _sensor_model_org.push_back(-1.09818644066980);
     _sensor_model_org.push_back(-0.811877413304292);
     _sensor_model_org.push_back(0.724863718358982);
     _sensor_model_org.push_back(0.206581098035374);
     _sensor_model_org.push_back(0.000318349321477128);
     _sensor_model_occupancy_goal_index_org = 2;
-    */
+
     // init = 2, free=0.4, occ=0.57
     _sensor_model_org.push_back(-0.405332476533774);
     _sensor_model_org.push_back(-0.310520726438271);
     _sensor_model_org.push_back(0.269715849124419);
     _sensor_model_org.push_back(0.0557912684728211);
-    _sensor_model_org.push_back(7.89868804542252e-05);
+    _sensor_model_org.push_back(7.89868804542252e-05);    
+    _sensor_model_occupancy_goal_index_org = 2;    
+    // init = 0, free=0.0, occ=1.0, std_dev=0.01
+    _LOG_ODDS_FREE = -12.9047000000000;
+    _sensor_model_org.push_back(-12.9047000000000);
+    _sensor_model_org.push_back(-5.07541925179800);
+    _sensor_model_org.push_back(4.66682501997290);
+    _sensor_model_org.push_back(0.0124194902846168);
+    _sensor_model_org.push_back(-1.27786670134364e-13);
     _sensor_model_occupancy_goal_index_org = 2;
+
+    // init = 0, free=0.0, occ=1.0, std_dev=0.025
+    _LOG_ODDS_FREE = -12.9047000000000;
+    _sensor_model_org.push_back(-6.60658807167115);
+    _sensor_model_org.push_back(-1.67333410943611);
+    _sensor_model_org.push_back(1.16376948902775);
+    _sensor_model_org.push_back(0.314476661398349);
+    _sensor_model_org.push_back(0.00269807779057679);
+    _sensor_model_org.push_back(-1.14660628768383e-06);
+    _sensor_model_occupancy_goal_index_org = 2;
+    */
 #endif
 
     _max_angle = 2 * M_PI/180.0;
