@@ -169,8 +169,8 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
     // calcualtions to incorporate position error
     // error in ray direction
     double rayNorm = sqrt(pow(dx,2)+pow(dy,2));
-    double ray_direction_error = std::abs(_x_std_dev * (dx / rayNorm) + _y_std_dev * (dy / rayNorm));
-    double ray_cross_error = std::abs(_x_std_dev * (-dy / rayNorm)) + abs(_y_std_dev * (dx / rayNorm));
+    double ray_direction_error = std::fabs(_x_std_dev * (dx / rayNorm) + _y_std_dev * (dy / rayNorm));
+    double ray_cross_error = std::fabs(_x_std_dev * (-dy / rayNorm)) + fabs(_y_std_dev * (dx / rayNorm));
 
     // min for errors
     ray_cross_error = (ray_cross_error < 0.025) ? 0.025 : ray_cross_error;
@@ -272,8 +272,8 @@ void Probabilistic_filter::coneRayTrace(double ox, double oy, double tx, double 
     bx1 = std::min((int)_map->sizeX(), bx1);
     by1 = std::min((int)_map->sizeY(), by1);
     int inserted_values = 0;
-    for(int x=bx0; x<=bx1; x++){
-        for(int y=by0; y<=by1; y++){
+    for(int y=by0; y<=by1; y++){
+        for(int x=bx0; x<=bx1; x++){
             double wx, wy;
             _map->mapToWorld(x,y,wx,wy);
             //update_cell(ox, oy, theta, range, wx, wy, clear_sensor_cone);
@@ -455,8 +455,8 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
         // calcualtions to incorporate position error
         // error in ray direction
         double rayNorm = sqrt(pow(delta_x,2)+pow(delta_y,2));
-        double ray_direction_error = std::abs(_x_std_dev * (delta_x / rayNorm) + _y_std_dev * (delta_y / rayNorm));
-        double ray_cross_error = std::abs(_x_std_dev * (-delta_y / rayNorm) + _y_std_dev * (delta_x / rayNorm));
+        double ray_direction_error = std::fabs(_x_std_dev * (delta_x / rayNorm) + _y_std_dev * (delta_y / rayNorm));
+        double ray_cross_error = std::fabs(_x_std_dev * (-delta_y / rayNorm) + _y_std_dev * (delta_x / rayNorm));
     int stretchFactor = ((int)(ray_direction_error / _map->resolution()) + 0.5);
     if(ray_direction_error > 1 && USE_POSISITION_NOISE){
         _sensor_model.clear();

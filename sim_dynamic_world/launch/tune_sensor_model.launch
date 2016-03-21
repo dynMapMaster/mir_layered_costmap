@@ -10,9 +10,9 @@
 	  <remap from="/costmap/costmap/costmap" to="dynamic_map" />
   </node>
 
-	<node name="player" pkg="rosbag" type="play" args="--rate 0.05 --clock --keep-alive --start=0 $(find run_mir)/launch/bags/Test_with_pose_noise_limited.bag" output="screen">
+	<node name="player" pkg="rosbag" type="play" args="--rate 0.05 --clock --keep-alive --start=0 $(find run_mir)/launch/bags/Test_scan_short_particlecloud.bag" output="screen">
 	</node> 
-	<!-- for cone 0.09 -->
+	<!-- for cone 0.09  Test_with_pose_noise_limited -->
   <node name="occupancy_publisher" pkg="occupancy_image_publish" type="occupancy_image_publish_node" output="screen" >
 	</node>
 

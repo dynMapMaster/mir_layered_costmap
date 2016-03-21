@@ -12,7 +12,7 @@ origin_x: -2.5
 origin_y: -2.5
 publish_cost_grid: true
 update_frequency: 0.1
-publish_frequency: 0.3
+publish_frequency: 0.1
 
 footprint_padding: 0.1
 

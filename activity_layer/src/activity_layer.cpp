@@ -457,13 +457,14 @@ void ActivityLayer::raytrace(const Observation& observation)
         for(size_t i = 0; i < observation.cloud_->size();i++){
             //calculate range
             double range = sqrt(pow(observation.origin_.x - observation.cloud_->points[i].x,2)+pow(observation.origin_.y - observation.cloud_->points[i].y,2));
-            bool mark_end = (abs(range-_max_range) < 0.001 ? false : true);
+            bool mark_end = (fabs(range-_max_range) < 0.001 ? false : true);
 
             int x0,y0, x1, y1;
             master->worldToMapEnforceBounds(observation.origin_.x,observation.origin_.y,x0,y0);
             master->worldToMapEnforceBounds(observation.cloud_->points[i].x,observation.cloud_->points[i].y,x1,y1);
             try
             {
+
                 _observation_map->_angle_std_dev = _angle_std_dev;
                 if(_x_std_dev < 0 || _y_std_dev < 0) // debug
                     return;
@@ -482,6 +483,8 @@ void ActivityLayer::raytrace(const Observation& observation)
                 _observation_map->coneRayTrace(observation.origin_.x, observation.origin_.y,
                                            observation.cloud_->points[i].x, observation.cloud_->points[i].y, 1*_angle_std_dev, mark_end);
 #endif
+                //_observation_map->coneRayTrace(-2,0,1,0,30*M_PI / 180,true);
+                //return;
             }
             catch(const char* s)
             {
