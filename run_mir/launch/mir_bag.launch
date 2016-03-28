@@ -10,7 +10,7 @@
 	  <remap from="/costmap/costmap/costmap" to="dynamic_map" />
   </node>
 
-	<node name="player" pkg="rosbag" type="play" args="--rate 1 --pause --clock --skip-empty=10 --loop $(find run_mir)/launch/bags/scan1.bag $(find run_mir)/launch/bags/scan2.bag $(find run_mir)/launch/bags/scan3.bag $(find run_mir)/launch/bags/scan4.bag $(find run_mir)/launch/bags/scan5.bag $(find run_mir)/launch/bags/scan6.bag" output="screen">
+	<node name="player" pkg="rosbag" type="play" args="--rate 5 --pause --clock --skip-empty=10 $(find run_mir)/launch/bags/scan6.bag" output="screen">
 		<remap from="dynamic_map" to="bag_map" />		
 
 		<remap from="/costmap/costmap/footprint" to="/unused_footprint" /> 
