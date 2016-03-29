@@ -10,6 +10,7 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _LOG_ODDS_FREE = _LOG_ODDS_FREE_ORG;
     // Setup sensormodel lookup table
 #if USE_IDEAL_LINE_SENSOR_MODEL > 0
+    _LOG_ODDS_FREE = -0.4055;
     _sensor_model_org.push_back(0.4055);
     _sensor_model_occupancy_goal_index_org = 0;
     /*
@@ -96,7 +97,6 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     ROS_INFO("max angle: %f", _max_angle);
 
 #if USE_POSISITION_NOISE == 0
-    _LOG_ODDS_FREE = _LOG_ODDS_FREE_ORG;
     _sensor_model = _sensor_model_org;
     _sensor_model_occupancy_goal_index = _sensor_model_occupancy_goal_index_org;
 #endif
