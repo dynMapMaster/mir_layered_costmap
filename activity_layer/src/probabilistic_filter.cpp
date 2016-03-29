@@ -7,7 +7,7 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _map = new Grid_structure<Probablistic_cell>(xDim,yDim,resolution, origin_x, origin_y);
     _laser_noise_var = laserStdDev * laserStdDev;
     _laser_noise_std_dev = laserStdDev;
-    //_LOG_ODDS_FREE = _LOG_ODDS_FREE_ORG;
+    _LOG_ODDS_FREE = _LOG_ODDS_FREE_ORG;
     // Setup sensormodel lookup table
 #if USE_IDEAL_LINE_SENSOR_MODEL > 0
     ROS_INFO("Using ideal sensor model");
@@ -66,13 +66,10 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _max_angle = 2 * M_PI/180.0;
     _angle_std_dev = _max_angle;
     ROS_INFO("max angle: %f", _max_angle);
-    _sensor_model = _sensor_model_org;
-#if USE_POSISITION_NOISE > 0
-    /*
-    _LOG_ODDS_FREE = _LOG_ODDS_FREE_ORG;
 
+#if USE_POSISITION_NOISE == 0
+    _sensor_model = _sensor_model_org;
     _sensor_model_occupancy_goal_index = _sensor_model_occupancy_goal_index_org;
-    */
 #endif
     _raytrace_weight = 0;
 }
