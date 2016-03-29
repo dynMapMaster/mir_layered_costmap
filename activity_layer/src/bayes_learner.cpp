@@ -30,7 +30,7 @@ void Bayes_learner::loadUpdateBounds(int& xMin, int& xMax, int& yMin, int& yMax)
 void Bayes_learner::addObservationMap(Observation_interface* observation)
 {
     //ROS_ERROR("time since update %i",(ros::Time::now().toNSec() - update_time));
-    ros::Time t = ros::Time::now();
+    //ros::Time t = ros::Time::now();
     //if( (t.toNSec()  - update_time) > UPDATE_INTERVAL)
     {
         update_time = ros::Time::now().toNSec();
@@ -78,7 +78,7 @@ void Bayes_learner::initCell(int x, int y, Initial_values value)
         break;
     }
     */
-    _grid.editCell(x,y)->addMeasurement(0.0);
+    _grid.editCell(x,y)->addMeasurement(0.0,false);
 }
 
 void Bayes_learner::deserialize(const std::vector<std::vector<double> >& values)

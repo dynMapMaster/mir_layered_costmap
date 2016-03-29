@@ -1,7 +1,7 @@
 Background\ ColorB=0.498039
 Background\ ColorG=0.498039
 Background\ ColorR=0.498039
-Camera\ Config=75.9082 117.683 21.5517 6.27502
+Camera\ Config=13.5578 66.732 -7.23402 6.27502
 Camera\ Type=rviz::FixedOrientationOrthoViewController
 Fixed\ Frame=/map
 Image.Enabled=0
@@ -184,11 +184,10 @@ base_footprint.Enabled=1
 base_laser_link0.Enabled=1
 base_laser_link1.Enabled=1
 base_link.Enabled=1
-blue_print_map.Enabled=1
 map.Enabled=1
 odom.Enabled=1
 [Window]
-Height=744
-Width=1317
-X=1687
-Y=-324
+Height=780
+Width=1333
+X=1679
+Y=-352

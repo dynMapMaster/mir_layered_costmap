@@ -7,21 +7,24 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _map = new Grid_structure<Probablistic_cell>(xDim,yDim,resolution, origin_x, origin_y);
     _laser_noise_var = laserStdDev * laserStdDev;
     _laser_noise_std_dev = laserStdDev;
-    _LOG_ODDS_FREE = _LOG_ODDS_FREE_ORG;
+    //_LOG_ODDS_FREE = _LOG_ODDS_FREE_ORG;
     // Setup sensormodel lookup table
 #if USE_IDEAL_LINE_SENSOR_MODEL > 0
-
-    _sensor_model_org.push_back(0.4055);
-    _sensor_model_occupancy_goal_index_org = 0;
+    ROS_INFO("Using ideal sensor model");
     /*
     _LOG_ODDS_FREE = -0.4055;
-    _sensor_model_org.push_back(2.9444);
-
+    _sensor_model_org.push_back(0.4055);
+    _sensor_model_occupancy_goal_index_org = 0;
+    */
+    _LOG_ODDS_FREE = -0.2;
+    _sensor_model_org.push_back(1.7346);
+    /*
     _LOG_ODDS_FREE = -1.383;
     _sensor_model_org.push_back(2.9444);
     //_sensor_model_org.push_back(4.5951);
-    _sensor_model_occupancy_goal_index_org = 0;
     */
+    _sensor_model_occupancy_goal_index_org = 0;
+
 #else
     /*
      // init = 0.5, free=0.25 , occ=0.67
@@ -63,11 +66,13 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _max_angle = 2 * M_PI/180.0;
     _angle_std_dev = _max_angle;
     ROS_INFO("max angle: %f", _max_angle);
-
-#if USE_POSISITION_NOISE == 0
-    _LOG_ODDS_FREE = _LOG_ODDS_FREE_ORG;
     _sensor_model = _sensor_model_org;
+#if USE_POSISITION_NOISE > 0
+    /*
+    _LOG_ODDS_FREE = _LOG_ODDS_FREE_ORG;
+
     _sensor_model_occupancy_goal_index = _sensor_model_occupancy_goal_index_org;
+    */
 #endif
     _raytrace_weight = 0;
 }
@@ -320,8 +325,8 @@ inline double Probabilistic_filter::getRangeWeight(int x1, int y1, int ori_x, in
     const double dy = y1 - ori_y;
     const double dist = _map->resolution()*sqrt(dx*dx+dy*dy);
     return (1-std::min(2*_angle_std_dev*dist,1.0))*_raytrace_weight;
-#else
-    return 1*_raytrace_weight;
+#else    
+    return _raytrace_weight;
 #endif
 }
 
@@ -466,7 +471,6 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
                 x1 += ix;
             }
             // else do nothing
-
             error += delta_x;
             y1 += iy;
         }
@@ -481,7 +485,6 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
                 {
                     break;
                 }
-
                 // Mark Position occupied by sensor model
                 _map->editCell(x1,y1)->addMeasurement(weight*(*sensor_ite));
 

@@ -461,7 +461,7 @@ void ActivityLayer::raytrace(const Observation& observation)
         ros::Time raytrace_time = ros::Time::now();
         if((raytrace_time.toSec() - cloud_recive_time.toSec()) > 0.3)
         {
-            //ROS_WARN("Skipping since time since last pose array recived is too big: %f",(raytrace_time.toSec() - cloud_recive_time.toSec()));
+            ROS_WARN("Skipping since time since last pose array recived is too big: %f",(raytrace_time.toSec() - cloud_recive_time.toSec()));
             return;
         }
         // get robot base link transform
@@ -478,7 +478,6 @@ void ActivityLayer::raytrace(const Observation& observation)
             return;
         }
         update_count++;
-        ROS_INFO("Updating with scan");
         tf::Transform tf_robot_to_map = tf_map_to_robot.inverse();
         // create a measurement cloud position wrt. the robot's base
         pcl::PointCloud<pcl::PointXYZ>::Ptr mesurement_cloud_in_robot_frame(new pcl::PointCloud<pcl::PointXYZ>());
@@ -499,17 +498,12 @@ void ActivityLayer::raytrace(const Observation& observation)
             pcl_ros::transformPointCloud(*mesurement_cloud_in_robot_frame, *particle_cloud_tmp, tf_robot_to_particle);
             pcl::PointCloud<pcl::PointXYZ>::Ptr particle_cloud(new pcl::PointCloud<pcl::PointXYZ>());
             pcl_ros::transformPointCloud(*particle_cloud_tmp, *particle_cloud, tf_map_to_robot);
-            _observation_map->_raytrace_weight = _pose_array.poses[0].position.z;
+            _observation_map->_raytrace_weight = _pose_array.poses[j].position.z;
             for(size_t i = 0; i < particle_cloud->size();i++){
                 //calculate range
-                //double particle_range = sqrt(pow(tf_map_to_particle.getOrigin().x() - particle_cloud->points[i].x,2)+pow(tf_map_to_particle.getOrigin().x() - particle_cloud->points[i].y,2));
-                //double obs_range = sqrt(pow(tf_map_to_particle.getOrigin().x() - particle_cloud->points[i].x,2)+pow(tf_map_to_particle.getOrigin().x() - particle_cloud->points[i].y,2));
-                //ROS_INFO("Particle. range = %f",range);
                 double range = sqrt(pow(observation.origin_.x - observation.cloud_->points[i].x,2)+pow(observation.origin_.y - observation.cloud_->points[i].y,2));
 
-                //ROS_INFO("Obs. range = %f",range);
                 bool mark_end = (fabs(range-_max_range) < 0.001 ? false : true);
-
                 int x0,y0, x1, y1;
                 master->worldToMapEnforceBounds(observation.origin_.x,observation.origin_.y,x0,y0);
                 master->worldToMapEnforceBounds(particle_cloud->points[i].x,particle_cloud->points[i].y,x1,y1);
@@ -690,10 +684,32 @@ struct weightMore{
 
 void ActivityLayer::poseArrayCB(geometry_msgs::PoseArray pose)
 {
-    //ROS_INFO("Pose array recived");
     std::sort(pose.poses.begin(), pose.poses.end(), weightMore());
+
     int used_weights = 30;
+
+    if(used_weights > pose.poses.size())
+        used_weights = pose.poses.size();
+    /*
+
+    // use particles which describes part of probability
+    double weight_sum = 0;
+    const double described_probability = 0.191;//0.3413;//0.682;
+    int i;
+    for (i = 0; weight_sum < described_probability; ++i) {
+        weight_sum += pose.poses[i].position.z;
+    }
+    used_weights = i + 1;
+
     pose.poses.resize(used_weights);
+    //ROS_INFO("uses %i particles",used_weights);
+
+    double excluded_weight_addition = (1-weight_sum) / used_weights;
+    //compensate for excluded particles
+    for (int i = 0; i < pose.poses.size(); ++i) {
+        pose.poses[i].position.z += excluded_weight_addition;
+    }
+
     // normalize weights
     /*
     double total_weight = 0;
