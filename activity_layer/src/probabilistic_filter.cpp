@@ -349,7 +349,7 @@ inline double Probabilistic_filter::getRangeWeight(int x1, int y1, int ori_x, in
     const double dx = x1 - ori_x;
     const double dy = y1 - ori_y;
     const double dist = _map->resolution()*sqrt(dx*dx+dy*dy);
-    return 1-std::min(2*_angle_std_dev*dist,1.0);
+    return 1-std::min(2*_angle_std_dev*dist+2*(_x_std_dev+_y_std_dev),1.0); //+((_x_std_dev+_y_std_dev)/divide_factor)
 #else
     return 1;
 #endif

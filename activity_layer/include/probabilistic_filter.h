@@ -12,7 +12,7 @@
 #define LINE_MODEL 2
 #define SENSOR_MODEL_TYPE 2
 
-#define USE_IDEAL_LINE_SENSOR_MODEL 0
+#define USE_IDEAL_LINE_SENSOR_MODEL 1
 
 #define USE_RANGE_AND_NOISE_DECAY 1
 
@@ -57,7 +57,7 @@ private:
     const static double _LOG_ODDS_FREE_ORG = -0.4055;
     double _LOG_ODDS_FREE;
 #else
-    const static double _LOG_ODDS_FREE_ORG = -1.09861228866811;
+    const static double _LOG_ODDS_FREE_ORG = -12.9047000000000;
     double _LOG_ODDS_FREE;
 #endif
     int _sensor_model_occupancy_goal_index;
