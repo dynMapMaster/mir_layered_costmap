@@ -450,48 +450,35 @@ bool ActivityLayer::getClearingObservations(std::vector<Observation>& clearing_o
   return current;
 }
 
-int update_count = 0;
 void ActivityLayer::raytrace(const Observation& observation)
 {
-    //if(update_count++ < 6)
-    {
-        Costmap2D* master = layered_costmap_->getCostmap();
-        for(size_t i = 0; i < observation.cloud_->size();i++){
-            //calculate range
-            double range = sqrt(pow(observation.origin_.x - observation.cloud_->points[i].x,2)+pow(observation.origin_.y - observation.cloud_->points[i].y,2));
-            bool mark_end = (fabs(range-_max_range) < 0.001 ? false : true);
+    Costmap2D* master = layered_costmap_->getCostmap();
+    for(size_t i = 0; i < observation.cloud_->size();i++){
+        //calculate range
+        double range = sqrt(pow(observation.origin_.x - observation.cloud_->points[i].x,2)+pow(observation.origin_.y - observation.cloud_->points[i].y,2));
+        bool mark_end = (fabs(range-_max_range) < 0.001 ? false : true);
 
-            int x0,y0, x1, y1;
-            master->worldToMapEnforceBounds(observation.origin_.x,observation.origin_.y,x0,y0);
-            master->worldToMapEnforceBounds(observation.cloud_->points[i].x,observation.cloud_->points[i].y,x1,y1);
-            try
-            {
-                _observation_map->_angle_std_dev = _angle_std_dev;
-                if(_x_std_dev < 0 || _y_std_dev < 0) // debug
-                    return;
+        int x0,y0, x1, y1;
+        master->worldToMapEnforceBounds(observation.origin_.x,observation.origin_.y,x0,y0);
+        master->worldToMapEnforceBounds(observation.cloud_->points[i].x,observation.cloud_->points[i].y,x1,y1);
+        try
+        {
+            _observation_map->_angle_std_dev = _angle_std_dev;
+            if(_x_std_dev < 0 || _y_std_dev < 0)
+                return;
 
-                _observation_map->_x_std_dev = _x_std_dev;
-                _observation_map->_y_std_dev = _y_std_dev;
-#if SENSOR_MODEL_TYPE == LINE_MODEL
-                _observation_map->raytrace(x0,y0,x1,y1,mark_end);
-#elif SENSOR_MODEL_TYPE == KERNEL_MODEL
-                _observation_map->raytrace(x0,y0,x1,y1,false);
-                if(mark_end)
-                    _observation_map->coneRayTrace(observation.origin_.x, observation.origin_.y,
-                                           observation.cloud_->points[i].x, observation.cloud_->points[i].y, 1*_angle_std_dev, mark_end);
-#elif SENSOR_MODEL_TYPE == CONE_MODEL
-                _observation_map->coneRayTrace(observation.origin_.x, observation.origin_.y,
-                                           observation.cloud_->points[i].x, observation.cloud_->points[i].y, 1*_angle_std_dev, mark_end);
-#endif
-            }
-            catch(const char* s)
-            {
-                ROS_ERROR("%s",s);
-            }
-            catch(...)
-            {
-                ROS_ERROR("Raytrace unknown error");
-            }
+            _observation_map->_x_std_dev = _x_std_dev;
+            _observation_map->_y_std_dev = _y_std_dev;
+
+            _observation_map->raytrace(x0,y0,x1,y1,mark_end);
+        }
+        catch(const char* s)
+        {
+            ROS_ERROR("%s",s);
+        }
+        catch(...)
+        {
+            ROS_ERROR("Raytrace unknown error");
         }
     }
 }
