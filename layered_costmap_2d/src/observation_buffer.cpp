@@ -101,14 +101,14 @@ bool ObservationBuffer::setGlobalFrame(const std::string new_global_frame)
   return true;
 }
 
-void ObservationBuffer::bufferCloud(const sensor_msgs::PointCloud2& cloud)
+void ObservationBuffer::bufferCloud(const sensor_msgs::PointCloud2& cloud, double angle_std_dev, double x_std_dev, double y_std_dev)
 {
   try
   {
       //actually convert the PointCloud2 message into a type we can reason about
       pcl::PointCloud<pcl::PointXYZ> pcl_cloud;
       pcl::fromROSMsg(cloud, pcl_cloud);
-      bufferCloud(pcl_cloud);
+      bufferCloud(pcl_cloud,angle_std_dev,x_std_dev,y_std_dev);
   }
   catch (pcl::PCLException& ex)
   {
@@ -117,7 +117,7 @@ void ObservationBuffer::bufferCloud(const sensor_msgs::PointCloud2& cloud)
   }
 }
 
-void ObservationBuffer::bufferCloud(const pcl::PointCloud<pcl::PointXYZ>& cloud)
+void ObservationBuffer::bufferCloud(const pcl::PointCloud<pcl::PointXYZ>& cloud, double angle_std_dev, double x_std_dev, double y_std_dev)
 {
   Stamped < tf::Vector3 > global_origin;
 
@@ -137,6 +137,11 @@ void ObservationBuffer::bufferCloud(const pcl::PointCloud<pcl::PointXYZ>& cloud)
     observation_list_.front().origin_.x = global_origin.getX();
     observation_list_.front().origin_.y = global_origin.getY();
     observation_list_.front().origin_.z = global_origin.getZ();
+
+    // Added uncertainty to the buffered observations
+    observation_list_.front().angle_std_dev_ = angle_std_dev;
+    observation_list_.front().x_std_dev_ = x_std_dev;
+    observation_list_.front().y_std_dev_ = y_std_dev;
 
     // make sure to pass on the raytrace/obstacle range of the observation buffer to the observations
     observation_list_.front().raytrace_range_ = raytrace_range_;
@@ -186,7 +191,7 @@ void ObservationBuffer::bufferCloud(const pcl::PointCloud<pcl::PointXYZ>& cloud)
 }
 
 // returns a copy of the observations
-void ObservationBuffer::getObservations(vector<Observation>& observations)
+void ObservationBuffer::getObservations(vector<Observation>& observations, bool clear_buffer)
 {
   // first... let's make sure that we don't have any stale observations
   purgeStaleObservations();
@@ -197,10 +202,15 @@ void ObservationBuffer::getObservations(vector<Observation>& observations)
   {
     observations.push_back(*obs_it);
   }
+
+  // No need to keep observations forever - Martin 03/03-2016
+  if(clear_buffer)
+    observation_list_.clear();
 }
 
 void ObservationBuffer::purgeStaleObservations()
 {
+    return;
   if (!observation_list_.empty())
   {
     list<Observation>::iterator obs_it = observation_list_.begin();

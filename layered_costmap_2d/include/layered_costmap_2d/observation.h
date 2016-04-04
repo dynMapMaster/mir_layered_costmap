@@ -51,8 +51,11 @@ public:
    * @brief  Creates an empty observation
    */
   Observation() :
-    cloud_(new pcl::PointCloud<pcl::PointXYZ>()), obstacle_range_(0.0), raytrace_range_(0.0)
+      cloud_(new pcl::PointCloud<pcl::PointXYZ>()), obstacle_range_(0.0), raytrace_range_(0.0),angle_std_dev_(0.0), x_std_dev_(0.0), y_std_dev_(0.0)
   {
+      angle_std_dev_ = 0;
+      x_std_dev_ = 0;
+      y_std_dev_ = 0;
   }
 
   virtual ~Observation()
@@ -68,9 +71,10 @@ public:
    * @param raytrace_range The range out to which an observation should be able to clear via raytracing
    */
   Observation(geometry_msgs::Point& origin, pcl::PointCloud<pcl::PointXYZ> cloud,
-              double obstacle_range, double raytrace_range) :
+              double obstacle_range, double raytrace_range, double angle_std_dev = 0.0, double x_std_dev = 0.0, double y_std_dev = 0.0) :
       origin_(origin), cloud_(new pcl::PointCloud<pcl::PointXYZ>(cloud)),
-      obstacle_range_(obstacle_range), raytrace_range_(raytrace_range)
+      obstacle_range_(obstacle_range), raytrace_range_(raytrace_range),
+      angle_std_dev_(angle_std_dev), x_std_dev_(x_std_dev), y_std_dev_(y_std_dev)
   {
   }
 
@@ -80,7 +84,8 @@ public:
    */
   Observation(const Observation& obs) :
       origin_(obs.origin_), cloud_(new pcl::PointCloud<pcl::PointXYZ>(*(obs.cloud_))),
-      obstacle_range_(obs.obstacle_range_), raytrace_range_(obs.raytrace_range_)
+      obstacle_range_(obs.obstacle_range_), raytrace_range_(obs.raytrace_range_),
+      angle_std_dev_(obs.angle_std_dev_), x_std_dev_(obs.x_std_dev_), y_std_dev_(obs.y_std_dev_)
   {
   }
 
@@ -89,14 +94,16 @@ public:
    * @param cloud The point cloud of the observation
    * @param obstacle_range The range out to which an observation should be able to insert obstacles
    */
-  Observation(pcl::PointCloud<pcl::PointXYZ> cloud, double obstacle_range) :
-      cloud_(new pcl::PointCloud<pcl::PointXYZ>(cloud)), obstacle_range_(obstacle_range), raytrace_range_(0.0)
+  Observation(pcl::PointCloud<pcl::PointXYZ> cloud, double obstacle_range,  double angle_std_dev = 0.0, double x_std_dev = 0.0, double y_std_dev = 0.0) :
+      cloud_(new pcl::PointCloud<pcl::PointXYZ>(cloud)), obstacle_range_(obstacle_range), raytrace_range_(0.0),
+      angle_std_dev_(angle_std_dev), x_std_dev_(x_std_dev), y_std_dev_(y_std_dev)
   {
   }
 
   geometry_msgs::Point origin_;
   pcl::PointCloud<pcl::PointXYZ>* cloud_;
   double obstacle_range_, raytrace_range_;
+  double angle_std_dev_, x_std_dev_, y_std_dev_;
 };
 
 }  // namespace costmap_2d
