@@ -42,7 +42,7 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/GetMap.h>
 
-#include <fstream>;
+#include <fstream>
 #include <sstream>
 
 //PLUGINLIB_EXPORT_CLASS(layered_costmap_2d::ActivityLayer, layered_costmap_2d::Layer)
@@ -79,7 +79,7 @@ void ActivityLayer::onInitialize()
     string poseTopicName ="";
     nh.param("pose_topic",poseTopicName,string("amcl_pose"));
     poseIsAccurate = false;
-    poseSubscriber = g_nh.subscribe(poseTopicName, 50, &ActivityLayer::poseCB,this);
+    poseSubscriber = g_nh.subscribe(poseTopicName, 1, &ActivityLayer::poseCB,this);
 
     // Advertise asve and load services
     saveService = g_nh.advertiseService("save_dynamicMap",&ActivityLayer::saveDynamicMap,this);
@@ -97,6 +97,10 @@ void ActivityLayer::onInitialize()
     // now we need to split the topics based on whitespace which we can use a stringstream for
     std::stringstream ss(topics_string);
 
+    // start observation map timer
+    _observation_map_timer = g_nh.createTimer(ros::Duration(60,0),&ActivityLayer::callback_observation_timer,this);
+    tracer_thread_running = false;
+
     std::string source;
     while (ss >> source)
     {
@@ -109,7 +113,7 @@ void ActivityLayer::onInitialize()
 
       source_node.param("topic", topic, source);
       source_node.param("sensor_frame", sensor_frame, std::string(""));
-      source_node.param("observation_persistence", observation_keep_time, 0.0);
+      source_node.param("observation_persistence", observation_keep_time, 999.0);
       source_node.param("expected_update_rate", expected_update_rate, 0.0);
       source_node.param("data_type", data_type, std::string("LaserScan"));
       source_node.param("min_obstacle_height", min_obstacle_height, 0.0);
@@ -193,6 +197,44 @@ void ActivityLayer::onInitialize()
     matchSize();
 }
 
+void ActivityLayer::callback_observation_timer(const ros::TimerEvent&)
+{
+    if(!tracer_thread_running)
+    {
+        tracer_thread_running = true;
+        tracer_thread = std::thread(&ActivityLayer::tracer_thread_function,this);
+        tracer_thread.detach();
+    }
+    else
+    {
+        ROS_ERROR("UNABLE TO ADD OBSERVATIONS");
+    }
+}
+
+void ActivityLayer::tracer_thread_function()
+{
+    ROS_INFO("ADDING OBSERVATIONS");
+    for(size_t i = 0; i < observation_buffers_.size(); i++)
+    {
+        vector<Observation> buffer;
+
+        observation_buffers_[i]->lock();
+        observation_buffers_[i]->getObservations(buffer,true);
+        observation_buffers_[i]->unlock();
+        ROS_INFO("BUFFER SIZE: %i  --", buffer.size());
+        for(size_t o = 0; o < buffer.size(); o++)
+        {
+            raytrace(buffer[o]);
+        }
+    }
+    _map_mutex.lock();
+    _map->addObservationMap(_observation_map);
+    _map_mutex.unlock();
+    ROS_INFO("ADDING OBSERVATIONS - DONE");
+    tracer_thread_running = false;
+}
+
+
 void ActivityLayer::setupDynamicReconfigure(ros::NodeHandle& nh)
 {
 
@@ -203,12 +245,13 @@ ActivityLayer::~ActivityLayer()
 
     if (dsrv_)
         delete dsrv_;
-
+    _map_mutex.lock();
     if(_observation_map)
         delete _observation_map;
 
     if(_map)
         delete _map;
+    _map_mutex.unlock();
 
 }
 void ActivityLayer::reconfigureCB(layered_costmap_2d::ObstaclePluginConfig &config, uint32_t level)
@@ -218,9 +261,7 @@ void ActivityLayer::reconfigureCB(layered_costmap_2d::ObstaclePluginConfig &conf
 double prev_recive_time;
 void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& raw_message,
                                       const boost::shared_ptr<ObservationBuffer>& buffer)
-{    
-    //if(poseIsAccurate)
-    {        
+{          
         sensor_msgs::LaserScan message = *raw_message;
         ros::Time recive_time = message.header.stamp;
         double now = recive_time.toSec();
@@ -255,39 +296,20 @@ void ActivityLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& raw_
         }
 
         // buffer the point cloud
-        buffer->lock();
-        buffer->bufferCloud(cloud);
-        buffer->unlock();
-
-        laserScanWaitingCounter++;
-        if(laserScanWaitingCounter > 1)
+        if(_angle_std_dev < 0 || _x_std_dev < 0 || _y_std_dev < 0)
         {
-            // Waste of time -> consider running in a timer callback
-            for(size_t i = 0; i < observation_buffers_.size(); i++)
-            {
-                vector<Observation> buffer;
-                observation_buffers_[i]->lock();
-                observation_buffers_[i]->getObservations(buffer);
-                observation_buffers_[i]->unlock();
-                for(size_t o = 0; o < buffer.size(); o++)
-                {                    
-                    raytrace(buffer[o]);
-                }
-            }
-            laserScanWaitingCounter = 0;
+            ROS_ERROR("BUFFER INPUT - COV = 0");
+            return;
         }
-    }
-    /*
-    else {
-        ROS_WARN("Skipping update of dynamic map since robot pose is too inaccurate");
-    }
-    */
-    _map->addObservationMap(_observation_map);
+        buffer->lock();
+        buffer->bufferCloud(cloud,_angle_std_dev,_x_std_dev,_y_std_dev);
+        buffer->unlock();
 }
 
-void ActivityLayer::laserScanValidInfCallback(const sensor_msgs::LaserScanConstPtr& raw_message,
-                                              const boost::shared_ptr<ObservationBuffer>& buffer)
+void ActivityLayer::laserScanValidInfCallback(const sensor_msgs::LaserScanConstPtr& raw_message, const boost::shared_ptr<ObservationBuffer>& buffer)
 {
+    ROS_ERROR("INF CALLED");
+    /*
     if(poseIsAccurate)
     {
         // Filter positive infinities ("Inf"s) to max_range.
@@ -345,6 +367,7 @@ void ActivityLayer::laserScanValidInfCallback(const sensor_msgs::LaserScanConstP
     else {
         ROS_WARN("Skipping update of dynamic map since robot pose is too inaccurate");
     }
+    */
 }
 
 void ActivityLayer::pointCloudCallback(const sensor_msgs::PointCloudConstPtr& message,
@@ -362,11 +385,11 @@ void ActivityLayer::pointCloud2Callback(const sensor_msgs::PointCloud2ConstPtr& 
 void ActivityLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x,
                                           double* min_y, double* max_x, double* max_y)
 {
-    //_map->addObservationMap(_observation_map);
-
     //ROS_INFO("Updating bound from activity layer");
     int layerMinX, layerMaxX, layerMinY, layerMaxY;
+    _map_mutex.lock();
     _map->loadUpdateBounds(layerMinX, layerMaxX, layerMinY, layerMaxY);
+    _map_mutex.unlock();
     if(layerMinX < 0 || layerMaxX < 0 || layerMinY < 0 || layerMaxY < 0)
     {
 
@@ -397,7 +420,7 @@ void ActivityLayer::updateFootprint(double robot_x, double robot_y, double robot
 
 void ActivityLayer::updateCosts(layered_costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
 {
-    //ROS_INFO("Updating cost from activity layer %i, %i, %i, %i",min_i, min_j, max_i, max_j);
+    ROS_INFO("Updating cost from activity layer %i, %i, %i, %i",min_i, min_j, max_i, max_j);
     unsigned char* master_array = master_grid.getCharMap();
     unsigned char val = 0;
     unsigned int span = master_grid.getSizeInCellsX();
@@ -406,7 +429,8 @@ void ActivityLayer::updateCosts(layered_costmap_2d::Costmap2D& master_grid, int 
         //ROS_INFO("j=%i",j);
         unsigned int it = j * span + min_i;
         for (int i = min_i; i < max_i; i++)
-        {            
+        {
+            _map_mutex.lock();
             if (_map->getCellValue(i,j,val)){
                 unsigned char old_cost = master_array[it];
                 //if (old_cost == NO_INFORMATION || old_cost < val)
@@ -416,11 +440,13 @@ void ActivityLayer::updateCosts(layered_costmap_2d::Costmap2D& master_grid, int 
             {
                 master_array[it] = 96;
             }
+            _map_mutex.unlock();
             it++;
         }
     }
-
+    _map_mutex.lock();
     _map->resetEditLimits();
+    _map_mutex.unlock();
 }
 
 void ActivityLayer::addStaticObservation(layered_costmap_2d::Observation& obs, bool marking, bool clearing)
@@ -453,6 +479,7 @@ bool ActivityLayer::getClearingObservations(std::vector<Observation>& clearing_o
 void ActivityLayer::raytrace(const Observation& observation)
 {
     Costmap2D* master = layered_costmap_->getCostmap();
+    _map_mutex.lock();
     for(size_t i = 0; i < observation.cloud_->size();i++){
         //calculate range
         double range = sqrt(pow(observation.origin_.x - observation.cloud_->points[i].x,2)+pow(observation.origin_.y - observation.cloud_->points[i].y,2));
@@ -463,12 +490,14 @@ void ActivityLayer::raytrace(const Observation& observation)
         master->worldToMapEnforceBounds(observation.cloud_->points[i].x,observation.cloud_->points[i].y,x1,y1);
         try
         {
-            _observation_map->_angle_std_dev = _angle_std_dev;
-            if(_x_std_dev < 0 || _y_std_dev < 0)
+            _observation_map->_angle_std_dev = observation.angle_std_dev_;
+            if(observation.x_std_dev_ < 0.0 || observation.y_std_dev_ < 0.0)
+            {
+                ROS_ERROR("NO POSE RECEIVED - Aborting raytrace");
                 return;
-
-            _observation_map->_x_std_dev = _x_std_dev;
-            _observation_map->_y_std_dev = _y_std_dev;
+            }
+            _observation_map->_x_std_dev = observation.x_std_dev_;
+            _observation_map->_y_std_dev = observation.y_std_dev_;
 
             _observation_map->raytrace(x0,y0,x1,y1,mark_end);
         }
@@ -481,6 +510,7 @@ void ActivityLayer::raytrace(const Observation& observation)
             ROS_ERROR("Raytrace unknown error");
         }
     }
+    _map_mutex.unlock();
 }
 
 void ActivityLayer::activate()
@@ -505,11 +535,13 @@ void ActivityLayer::matchSize()
     nav_msgs::OccupancyGrid grid = requestMap();
     master->resizeMap(grid.info.width, grid.info.height, grid.info.resolution,
               grid.info.origin.position.x, grid.info.origin.position.y);
+    _map_mutex.lock();
     if(_map)
         delete _map;
     if(_observation_map)
         delete _observation_map;
     int prev_x_size = _xSize, prev_y_size = _ySize;
+
 
     _xSize = master->getSizeInCellsX();
     _ySize = master->getSizeInCellsY();
@@ -517,6 +549,7 @@ void ActivityLayer::matchSize()
     _resolution = master->getResolution();
     _observation_map = new FilterT(_xSize, _ySize, _resolution, SENSOR_STD_DEV / _resolution, master->getOriginX(), master->getOriginY());
     _map = new LearnerT(_xSize, _ySize, _resolution);
+    _map_mutex.unlock();
     // request map from mapserver
 
     // Initialize _map
@@ -526,8 +559,10 @@ void ActivityLayer::matchSize()
             for(int y = 0; y < grid.info.height; y++){
                 Costmap_interpretator::Initial_values val = determineInitialValue(grid.data[y * grid.info.width + x]);
                 u_char learned_value;
+                _map_mutex.lock();
                 if(_map->getCellValue(x,y,learned_value) == false )
                     _map->initCell(x,y,val);
+                _map_mutex.unlock();
             }
         }
     }
@@ -596,7 +631,9 @@ bool ActivityLayer::saveDynamicMap(activity_layer::saveDynaicMap::Request &req, 
     resp.success = false;
     try
     {
+        _map_mutex.lock();
         std::vector<std::vector<double> > mapSerialized = _map->serialize();
+        _map_mutex.unlock();
         // Create an output archive
         std::ofstream ofs;
         ofs.open(req.path.c_str());
@@ -649,7 +686,9 @@ bool ActivityLayer::loadDynamicMap(activity_layer::loadDynaicMap::Request &req, 
 
             loadedObject.push_back(std::vector<double>());
         }
+        _map_mutex.lock();
         _map->deserialize(loadedObject);
+        _map_mutex.unlock();
         resp.success = true;
         ROS_INFO("LOAD DYNAMIC MAP - SUCCESS");
     }

@@ -69,6 +69,9 @@
 #include "activity_layer/loadDynaicMap.h"
 #include "activity_layer/saveDynaicMap.h"
 
+#include <thread>
+#include <mutex>
+
 namespace dynamic_map
 {
 
@@ -188,9 +191,11 @@ private:
     void reconfigureCB(layered_costmap_2d::ObstaclePluginConfig &config, uint32_t level);    
     FilterT* _observation_map;
     LearnerT* _map;
+
+
     int _xSize, _ySize;
     double _resolution;
-    static const double SENSOR_STD_DEV = 0 ; //0.01; // in m
+    constexpr static double SENSOR_STD_DEV = 0 ; //0.01; // in m
     std::string _global_frame;
     double _max_range;
 
@@ -198,8 +203,8 @@ private:
     bool poseIsAccurate;
     ros::Subscriber poseSubscriber;
 
-    static const double POSE_POS_STDDEV = 0.3162; //sqrt(0.1)
-    static const double POSE_ORI_STDDEV = 0.1732; // sqrt(0.03)
+    static constexpr double POSE_POS_STDDEV = 0.3162; //sqrt(0.1)
+    static constexpr double POSE_ORI_STDDEV = 0.1732; // sqrt(0.03)
     double _angle_std_dev;
     double _x_std_dev, _y_std_dev;
     // Pose callback
@@ -220,6 +225,15 @@ private:
 
     bool saveDynamicMap(activity_layer::saveDynaicMap::Request &req, activity_layer::saveDynaicMap::Response &resp);
     bool loadDynamicMap(activity_layer::loadDynaicMap::Request &req, activity_layer::loadDynaicMap::Response &resp);
+
+    // Timer to enable timer controlled copy of observationmap to learner map
+    ros::Timer _observation_map_timer;
+    void callback_observation_timer(const ros::TimerEvent&);
+    // Thread test
+    bool tracer_thread_running;
+    std::mutex _map_mutex;
+    void tracer_thread_function();
+    std::thread tracer_thread;
 };
 
 }  // namespace layered_costmap_2d

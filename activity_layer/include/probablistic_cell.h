@@ -6,13 +6,15 @@ class Probablistic_cell
 {
 public:
     Probablistic_cell();
-    void addMeasurement(double log_odds_update, bool override=true);
+    void addMeasurement(double log_odds_update);
     double getProbForOccupied(const bool reset=true);
     void resetCell();
     bool deserialize(const std::vector<double>& values);
     std::vector<double> serialize();
 private:
     double log_odds;
+    int current_consecutive_free;
+    int max_consecutive_free;
 };
 
 #endif // PROBABLISTIC_CELL_H
