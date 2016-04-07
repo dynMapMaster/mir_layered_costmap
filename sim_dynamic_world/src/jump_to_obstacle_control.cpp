@@ -44,13 +44,21 @@ int main(int argc, char** argv)
         for (int32_t i = 0; i < my_list.size(); ++i)
         {
             ROS_ASSERT(my_list[i].getType() == XmlRpc::XmlRpcValue::TypeArray);
-            ROS_ASSERT(my_list[i].size() == 4);
+            ROS_ASSERT(my_list[i].size() == 4 || my_list[i].size() == 5);
             Waypoint waypoint;
             waypoint.pose.pose.position.x = static_cast<double>(my_list[i][0]);
             waypoint.pose.pose.position.y = static_cast<double>(my_list[i][1]);
             double yaw = M_PI/180.0 * static_cast<double>(my_list[i][2]);
             waypoint.pose.pose.orientation = tf::createQuaternionMsgFromYaw(yaw);
             waypoint.stay_time = static_cast<double>(my_list[i][3]);
+            double scale_stay_time;
+            if(my_list[i].size() == 5)
+                scale_stay_time = static_cast<double>(my_list[i][4]);
+            else
+                 scale_stay_time = 1;
+
+            waypoint.stay_time *= scale_stay_time;
+
             waypoint.pose.header.frame_id = obstacle_name;
             waypoints.push_back(waypoint);
             ROS_DEBUG("Obstacle waits at; (%f, %f, %f), for %f seconds",waypoint.pose.pose.position.x, waypoint.pose.pose.position.y, yaw, waypoint.stay_time);
