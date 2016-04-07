@@ -36,7 +36,7 @@ int main(int argc, char** argv)
     std::vector<Waypoint> waypoints;
     {
         string obstacle_name;
-        n.param<string>("name", obstacle_name, "obstacle");
+        n.param<string>("name", obstacle_name, "obstacle");        
         ROS_DEBUG("Retriving waypoints for obstacle: %s", obstacle_name.c_str());
         XmlRpc::XmlRpcValue my_list;
         n.getParam("waypoints", my_list);
@@ -44,7 +44,7 @@ int main(int argc, char** argv)
         for (int32_t i = 0; i < my_list.size(); ++i)
         {
             ROS_ASSERT(my_list[i].getType() == XmlRpc::XmlRpcValue::TypeArray);
-            ROS_ASSERT(my_list[i].size() == 4 || my_list[i].size() == 5);
+            ROS_ASSERT(my_list[i].size() == 4);
             Waypoint waypoint;
             waypoint.pose.pose.position.x = static_cast<double>(my_list[i][0]);
             waypoint.pose.pose.position.y = static_cast<double>(my_list[i][1]);
@@ -52,11 +52,7 @@ int main(int argc, char** argv)
             waypoint.pose.pose.orientation = tf::createQuaternionMsgFromYaw(yaw);
             waypoint.stay_time = static_cast<double>(my_list[i][3]);
             double scale_stay_time;
-            if(my_list[i].size() == 5)
-                scale_stay_time = static_cast<double>(my_list[i][4]);
-            else
-                 scale_stay_time = 1;
-
+            n.param<double>("scale_stay_time", scale_stay_time, 1.0);
             waypoint.stay_time *= scale_stay_time;
 
             waypoint.pose.header.frame_id = obstacle_name;
