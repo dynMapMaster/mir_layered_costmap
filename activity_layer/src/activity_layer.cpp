@@ -680,18 +680,25 @@ struct weightMore{
     {
         return p1.position.z > p2.position.z;
     }
-} ;
+};
 
 void ActivityLayer::poseArrayCB(geometry_msgs::PoseArray pose)
 {
     std::sort(pose.poses.begin(), pose.poses.end(), weightMore());
-
+/*
     int used_weights = 30;
 
     if(used_weights > pose.poses.size())
         used_weights = pose.poses.size();
-    /*
 
+    // Displayed sum of particles
+    double weight_sum = 0;
+    for (int i = 0; i < used_weights; ++i) {
+        weight_sum += pose.poses[i].position.z;
+    }
+    ROS_INFO("Used prob: %f",weight_sum);
+
+    /*
     // use particles which describes part of probability
     double weight_sum = 0;
     const double described_probability = 0.191;//0.3413;//0.682;
@@ -699,7 +706,7 @@ void ActivityLayer::poseArrayCB(geometry_msgs::PoseArray pose)
     for (i = 0; weight_sum < described_probability; ++i) {
         weight_sum += pose.poses[i].position.z;
     }
-    used_weights = i + 1;
+    //used_weights = i + 1;
 
     pose.poses.resize(used_weights);
     //ROS_INFO("uses %i particles",used_weights);
@@ -720,6 +727,7 @@ void ActivityLayer::poseArrayCB(geometry_msgs::PoseArray pose)
         pose.poses[i].position.z /= total_weight;
     }
     */
+    //pose.poses.resize(used_weights);
     _pose_array = pose;
     cloud_recive_time = ros::Time::now();
 }

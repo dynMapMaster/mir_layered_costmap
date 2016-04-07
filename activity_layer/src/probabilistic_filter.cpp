@@ -42,15 +42,14 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _sensor_model_org.push_back(0.0557912684728211);
     _sensor_model_org.push_back(7.89868804542252e-05);    
     _sensor_model_occupancy_goal_index_org = 2;    
+    */
     // init = 0, free=0.0, occ=1.0, std_dev=0.01
     _LOG_ODDS_FREE = -12.9047000000000;
-    _sensor_model_org.push_back(-12.9047000000000);
     _sensor_model_org.push_back(-5.07541925179800);
     _sensor_model_org.push_back(4.66682501997290);
     _sensor_model_org.push_back(0.0124194902846168);
-    _sensor_model_org.push_back(-1.27786670134364e-13);
-    _sensor_model_occupancy_goal_index_org = 2;
-
+    _sensor_model_occupancy_goal_index_org = 1;
+    /*
     // init = 0, free=0.0, occ=1.0, std_dev=0.025
     _LOG_ODDS_FREE = -12.9047000000000;
     _sensor_model_org.push_back(-6.60658807167115);
