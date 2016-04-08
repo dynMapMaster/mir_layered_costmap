@@ -20,13 +20,16 @@ public:
     void deserialize(const std::vector<std::vector<double> > &values);
 
     // Constants
-    static constexpr uint64_t UPDATE_INTERVAL = 5*60e9;           // Time before new observations are accepted, in nanoseconds
+    static constexpr uint64_t UPDATE_INTERVAL = 40e9;           // Time before new observations are accepted, in nanoseconds
     static constexpr double MIN_OBS_VALUE = 40;                 // Minimum sum of observations before cost is calculated
-    static constexpr unsigned char OBSTACLE_THRESHOLD = 200;    // Equal or above this is obstacles
+    static constexpr unsigned char OBSTACLE_THRESHOLD = 200;    // Equal or above this is obstacles        
+    double getPredictScore();
 private:    
     Grid_structure<Pmac_cell> grid;
     double update_time;
-    void translateOcc(unsigned char &value);
+    void translateOcc(unsigned char &value);    
+    double sse_score;
+    int scored_observations;
 };
 
 #endif // PMAC_LEARNER_H

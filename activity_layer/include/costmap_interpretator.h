@@ -14,6 +14,7 @@ public:
     virtual void loadUpdateBounds(int& xMin, int& xMax, int& yMin, int& yMax) = 0;
     virtual void addObservationMap(Observation_interface* observation) = 0;
     virtual void resetEditLimits() = 0;
+    virtual double getPredictScore() = 0;
     virtual void initCell(int x, int y, Initial_values value) = 0;
     virtual void deserialize(const std::vector<std::vector<double> >& values) = 0;
     virtual std::vector<std::vector<double> > serialize() = 0;

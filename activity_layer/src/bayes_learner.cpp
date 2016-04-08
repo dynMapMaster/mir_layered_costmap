@@ -21,6 +21,11 @@ bool Bayes_learner::getCellValue(int x, int y, unsigned char & cellValueOutput)
     return false;
 }
 
+double Bayes_learner::getPredictScore()
+{
+    return 0.0;
+}
+
 
 void Bayes_learner::loadUpdateBounds(int& xMin, int& xMax, int& yMin, int& yMax)
 {

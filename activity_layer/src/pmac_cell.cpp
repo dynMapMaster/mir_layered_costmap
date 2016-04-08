@@ -6,7 +6,7 @@
 
 Pmac_cell::Pmac_cell()
     : occupied_count(0), free_count(0), entry(0), exit(0),
-    prev_occ_prob(0.5), previous_is_occupied(false)
+      prev_occ_prob(0.5), previous_is_occupied(false), lastObservedTime(0.0)
 {
 }
 
@@ -111,7 +111,7 @@ void Pmac_cell::init(double initialOccupancy, double initialFree)
      return free_count + occupied_count;
  }
 
- double Pmac_cell::getLastObservation()
+ double Pmac_cell::getLastObservationTime()
  {
     return lastObservedTime;
  }

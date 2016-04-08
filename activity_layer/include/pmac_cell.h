@@ -11,7 +11,7 @@ public:
     double getProjectedOccupancyProbability(unsigned noOfProjections = 1);
     void init(double initialOccupancy, double initialFree);
     double observationSum();
-    double getLastObservation();
+    double getLastObservationTime();
     unsigned getMixingTime();
 
     bool deserialize(const std::vector<double> &values);

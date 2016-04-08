@@ -16,6 +16,7 @@ public:
     virtual void initCell(int x, int y, Initial_values value);
     virtual void deserialize(const std::vector<std::vector<double> >& values) ;
     virtual std::vector<std::vector<double> > serialize();
+    virtual double getPredictScore();
     static const uint64_t UPDATE_INTERVAL = 30e9;           // Time before new observations are accepted, in nanoseconds
     constexpr static double _LOG_ODDS_FREE = -5;//-11.5129354649202;
     constexpr static double _INITIAL_OCCUPIED_PORBABILITY = 0.9;

@@ -58,8 +58,6 @@ using namespace std;
 namespace dynamic_map
 {
 
-
-
 void ActivityLayer::onInitialize()
 {
     _x_std_dev = -1;
@@ -98,7 +96,7 @@ void ActivityLayer::onInitialize()
     std::stringstream ss(topics_string);
 
     // start observation map timer
-    _observation_map_timer = g_nh.createTimer(ros::Duration(60,0),&ActivityLayer::callback_observation_timer,this);
+    _observation_map_timer = g_nh.createTimer(ros::Duration(30,0),&ActivityLayer::callback_observation_timer,this);
     tracer_thread_running = false;
 
     std::string source;
@@ -218,20 +216,13 @@ void ActivityLayer::tracer_thread_function()
     do
     {
         overtime = false;
-        ROS_INFO("ADDING OBSERVATIONS");
         for(size_t i = 0; i < observation_buffers_.size(); i++)
         {
-            //vector<Observation> buffer;
             list<Observation> buffer;
 
             observation_buffers_[i]->lock();
             observation_buffers_[i]->getObservations(buffer,true);
-            observation_buffers_[i]->unlock();
-            ROS_INFO("BUFFER SIZE: %i  --", buffer.size());
-            //for(size_t o = 0; o < buffer.size(); o++)
-            //{
-            //    raytrace(buffer[o]);
-            //}
+            observation_buffers_[i]->unlock();            
             list<Observation>::iterator obs_it;
             for (obs_it = buffer.begin(); obs_it != buffer.end(); ++obs_it)
             {
@@ -242,8 +233,8 @@ void ActivityLayer::tracer_thread_function()
         _map->addObservationMap(_observation_map);
         _map_mutex.unlock();
         ROS_INFO("ADDING OBSERVATIONS - DONE");
-        tracer_thread_running = false;
     } while(overtime);
+    tracer_thread_running = false;
 }
 
 
@@ -458,7 +449,9 @@ void ActivityLayer::updateCosts(layered_costmap_2d::Costmap2D& master_grid, int 
     }
     _map_mutex.lock();
     _map->resetEditLimits();
+    double score = _map->getPredictScore();
     _map_mutex.unlock();
+    ROS_INFO("Score: %f    ", score);
 }
 
 void ActivityLayer::addStaticObservation(layered_costmap_2d::Observation& obs, bool marking, bool clearing)
