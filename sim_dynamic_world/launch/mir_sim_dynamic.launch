@@ -1,46 +1,301 @@
 <!-- -->
 <launch>
+  <arg name="speed_factor" value="5" />
 	<param name="use_sim_time" value="true" />
 
 	<include file="$(find mirCommon)/launch/mir_bringup.launch"/>
 
 	<node pkg="tf" type="static_transform_publisher" name="blue_print_link_broadcaster" args="0. 0. 0 0 0 0 map blue_print_map 20" />   
 
-	<node name="ros_map_server" pkg="map_server" type="map_server" args="$(find sim_dynamic_world)/world/navigation_simulation_with_features.yaml">
+	<!--node name="ros_map_server" pkg="map_server" type="map_server" args="$(find sim_dynamic_world)/world/navigation_simulation_with_features.yaml">
 		<remap from="/map" to="/blue_print_map" />
-	</node>
+	</node>-->
 
-  <node name="costmap" pkg="layered_costmap_2d" type="costmap_2d_node" output="screen" >
+  <!--node name="costmap" pkg="layered_costmap_2d" type="costmap_2d_node" output="screen" >
 		<rosparam file="$(find user_priority_map)/launch/sim_priority_layer.yaml" command="load" ns="costmap"/> 
 		<remap from="/costmap/costmap/costmap" to="dynamic_map" />
   </node>
 
   <node name="occupancy_publisher" pkg="occupancy_image_publish" type="occupancy_image_publish_node" >
-	</node>
+	</node-->
  
 <!-- 	<node name="occupancy_im_shower" pkg="rqt_image_view" type="rqt_image_view" /> -->
  
+<!-- Top most obstacle from map -->
   <node name="mir_jump_controller1" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
     <param name="name" value="Block 1" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
     <rosparam param="waypoints">  
       [
-        [5.0, 0.4, 0.0, 60.0],
-        [20.0, 20.0, 0.0, 30.0]
+        [-7.5, 17.0, 0.0, 6.0],
+        [7.8, 16.0, 0.0, 60.0],
+        [3.5, 16.0, 0.0, 80.0],
       ]
     </rosparam>
   </node>
 
+<!-- Second top row left obstacle from map -->
   <node name="mir_jump_controller2" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
     <param name="name" value="Block 2" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
     <rosparam param="waypoints">  
       [
-        [1.0, 0.3, 0.0, 10.0],
-        [0.0, 20.0, 0.0, 30.0]
+        [-4.0, 7.0, 0.0, 6.0],
+        [7.8, 12.5, 0.0, 60.0],
+        [6.8, 10.5, 0.0, 30.0]
       ]
     </rosparam>
   </node>
 
-  <node name="visulizer" pkg="rviz" type="rviz" args="-d $(find activity_layer)/config/sim_activity_layer.vcg"/>
+<!-- Second top row right obstacle from map -->
+  <node name="mir_jump_controller3" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 3" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.3, 0.0, 6.0],
+        [18.0, 12.5, 0.0, 30.0],
+        [18.0, 9.5, 0.0, 30.0]
+      ]
+    </rosparam>
+  </node>
+
+<!-- Left wall pallets -->
+  <node name="mir_jump_controller4" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 4" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.4, 1.6, 32.0],
+        [1.0, 5.8, 90.0, 90.0]
+      ]
+    </rosparam>
+  </node>
+
+  <node name="mir_jump_controller5" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 5" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.4, 1.6, 32.0],
+        [1.0, 8.0, 90.0, 90.0]
+      ]
+    </rosparam>
+  </node>
+
+
+  <node name="mir_jump_controller6" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 6" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.4, 1.6, 32.0],
+        [1.0, 10.4, 90.0, 90.0]
+      ]
+    </rosparam>
+  </node>
+
+
+  <node name="mir_jump_controller7" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 7" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.4, 1.6, 22.0],
+        [1.0, 12.6, 90.0, 90.0]
+      ]
+    </rosparam>
+  </node>
+
+
+  <node name="mir_jump_controller8" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 8" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-3.0, 0.3, 0.0, 12.0],
+        [1.0, 14.8, 90.0, 90.0]
+      ]
+    </rosparam>
+  </node>
+
+<!-- LEFT WALL END -->
+
+
+<!-- Second lowest on map -->
+  <node name="mir_jump_controller9" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 9" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-1.00, 0.3, 0.0, 8.0],
+        [12.0,6.5, 0.0, 30.0],
+        [12.0,4.5, 30.0, 7.0]
+      ]
+    </rosparam>
+  </node>
+
+<!-- Lowest obstacel on map -->
+  <node name="mir_jump_controller10" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 10" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.3, 0.0, 6.0],
+        [8.0, 2.9, 0.0, 40.0],
+        [10.0, 2.9, -26.0, 90.0]
+      ]
+    </rosparam>
+  </node>
+
+<!-- NEW OBSTACLES -->
+
+  <node name="mir_jump_controller11" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 11" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.3, 0.0, 60.0],
+        [17.0, 10.9, 70.0, 80.0]
+      ]
+    </rosparam>
+  </node>
+
+  <node name="mir_jump_controller12" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 12" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.3, 0.0, 90.0],
+        [8.0, 15.9, 60.0, 130.0]
+      ]
+    </rosparam>
+  </node>
+
+  <node name="mir_jump_controller13" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 13" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.3, 0.0, 45.0],
+        [5.5, 3.2, 90.0, 50.0]
+      ]
+    </rosparam>
+  </node>
+
+  <node name="mir_jump_controller14" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 14" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.3, 0.0, 60.0],
+        [12.27, 15.13, 47.0, 70.0]
+      ]
+    </rosparam>
+  </node>
+
+  <node name="mir_jump_controller15" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 15" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.3, 0.0, 80.0],
+        [3.8, 9.73, -37.0, 35.0]
+      ]
+    </rosparam>
+  </node>
+
+  <node name="mir_jump_controller16" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 16" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.3, 0.0, 50.0],
+        [17.13, 5.27, -146.0, 30.0]
+      ]
+    </rosparam>
+  </node>
+
+  <node name="mir_jump_controller17" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 17" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.3, 0.0, 30.0],
+        [5.1, 4.0, 20.0, 66.0]
+      ]
+    </rosparam>
+  </node>
+
+  <node name="mir_jump_controller18" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 18" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.3, 0.0, 25.0],
+        [15.0, 16.7, 15.0, 20.0],
+        [15.0, 19.7, 15.0, 20.0]
+      ]
+    </rosparam>
+  </node>
+
+  <node name="mir_jump_controller19" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 19" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.3, 0.0, 43.0],
+        [19.0, 14.0, 90.0, 120.0]
+      ]
+    </rosparam>
+  </node>
+
+  <node name="mir_jump_controller20" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 20" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.3, 0.0, 2.0],
+        [13.0, 9.0, 30.0, 0.5]
+      ]
+    </rosparam>
+  </node>
+
+  <node name="mir_jump_controller21" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 21" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.3, 0.0, 53.0],
+        [7.93, 1.2, 20.0, 86.0]
+      ]
+    </rosparam>
+  </node>
+
+  <node name="mir_jump_controller22" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 22" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.3, 0.0, 100.0],
+        [18.55, 7.51, 90.0, 300.0]
+      ]
+    </rosparam>
+  </node>
+
+  <node name="mir_jump_controller23" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
+    <param name="name" value="Block 23" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <rosparam param="waypoints">  
+      [
+        [-10.0, 0.3, 0.0, 50.0],
+        [10.0, 6.51, 20.0, 180.0],
+        [9.5, 6.51, -20.0, 180.0]
+      ]
+    </rosparam>
+  </node>
+
+  <!--node name="visulizer" pkg="rviz" type="rviz" args="-d $(find activity_layer)/config/sim_activity_layer.vcg"/-->
 
   <param name="robot_description" textfile="$(find mirCommon)/urdf/mir.urdf" />
 
