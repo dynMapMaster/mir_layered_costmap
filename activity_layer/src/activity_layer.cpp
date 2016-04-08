@@ -201,6 +201,7 @@ void ActivityLayer::callback_observation_timer(const ros::TimerEvent&)
 {
     if(!tracer_thread_running)
     {
+        overtime = false;
         tracer_thread_running = true;
         tracer_thread = std::thread(&ActivityLayer::tracer_thread_function,this);
         tracer_thread.detach();
@@ -208,30 +209,41 @@ void ActivityLayer::callback_observation_timer(const ros::TimerEvent&)
     else
     {
         ROS_ERROR("UNABLE TO ADD OBSERVATIONS");
+        overtime = true;
     }
 }
 
 void ActivityLayer::tracer_thread_function()
 {
-    ROS_INFO("ADDING OBSERVATIONS");
-    for(size_t i = 0; i < observation_buffers_.size(); i++)
+    do
     {
-        vector<Observation> buffer;
-
-        observation_buffers_[i]->lock();
-        observation_buffers_[i]->getObservations(buffer,true);
-        observation_buffers_[i]->unlock();
-        ROS_INFO("BUFFER SIZE: %i  --", buffer.size());
-        for(size_t o = 0; o < buffer.size(); o++)
+        overtime = false;
+        ROS_INFO("ADDING OBSERVATIONS");
+        for(size_t i = 0; i < observation_buffers_.size(); i++)
         {
-            raytrace(buffer[o]);
+            //vector<Observation> buffer;
+            list<Observation> buffer;
+
+            observation_buffers_[i]->lock();
+            observation_buffers_[i]->getObservations(buffer,true);
+            observation_buffers_[i]->unlock();
+            ROS_INFO("BUFFER SIZE: %i  --", buffer.size());
+            //for(size_t o = 0; o < buffer.size(); o++)
+            //{
+            //    raytrace(buffer[o]);
+            //}
+            list<Observation>::iterator obs_it;
+            for (obs_it = buffer.begin(); obs_it != buffer.end(); ++obs_it)
+            {
+                raytrace(*obs_it);
+            }
         }
-    }
-    _map_mutex.lock();
-    _map->addObservationMap(_observation_map);
-    _map_mutex.unlock();
-    ROS_INFO("ADDING OBSERVATIONS - DONE");
-    tracer_thread_running = false;
+        _map_mutex.lock();
+        _map->addObservationMap(_observation_map);
+        _map_mutex.unlock();
+        ROS_INFO("ADDING OBSERVATIONS - DONE");
+        tracer_thread_running = false;
+    } while(overtime);
 }
 
 

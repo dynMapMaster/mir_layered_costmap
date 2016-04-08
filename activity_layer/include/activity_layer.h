@@ -230,7 +230,7 @@ private:
     ros::Timer _observation_map_timer;
     void callback_observation_timer(const ros::TimerEvent&);
     // Thread test
-    bool tracer_thread_running;
+    bool tracer_thread_running, overtime;
     std::mutex _map_mutex;
     void tracer_thread_function();
     std::thread tracer_thread;
