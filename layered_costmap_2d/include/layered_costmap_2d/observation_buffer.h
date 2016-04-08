@@ -112,6 +112,7 @@ namespace layered_costmap_2d {
        * @param  observations The vector to be filled
        */
       void getObservations(std::vector<Observation>& observations, bool clear_buffer = false);
+      void getObservations(std::list<Observation>& observations, bool clear_buffer = false);
 
       /**
        * @brief  Check if the observation buffer is being update at its expected rate

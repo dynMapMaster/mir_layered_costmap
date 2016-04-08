@@ -208,6 +208,23 @@ void ObservationBuffer::getObservations(vector<Observation>& observations, bool 
     observation_list_.clear();
 }
 
+void ObservationBuffer::getObservations(std::list<Observation>& observations, bool clear_buffer)
+{
+  // first... let's make sure that we don't have any stale observations
+  purgeStaleObservations();
+
+  // now we'll just copy the observations for the caller
+  //list<Observation>::iterator obs_it;
+  //for (obs_it = observation_list_.begin(); obs_it != observation_list_.end(); ++obs_it)
+  //{
+  //  observations.push_back(*obs_it);
+  //}
+  observations = observation_list_;
+  // No need to keep observations forever - Martin 03/03-2016
+  if(clear_buffer)
+    observation_list_.clear();
+}
+
 void ObservationBuffer::purgeStaleObservations()
 {
     return;
