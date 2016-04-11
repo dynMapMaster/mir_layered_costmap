@@ -13,8 +13,6 @@ public:
     std::vector<double> serialize();
 private:
     double log_odds;
-    int current_consecutive_free;
-    int max_consecutive_free;
 };
 
 #endif // PROBABLISTIC_CELL_H

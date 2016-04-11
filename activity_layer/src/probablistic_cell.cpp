@@ -10,29 +10,18 @@ Probablistic_cell::Probablistic_cell()
 void Probablistic_cell::addMeasurement(double log_odds_update)
 {
         log_odds += log_odds_update;
-        if(log_odds_update < 0)
-        {
-            current_consecutive_free++;
-            if(current_consecutive_free > max_consecutive_free)
-                max_consecutive_free = current_consecutive_free;
-        }
-        else
-        {
-            current_consecutive_free = 0;
-        }
 }
 
 double Probablistic_cell::getProbForOccupied(const bool reset)
 {
+    if(log_odds == 0.0)
+        return -1;
+
     double occupied_prob = 1 - 1 / (1 + std::exp(log_odds));
 
     if(reset)
     {
-        if(max_consecutive_free > 15)
-        {
-            //ROS_ERROR("HIGHLY DYNAMIC");
-           // occupied_prob = 0;
-        }
+
         resetCell();
     }
     return occupied_prob;
@@ -41,8 +30,6 @@ double Probablistic_cell::getProbForOccupied(const bool reset)
 void Probablistic_cell::resetCell()
 {
     log_odds = 0;
-    max_consecutive_free = 0;
-    current_consecutive_free = 0;
 }
 
 bool Probablistic_cell::deserialize(const std::vector<double>& values)

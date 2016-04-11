@@ -38,6 +38,8 @@ private:
     std::vector<double> _sensor_model;
     constexpr static double _LOG_ODDS_FREE = -0.4055;
 
+    constexpr static double _RAYTRACE_INSERT_TRESHOLD = 0.00001;
+
     int _sensor_model_occupancy_goal_index;
 
     inline void bresenham2Dv0(int x1, int y1, int x2, int y2, bool markEnd = true);

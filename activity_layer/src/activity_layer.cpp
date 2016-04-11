@@ -96,7 +96,7 @@ void ActivityLayer::onInitialize()
     std::stringstream ss(topics_string);
 
     // start observation map timer
-    _observation_map_timer = g_nh.createTimer(ros::Duration(30,0),&ActivityLayer::callback_observation_timer,this);
+    _observation_map_timer = g_nh.createTimer(ros::Duration(10,0),&ActivityLayer::callback_observation_timer,this);
     tracer_thread_running = false;
 
     std::string source;
@@ -634,6 +634,9 @@ void ActivityLayer::poseCB(geometry_msgs::PoseWithCovarianceStamped pose)
 bool ActivityLayer::saveDynamicMap(activity_layer::saveDynaicMap::Request &req, activity_layer::saveDynaicMap::Response &resp)
 {
     resp.success = false;
+    _map_mutex.lock();
+    ROS_INFO("Score: %f      ",_map->getPredictScore());
+    _map_mutex.unlock();
     try
     {
         _map_mutex.lock();

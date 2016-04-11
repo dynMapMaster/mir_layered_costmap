@@ -116,7 +116,11 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
             // Mark Position clear
             try // remove to improve performance
             {
-                _map->editCell(x1,y1)->addMeasurement(weight*_LOG_ODDS_FREE);
+                double value = weight*_LOG_ODDS_FREE;
+                if(std::fabs(value) <= _RAYTRACE_INSERT_TRESHOLD)
+                    return;
+
+                _map->editCell(x1,y1)->addMeasurement(value);
             }
             catch(const char* s)
             {
@@ -149,7 +153,11 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
                 // Mark Position occupied by sensor model
                 try // remove to improve performance
                 {
-                    _map->editCell(x1,y1)->addMeasurement( weight*(*sensor_ite));
+                    double value = weight*(*sensor_ite);
+                    if(std::fabs(value) <= _RAYTRACE_INSERT_TRESHOLD)
+                        return;
+
+                    _map->editCell(x1,y1)->addMeasurement(value);
                 }
                 catch(const char* s)
                 {
@@ -195,7 +203,11 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
             // Mark Position clear
             try // remove to improve performance
             {
-                _map->editCell(x1,y1)->addMeasurement(weight*_LOG_ODDS_FREE);
+                double value = weight*_LOG_ODDS_FREE;
+                if(std::fabs(value) <= _RAYTRACE_INSERT_TRESHOLD)
+                    return;
+
+                _map->editCell(x1,y1)->addMeasurement(value);
             }
             catch(const char* s)
             {
@@ -228,7 +240,11 @@ inline void Probabilistic_filter::bresenham2Dv0(int x1, int y1, int x2, int y2, 
                 // Mark Position occupied by sensor model
                 try // remove to improve performance
                 {
-                    _map->editCell(x1,y1)->addMeasurement(weight*(*sensor_ite));
+                    double value = weight*(*sensor_ite);
+                    if(std::fabs(value) <= _RAYTRACE_INSERT_TRESHOLD)
+                        return;
+
+                    _map->editCell(x1,y1)->addMeasurement(value);
                 }
                 catch(const char* s)
                 {

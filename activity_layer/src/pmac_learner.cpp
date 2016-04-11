@@ -1,40 +1,21 @@
 #include "pmac_learner.h"
+#include "std_msgs/Float32.h"
 
 Pmac_learner::Pmac_learner(int sizeX=2, int sizeY =2, double resolution=2)
     : grid(sizeX, sizeY, resolution), sse_score(0.0), scored_observations(0)
 {
     update_time = ros::Time::now().toNSec();
+    ros::NodeHandle nh;
+    currentErrorPub = nh.advertise<std_msgs::Float32>("current_map_error",10);
 }
 
 bool Pmac_learner::getCellValue(int x, int y, unsigned char& cellValueOutput)
 {
-    Pmac_cell* cell = grid.readCell(x,y);
-    if (cell != NULL && cell->observationSum() >= MIN_OBS_VALUE)
+
+    double occ_value = getOccupancyPrabability(x,y);
+    if(occ_value >= 0)
     {
-        ros::Time currentTime = ros::Time::now();
-        // Determine number of projection steps
-        unsigned steps = (unsigned) (((currentTime.toSec() - cell->getLastObservationTime()) /((double)UPDATE_INTERVAL / 1e9) )+0.5);
-
-        if(steps == 0)
-            steps = 1;
-
-        double occupancy_prob = 0;
-        if(steps > 10 && steps > cell->getMixingTime())
-        {
-            occupancy_prob = cell->getLongTermOccupancyProb();
-        }
-        else
-        {
-            occupancy_prob = cell->getProjectedOccupancyProbability(steps);
-        }
-
-        if(occupancy_prob < 0) {
-            occupancy_prob = 0;
-        }
-        else if(occupancy_prob > 1) {
-            occupancy_prob = 1;
-        }
-        cellValueOutput = 255 * occupancy_prob;
+        cellValueOutput = 255 * occ_value;
 
         translateOcc(cellValueOutput);
 
@@ -60,6 +41,7 @@ void Pmac_learner::addObservationMap(Observation_interface* observation)
     ros::Time t = ros::Time::now();
     if( (t.toNSec()  - update_time) > UPDATE_INTERVAL)
     {
+        double current_sse, current_obs_number;
         update_time = ros::Time::now().toNSec();
         int max_x, max_y, min_y, min_x;
         observation->loadUpdateBounds( min_x,  max_x,  min_y,  max_y);
@@ -68,17 +50,25 @@ void Pmac_learner::addObservationMap(Observation_interface* observation)
             for(int y = min_y; y <= max_y ; y++){
                 for(int x = min_x; x <= max_x; x++){
                     double occupancy_prob = observation->getOccupancyPrabability(x,y);
-                    if (occupancy_prob >= 0) {
+                    if (occupancy_prob >= 0){
                         double predicted_occupancy_prob = getOccupancyPrabability(x,y);
                         Pmac_cell* cell = grid.editCell(x,y);
-                        if(predicted_occupancy_prob > 0.5 || occupancy_prob > 0.5){
+                        if((predicted_occupancy_prob > 0.5 || occupancy_prob > 0.5) && predicted_occupancy_prob >= 0){
                             sse_score += std::pow(occupancy_prob - predicted_occupancy_prob,2);
                             scored_observations++;
+                            current_sse += std::pow(occupancy_prob - predicted_occupancy_prob,2);
+                            current_obs_number++;
                         }
                         cell->addProbability(occupancy_prob,t.toSec());
                     }
                 }
             }
+        }
+        if(current_obs_number > 0 )
+        {
+            std_msgs::Float32 msg;
+            msg.data = (float)(current_sse / current_obs_number);
+            currentErrorPub.publish(msg);
         }
         observation->resetEditLimits();
     }
@@ -98,17 +88,21 @@ double Pmac_learner::getOccupancyPrabability(int x, int y)
         uint64_t time_now = ros::Time::now().toNSec();
         uint64_t time_span = time_now - prev_reading_time;
         unsigned steps = time_span / UPDATE_INTERVAL + 0.5;
+
         if(steps == 0)
             steps = 1;
 
+        ROS_INFO_THROTTLE(1,"Steps projcted: %i     ",steps);
+
         double occupancy_prob = 0;
-        if(steps > 10 && steps > cell->getMixingTime())
+
+        if(steps > 20 || (steps > 5 && steps > cell->getMixingTime()))
         {
             occupancy_prob = cell->getLongTermOccupancyProb();
         }
         else
         {
-            occupancy_prob = cell->getProjectedOccupancyProbability(steps);
+           occupancy_prob = cell->getProjectedOccupancyProbability(steps);
         }
 
         if(occupancy_prob < 0) {
@@ -133,12 +127,12 @@ void Pmac_learner::initCell(int x, int y, Initial_values value)
     switch(value)
     {
         case Free:
-            grid.editCell(x,y)->init(0,50);
+            grid.editCell(x,y)->init(0,1);
             break;
         case Unknown:
             break;
         case Obstacle:
-            grid.editCell(x,y)->init(50,0);
+            grid.editCell(x,y)->init(1,0);
             break;
         default:
             break;

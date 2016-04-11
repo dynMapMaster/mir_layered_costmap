@@ -5,13 +5,14 @@
 
 
 Pmac_cell::Pmac_cell()
-    : occupied_count(0), free_count(0), entry(0), exit(0),
-      prev_occ_prob(0.5), previous_is_occupied(false), lastObservedTime(0.0)
+    : occupied_count(1), free_count(1), entry(1), exit(1),
+      prev_occ_prob(0.5), previous_is_occupied(false), lastObservedTime(0.0), long_term_best(0)
 {
 }
 
 void Pmac_cell::addProbability(double occ_prob, double timeStamp)
 {
+    //occ_prob = occ_prob > 0.5 ? 1 : 0; // pmac -> imac
     double free_prob = (1 - occ_prob);
     bool current_is_occupied = occ_prob > 0.5;
     lastObservedTime = timeStamp;
@@ -21,6 +22,7 @@ void Pmac_cell::addProbability(double occ_prob, double timeStamp)
         if(previous_is_occupied == false)
         {
             entry += 1 - prev_occ_prob;
+            last_transition = timeStamp;
         }
     }
     else
@@ -29,6 +31,7 @@ void Pmac_cell::addProbability(double occ_prob, double timeStamp)
         if(previous_is_occupied)
         {
             exit += prev_occ_prob;
+            last_transition = timeStamp;
         }
     }
     previous_is_occupied = current_is_occupied;
@@ -88,20 +91,66 @@ double Pmac_cell::getProjectedOccupancyProbability(unsigned noOfProjections)
     return states(0,0);
 }
 
+double Pmac_cell::getTemporalPrediction(int forward_steps)
+{
+    /*
+    double lambda_entry = (entry + 1) / (free_count + 1); // a(1,2)
+    double lambda_exit = (exit + 1) / (occupied_count + 1); // a(2,1)
+
+    lambda_entry = (lambda_entry > 1 ? 1 : lambda_entry);
+    lambda_exit = (lambda_exit > 1 ? 1 : lambda_exit);
+
+    int free_time = 1.0 / (1.0- lambda_entry);
+    int occ_time = 1.0 / (1.0-lambda_exit);
+    double weight = forward_steps / (free_time+occ_time);
+    forward_steps %= (free_time+occ_time);
+    double occ_value = 0;
+    if(previous_is_occupied)
+    {
+        if(forward_steps > occ_time)
+            occ_value = 0;
+        else
+            occ_value = 1;
+    }
+    else
+    {
+        if(occupied_count > 2)
+        {
+            if(forward_steps > free_time)
+                occ_value = 1;
+            else
+                occ_value = 0;
+        }
+        else
+            occ_value = 0;
+    }
+
+    occ_value *= 1.0/weight;
+
+    return occ_value;
+    */
+    return -1;
+}
+
+double Pmac_cell::getLastTransitionTime()
+{
+    return last_transition;
+}
+
 void Pmac_cell::init(double initialOccupancy, double initialFree)
 {
     if(initialOccupancy > initialFree)
     {
-        occupied_count = initialOccupancy;
+        occupied_count += initialOccupancy;
 
         prev_occ_prob = 1;
         previous_is_occupied = true;
     }
     else
     {
-        free_count = initialFree;
+        free_count += initialFree;
 
-        prev_occ_prob = 0;
+        prev_occ_prob = 1;
         previous_is_occupied = false;
     }
 }
