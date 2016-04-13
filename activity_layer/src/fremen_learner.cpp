@@ -46,7 +46,7 @@ void Fremen_learner::addObservationMap(Observation_interface* observation)
             for(int y = min_y; y <= max_y ; y++){
                 for(int x = min_x; x <= max_x; x++){
                     double occupancy_prob = observation->getOccupancyPrabability(x,y);
-                    if (occupancy_prob >= 0){
+                    if (occupancy_prob >= 0) {
                         double predicted_occupancy_prob = getOccupancyPrabability(x,y);
                         Fremen_cell* cell = grid.editCell(x,y);
                         if((predicted_occupancy_prob > 0.5 || occupancy_prob > 0.5) && predicted_occupancy_prob >= 0){
@@ -116,7 +116,7 @@ double Fremen_learner::getOccupancyPrabability(int x, int y)
     if (cell != NULL)
     {
         double now = ros::Time::now().toSec();
-        cell->estimate(now);
+        return cell->estimate(now);
     }
     else
         return -1.0;

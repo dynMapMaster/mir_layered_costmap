@@ -1,11 +1,13 @@
 #include "fremen_cell.h"
 #include <cmath>
 #include <algorithm>
+#include <ros/ros.h>
 using namespace std;
 
 Fremen_cell::Fremen_cell()
     : components(_NUM_PERIODICITIES), gain(0.5), prev_measurement(0.5),
-      first_time(-1), last_time(-1), measurements(0), order(3), periods(_NUM_PERIODICITIES)
+      first_time(-1), last_time(-1), measurements(0), order(3), periods(_NUM_PERIODICITIES),
+      freq_elements(order)
 {
     for (int i = 0; i < periods.size(); ++i) {
         periods[i] = (_NUM_PERIODICITIES*3600)/(i+1);
@@ -24,11 +26,13 @@ Fremen_cell::~Fremen_cell()
 
 int Fremen_cell::update(unsigned char order)
 {
+    /*
     if(gain == 0.0 || measurements == 0)
     {
         //order = 0;
         return 0;
     }
+    */
     if(!components.empty())
     {
         vector<Freq_element> freq(_NUM_PERIODICITIES);
@@ -59,6 +63,7 @@ int Fremen_cell::update(unsigned char order)
             freq_elements[i].period = periods[i];
         }
     }
+    return 0;
 }
 
 double Fremen_cell::estimate(double time)
@@ -69,24 +74,28 @@ double Fremen_cell::estimate(double time)
         estimate += 2*freq_elements[i].amplitude*cos(time/freq_elements[i].period*2*M_PI-freq_elements[i].phase);
     }
 
-    estimate += (prev_measurement - estimate)*exp(-fabs(time-last_time) / 3600.0);
+    //estimate += (prev_measurement - estimate)*exp(-fabs(time-last_time) / 3600.0);
 
     if(estimate < 0.0 + _SATURATION)
         estimate = 0.0 + _SATURATION;
     else if(estimate > 1.0 - _SATURATION)
         estimate = 1.0 - _SATURATION;
-
+/*
+    if(estimate >= 0.4)
+        estimate = 1.0;
+*/
     return estimate;
 }
 
 void Fremen_cell::addProbability(double occ_prob, double time)
-{
+{    
+    if(measurements == 0) first_time = time;
     last_time = time;
     prev_measurement = occ_prob;
     double old_gain = gain;
     double new_gain = occ_prob;
-    measurements++;
-    gain = (gain*measurements+new_gain) / (measurements);
+
+    gain = (gain*measurements+new_gain) / (measurements + 1);
 
     if(old_gain > 0) {
         for(int i=0; i<_NUM_PERIODICITIES; i++)
@@ -102,8 +111,9 @@ void Fremen_cell::addProbability(double occ_prob, double time)
         components[i].real_states += occ_prob * cos(angle);
         components[i].imag_states += occ_prob * sin(angle);
         components[i].real_balance += gain * cos(angle);
-        components[i].imag_balance += gain * cos(angle);
+        components[i].imag_balance += gain * sin(angle);
     }
+    measurements++;
     //order = -1;
 }
 

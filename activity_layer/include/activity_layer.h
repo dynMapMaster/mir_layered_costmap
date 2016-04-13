@@ -74,7 +74,6 @@
 
 namespace dynamic_map
 {
-
 typedef Fremen_learner LearnerT;
 typedef Probabilistic_filter FilterT;
 
