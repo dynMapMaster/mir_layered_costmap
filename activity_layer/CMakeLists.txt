@@ -34,10 +34,14 @@ rosbuild_add_library(activity_layer
   src/probabilistic_filter.cpp
   src/pmac_learner.cpp
 	src/bayes_learner.cpp
+  src/fremen_cell.cpp
+  include/fremen_cell.h
+  src/fremen_learner.cpp
+  include/fremen_learner.h
  # src/activityMap.cpp
   #src/activityMapComponent.cpp	
 )
-include_directories(include 
+include_directories(include
   ${layered_costmap_2d}
 )
 target_link_libraries(activity_layer 

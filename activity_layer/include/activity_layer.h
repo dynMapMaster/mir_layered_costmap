@@ -65,7 +65,7 @@
 #include <pmac_learner.h>
 #include <bayes_learner.h>
 #include <probabilistic_filter.h>
-
+#include <fremen_learner.h>
 #include "activity_layer/loadDynaicMap.h"
 #include "activity_layer/saveDynaicMap.h"
 
@@ -75,7 +75,7 @@
 namespace dynamic_map
 {
 
-typedef Pmac_learner LearnerT;
+typedef Fremen_learner LearnerT;
 typedef Probabilistic_filter FilterT;
 
 class ActivityLayer : public layered_costmap_2d::Layer
