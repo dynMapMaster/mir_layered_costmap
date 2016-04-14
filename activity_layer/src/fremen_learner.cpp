@@ -95,7 +95,28 @@ void Fremen_learner::deserialize(const std::vector<std::vector<double> >& values
 
 vector<vector<double> > Fremen_learner::serialize()
 {
-
+    vector<vector<double> > result;
+    vector<double> init_vals;
+    init_vals.push_back(grid.sizeX());
+    init_vals.push_back(grid.sizeY());
+    init_vals.push_back(grid.resolution());
+    result.push_back(init_vals);
+    for(int y = 0; y < grid.sizeX();y++){
+        for(int x = 0 ; x < grid.sizeX(); x++){
+            vector<double> next_vector;
+            Fremen_cell* cell = grid.readCell(x,y);
+            if(cell != NULL)
+            {
+                result.push_back(cell->serialize());
+            }
+            else
+            {
+                next_vector.push_back(0);
+                result.push_back(next_vector);
+            }
+        }
+    }
+    return result;
 }
 
 void Fremen_learner::translateOcc(unsigned char& value)

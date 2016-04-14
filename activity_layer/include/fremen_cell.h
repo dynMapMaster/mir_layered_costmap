@@ -15,6 +15,9 @@ public:
     int evaluate_current(double time, double signal, unsigned char order, double error);
     double estimate(double time);
 
+    std::vector<double> serialize();
+    void deserialize(std::vector<double> &input);
+
     typedef struct {
         double amplitude;
         double phase;

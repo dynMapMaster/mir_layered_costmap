@@ -121,3 +121,17 @@ int Fremen_cell::evaluate_current(double time, double signal, unsigned char orde
 {
 
 }
+
+std::vector<double> Fremen_cell::serialize()
+{
+    std::vector<double> result;
+    result.push_back(gain);
+    result.push_back(measurements);
+    for(int i = 0; i < freq_elements.size();i++)
+    {
+        result.push_back(freq_elements[i].amplitude);
+        result.push_back(freq_elements[i].phase);
+        result.push_back(freq_elements[i].period);
+    }
+    return result;
+}
