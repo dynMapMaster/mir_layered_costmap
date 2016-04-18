@@ -6,12 +6,19 @@ using namespace std;
 
 Fremen_cell::Fremen_cell()
     : components(_NUM_PERIODICITIES), gain(0.5), prev_measurement(0.5),
-      first_time(-1), last_time(-1), measurements(0), order(3), periods(_NUM_PERIODICITIES),
+      first_time(-1), last_time(-1), measurements(0), order(5), periods(_NUM_PERIODICITIES),
       freq_elements(order)
 {
+    // linear spread periodicies
+    double step_size = _NUM_PERIODICITIES*30/(_NUM_PERIODICITIES+1);
     for (int i = 0; i < periods.size(); ++i) {
-        periods[i] = (_NUM_PERIODICITIES*3600)/(i+1);
+        periods[i] = step_size*(i+1);
     }
+    /*
+    for (int i = 0; i < periods.size(); ++i) {
+        periods[i] = (_NUM_PERIODICITIES*30)/(i+1);
+    }
+    */
 }
 
 bool fremenSort(Fremen_cell::Freq_element e1, Fremen_cell::Freq_element e2)
@@ -80,10 +87,11 @@ double Fremen_cell::estimate(double time)
         estimate = 0.0 + _SATURATION;
     else if(estimate > 1.0 - _SATURATION)
         estimate = 1.0 - _SATURATION;
-/*
-    if(estimate >= 0.4)
+
+    if(estimate >= 0.5)
         estimate = 1.0;
-*/
+    else
+        estimate = 0.0;
     return estimate;
 }
 
@@ -91,6 +99,12 @@ void Fremen_cell::addProbability(double occ_prob, double time)
 {    
     if(measurements == 0) first_time = time;
     last_time = time;
+    /*
+    if(occ_prob > 0.5)
+        occ_prob = 1.0;
+    else if(occ_prob < 0.5)
+        occ_prob = 0.0;
+        */
     prev_measurement = occ_prob;
     double old_gain = gain;
     double new_gain = occ_prob;

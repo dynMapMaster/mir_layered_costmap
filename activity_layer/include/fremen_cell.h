@@ -32,7 +32,7 @@ public:
     } Spectral_component;
 private:
     constexpr static unsigned _NUM_PERIODICITIES = 24;
-    constexpr static double _SATURATION = 0.0;
+    constexpr static double _SATURATION = 0.05; // minimum uncertainty when predicting
     constexpr static double _AMPLITUDE_THRESHOLD = 0.0;
 
     std::vector<double> periods;

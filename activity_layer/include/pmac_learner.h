@@ -32,6 +32,7 @@ private:
     int scored_observations;
 
     ros::Publisher currentErrorPub;
+    ros::Publisher lambda_entry_pub, lambda_exit_pub;
 };
 
 #endif // PMAC_LEARNER_H

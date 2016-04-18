@@ -28,14 +28,14 @@ bool Fremen_learner::getCellValue(int x, int y, unsigned char & cellValueOutput)
 
 void Fremen_learner::loadUpdateBounds(int& xMin, int& xMax, int& yMin, int& yMax)
 {
-
+    grid.loadUpdateBounds(xMin,xMax,yMin,yMax);
 }
 
 void Fremen_learner::addObservationMap(Observation_interface* observation)
 {
     //ROS_ERROR("time since update %i",(ros::Time::now().toNSec() - update_time));
     ros::Time t = ros::Time::now();
-    if( (t.toNSec()  - update_time) > UPDATE_INTERVAL)
+    //if( (t.toNSec()  - update_time) > UPDATE_INTERVAL)
     {
         double current_sse, current_obs_number;
         update_time = ros::Time::now().toNSec();
@@ -52,9 +52,23 @@ void Fremen_learner::addObservationMap(Observation_interface* observation)
                         if((predicted_occupancy_prob > 0.5 || occupancy_prob > 0.5) && predicted_occupancy_prob >= 0){
                             sse_score += std::pow(occupancy_prob - predicted_occupancy_prob,2);
                             scored_observations++;
-                            current_sse += std::pow(occupancy_prob - predicted_occupancy_prob,2);
+                            if(occupancy_prob >= 0.5)
+                                occupancy_prob = 1.0;
+                            else
+                                occupancy_prob = 0.0;
+                            current_sse += std::abs(occupancy_prob - predicted_occupancy_prob);
+                            //current_sse += std::pow(occupancy_prob - predicted_occupancy_prob,2);
                             current_obs_number++;
                         }
+                        /*
+                        if(x == 159 && y == 200)
+                        {
+                            //ROS_INFO("occ.: %f", occupancy_prob);
+                            std_msgs::Float32 msg;
+                            msg.data = (float)(occupancy_prob);
+                            currentErrorPub.publish(msg);
+                        }
+                        */
                         cell->addProbability(occupancy_prob,t.toSec());
                     }
                 }

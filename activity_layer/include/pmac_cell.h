@@ -1,7 +1,6 @@
 #ifndef PMAC_CELL_H
 #define PMAC_CELL_H
 #include <vector>
-
 class Pmac_cell
 {
 public:
@@ -20,7 +19,8 @@ public:
     std::vector<double> serialize();
 
     int long_term_best;
-
+    double getLambdaExit();
+    double getLambdaEntry();
 private:
     static constexpr int NO_INTIAL_UPDATES = 100;
     static constexpr int MAX_NO_OF_OBS = 500;

@@ -7,6 +7,8 @@ Pmac_learner::Pmac_learner(int sizeX=2, int sizeY =2, double resolution=2)
     update_time = ros::Time::now().toNSec();
     ros::NodeHandle nh;
     currentErrorPub = nh.advertise<std_msgs::Float32>("current_map_error",10);
+    lambda_entry_pub = nh.advertise<std_msgs::Float32>("lambda_entry",10);
+    lambda_exit_pub = nh.advertise<std_msgs::Float32>("lambda_exit",10);
 }
 
 bool Pmac_learner::getCellValue(int x, int y, unsigned char& cellValueOutput)
@@ -39,7 +41,7 @@ void Pmac_learner::addObservationMap(Observation_interface* observation)
 {
     //ROS_ERROR("time since update %i",(ros::Time::now().toNSec() - update_time));
     ros::Time t = ros::Time::now();
-    if( (t.toNSec()  - update_time) > UPDATE_INTERVAL)
+    //if( (t.toNSec()  - update_time) > UPDATE_INTERVAL)
     {
         double current_sse, current_obs_number;
         update_time = ros::Time::now().toNSec();
@@ -60,10 +62,21 @@ void Pmac_learner::addObservationMap(Observation_interface* observation)
                             current_obs_number++;
                         }
                         cell->addProbability(occupancy_prob,t.toSec());
+                        /*
+                        if(x == 159 && y == 200)
+                        {
+                            std_msgs::Float32 msg;
+                            msg.data = cell->getLambdaEntry();
+                            lambda_entry_pub.publish(msg);
+                            msg.data = cell->getLambdaExit();
+                            lambda_exit_pub.publish(msg);
+                        }
+                        */
                     }
                 }
             }
         }
+
         if(current_obs_number > 0 )
         {
             std_msgs::Float32 msg;
@@ -93,7 +106,9 @@ double Pmac_learner::getOccupancyPrabability(int x, int y)
             steps = 1;
 
         ROS_INFO_THROTTLE(1,"Steps projcted: %i     ",steps);
-
+        steps = 1;
+        double occupancy_prob = cell->getProjectedOccupancyProbability(steps);
+        /*
         double occupancy_prob = 0;
 
         if(steps > 20 || (steps > 5 && steps > cell->getMixingTime()))
@@ -111,6 +126,7 @@ double Pmac_learner::getOccupancyPrabability(int x, int y)
         else if(occupancy_prob > 1) {
             occupancy_prob = 1;
         }
+        */
         return occupancy_prob;
     }
     else

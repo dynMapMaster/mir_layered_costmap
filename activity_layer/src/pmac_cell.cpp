@@ -2,26 +2,42 @@
 
 #include "boost/numeric/ublas/matrix.hpp"
 #include <cmath>
+#include <float.h>
 
 
 Pmac_cell::Pmac_cell()
-    : occupied_count(1), free_count(1), entry(1), exit(1),
+    : occupied_count(DBL_MIN), free_count(DBL_MIN), entry(DBL_MIN), exit(DBL_MIN),
       prev_occ_prob(0.5), previous_is_occupied(false), lastObservedTime(0.0), long_term_best(0)
 {
 }
 
 void Pmac_cell::addProbability(double occ_prob, double timeStamp)
 {
-    //occ_prob = occ_prob > 0.5 ? 1 : 0; // pmac -> imac
     double free_prob = (1 - occ_prob);
-    bool current_is_occupied = occ_prob > 0.5;
     lastObservedTime = timeStamp;
+    occupied_count += occ_prob;
+    free_count += free_prob;
+    double event_counter = occ_prob - prev_occ_prob;
+    if(event_counter > 0)
+    {
+        entry += event_counter;
+    }
+    else
+    {
+        exit += -event_counter;
+    }
+    prev_occ_prob = occ_prob;
+
+    /*
+    bool current_is_occupied = occ_prob > 0.5;
+    occ_prob = occ_prob > 0.5 ? 1 : 0; // pmac -> imac
+    double free_prob = (1 - occ_prob);
     if(current_is_occupied)
     {
         occupied_count += occ_prob;
         if(previous_is_occupied == false)
         {
-            entry += 1 - prev_occ_prob;
+            entry += (1 - prev_occ_prob);
             last_transition = timeStamp;
         }
     }
@@ -36,6 +52,7 @@ void Pmac_cell::addProbability(double occ_prob, double timeStamp)
     }
     previous_is_occupied = current_is_occupied;
     prev_occ_prob = occ_prob;
+    /*
     // recency weightning
     if(current_is_occupied)
     {
@@ -61,6 +78,17 @@ void Pmac_cell::addProbability(double occ_prob, double timeStamp)
         occupied_count = 1 + (occupied_count-1) * FORGET_FACTOR;
         entry = 1 + (entry-1) * FORGET_FACTOR;
     }
+    */
+}
+
+double Pmac_cell::getLambdaExit()
+{
+    return (exit + 1) / (occupied_count + 1); // a(2,1)
+}
+
+double Pmac_cell::getLambdaEntry()
+{
+    return (entry + 1) / (free_count + 1); // a(1,2)
 }
 
 double Pmac_cell::getLongTermOccupancyProb()
@@ -82,8 +110,8 @@ double Pmac_cell::getProjectedOccupancyProbability(unsigned noOfProjections)
     marchovM(1,1) = 1 - lambda_entry;
 
     boost::numeric::ublas::matrix<double> states(1,2);
-    states(0,0) = prev_occ_prob;
-    states(0,1) = 1 - prev_occ_prob;
+    states(0,0) = 0.5;//prev_occ_prob;
+    states(0,1) = 0.5;//1 - prev_occ_prob;
 
     for(unsigned i = 0; i < noOfProjections; i++){
         states = boost::numeric::ublas::prod(states, marchovM);
@@ -141,16 +169,16 @@ void Pmac_cell::init(double initialOccupancy, double initialFree)
 {
     if(initialOccupancy > initialFree)
     {
-        occupied_count += initialOccupancy;
-
+        //occupied_count += initialOccupancy;
+        occupied_count = 1;
         prev_occ_prob = 1;
         previous_is_occupied = true;
     }
     else
     {
-        free_count += initialFree;
-
-        prev_occ_prob = 1;
+        //free_count += initialFree;
+        free_count = 1;
+        prev_occ_prob = 0;
         previous_is_occupied = false;
     }
 }

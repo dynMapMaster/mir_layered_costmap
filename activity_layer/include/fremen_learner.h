@@ -21,7 +21,7 @@ public:
     virtual std::vector<std::vector<double> > serialize();
 
 private:
-    static constexpr uint64_t UPDATE_INTERVAL = 20e9;
+    static constexpr uint64_t UPDATE_INTERVAL = 0e9;
     static constexpr double MIN_OBS_VALUE = 1; // Minimum sum of observations before cost is calculated
     static constexpr unsigned char OBSTACLE_THRESHOLD = 200;
     ros::Publisher currentErrorPub;
