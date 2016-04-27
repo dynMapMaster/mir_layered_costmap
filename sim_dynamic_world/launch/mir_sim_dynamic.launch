@@ -21,6 +21,22 @@
  
 <!-- 	<node name="occupancy_im_shower" pkg="rqt_image_view" type="rqt_image_view" /> -->
  
+<!-- MARKOV OBSTACLE -->
+  <node name="mir_markov_controller1" pkg="sim_dynamic_world" type="markov_obstacle_control" output="screen">
+    <param name="name" value="Smallblock 1" />
+    <param name="scale_stay_time" value="$(arg speed_factor)"/>
+    <param name="lambda_exit" value="0.8"/>
+    <param name="lambda_entry" value="0.4"/>
+    <param name="markov_time" value="6.0"/>
+    <rosparam param="waypoints">
+      [
+        [9.0, 11.0, 0.0],
+        [-7.8, -16.0, 0.0],
+      ]
+    </rosparam>
+  </node>
+
+
 <!-- Top most obstacle from map -->
   <node name="mir_jump_controller1" pkg="sim_dynamic_world" type="jump_to_control" output="screen">
     <param name="name" value="Block 1" />
