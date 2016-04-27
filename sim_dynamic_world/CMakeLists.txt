@@ -41,3 +41,6 @@ target_link_libraries(dynamic_obsacle_control ${LOG4CXX_LIBRARY})
 rosbuild_add_executable(jump_to_control src/jump_to_obstacle_control.cpp)
 target_link_libraries(jump_to_control ${LOG4CXX_LIBRARY})
 
+rosbuild_add_executable(markov_obstacle_control src/markov_obstacle_control.cpp)
+target_link_libraries(markov_obstacle_control ${LOG4CXX_LIBRARY})
+
