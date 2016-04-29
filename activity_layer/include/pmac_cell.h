@@ -18,7 +18,6 @@ public:
     bool deserialize(const std::vector<double> &values);
     std::vector<double> serialize();
 
-    int long_term_best;
     double getLambdaExit();
     double getLambdaEntry();
 private:
@@ -28,9 +27,10 @@ private:
     double occupied_count, free_count;
     double entry, exit;
     double prev_occ_prob;
-    bool previous_is_occupied;
     double lastObservedTime;
     double last_transition;
+    double last_exit_residue, last_entry_residue;
+    unsigned last_exit_cnt, last_entry_cnt;
 };
 
 #endif // PMAC_CELL_H

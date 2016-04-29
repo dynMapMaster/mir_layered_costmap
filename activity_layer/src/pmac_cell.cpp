@@ -7,24 +7,60 @@
 
 Pmac_cell::Pmac_cell()
     : occupied_count(DBL_MIN), free_count(DBL_MIN), entry(DBL_MIN), exit(DBL_MIN),
-      prev_occ_prob(0.5), previous_is_occupied(false), lastObservedTime(0.0), long_term_best(0)
+      prev_occ_prob(0.5), lastObservedTime(0.0)
 {
 }
 
 void Pmac_cell::addProbability(double occ_prob, double timeStamp)
 {
-    double free_prob = (1 - occ_prob);
     lastObservedTime = timeStamp;
-    occupied_count += occ_prob;
-    free_count += free_prob;
-    double event_counter = occ_prob - prev_occ_prob;
-    if(event_counter > 0)
+
+    if(occ_prob > 0.5)
     {
-        entry += event_counter;
+        double occupied_prob = (occ_prob - 0.5) * 2;
+        occupied_count += occupied_prob;
+        // occ state
+        if(prev_occ_prob <= 0.5)
+        {
+            last_exit_residue = 0;
+            last_exit_cnt = 0;
+            last_entry_residue /= last_entry_cnt;
+            last_transition = timeStamp;
+        }
+
+        // start counting the exit max up
+        last_exit_residue += occupied_prob;
+
+        // increment entry event
+        if(last_entry_residue > 0.0)
+        {
+            double next_entry_cnt = std::min(occupied_prob,last_entry_residue);
+            entry += next_entry_cnt;
+            last_entry_residue -= next_entry_cnt;
+        }
+
     }
     else
     {
-        exit += -event_counter;
+         double free_prob = (0.5 - occ_prob) * 2;
+        free_count += free_prob;
+
+        if(prev_occ_prob > 0.5)
+        {
+            last_entry_residue = 0;
+            last_entry_cnt = 0;
+            last_exit_residue /= last_exit_cnt;
+            last_transition = timeStamp;
+        }
+
+        last_entry_residue += free_prob;
+
+        if(last_exit_residue > 0.0)
+        {
+            double next_exit_cnt = std::min(free_prob,last_exit_residue);
+            exit += next_exit_cnt;
+            last_exit_residue -= next_exit_cnt;
+        }
     }
     prev_occ_prob = occ_prob;
 
@@ -172,14 +208,12 @@ void Pmac_cell::init(double initialOccupancy, double initialFree)
         //occupied_count += initialOccupancy;
         occupied_count = 1;
         prev_occ_prob = 1;
-        previous_is_occupied = true;
     }
     else
     {
         //free_count += initialFree;
         free_count = 1;
         prev_occ_prob = 0;
-        previous_is_occupied = false;
     }
 }
 
@@ -211,7 +245,6 @@ void Pmac_cell::init(double initialOccupancy, double initialFree)
          entry = values[2];
          exit = values[3];
          prev_occ_prob = values[4];
-         previous_is_occupied = (prev_occ_prob > 0.5) ? true : false;
          lastObservedTime = 0;
          returnVal = true;
      }
