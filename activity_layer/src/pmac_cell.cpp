@@ -7,7 +7,9 @@
 
 Pmac_cell::Pmac_cell()
     : occupied_count(DBL_MIN), free_count(DBL_MIN), entry(DBL_MIN), exit(DBL_MIN),
-      prev_occ_prob(0.5), lastObservedTime(0.0)
+      prev_occ_prob(0.5), lastObservedTime(0.0), last_exit_cnt(DBL_MIN), last_entry_cnt(DBL_MIN),
+      old_entry_cnt(DBL_MIN), old_exit_cnt(DBL_MIN), last_entry_residue(0.0), last_exit_residue(0.0),
+      old_exit_residue(0.0), old_entry_residue(0.0)
 {
 }
 
@@ -24,12 +26,26 @@ void Pmac_cell::addProbability(double occ_prob, double timeStamp)
         {
             last_exit_residue = 0;
             last_exit_cnt = 0;
-            last_entry_residue /= last_entry_cnt;
+            double old_entry_residue_avg = old_entry_residue / old_entry_cnt;
+            double current_entry_residue_avg = last_entry_residue / last_entry_cnt;
+
+            if(current_entry_residue_avg > old_entry_residue_avg)
+            {
+                last_entry_residue = current_entry_residue_avg;
+                old_entry_residue = 0.0;
+                old_entry_cnt = 0.0;
+            }
+            else {
+                last_entry_residue = old_entry_residue_avg;
+            }
             last_transition = timeStamp;
         }
 
         // start counting the exit max up
         last_exit_residue += occupied_prob;
+        ++last_exit_cnt;
+        old_exit_residue += occupied_prob;
+        ++old_exit_cnt;
 
         // increment entry event
         if(last_entry_residue > 0.0)
@@ -37,29 +53,42 @@ void Pmac_cell::addProbability(double occ_prob, double timeStamp)
             double next_entry_cnt = std::min(occupied_prob,last_entry_residue);
             entry += next_entry_cnt;
             last_entry_residue -= next_entry_cnt;
+            old_entry_residue -= next_entry_cnt;
         }
-
     }
     else
     {
-         double free_prob = (0.5 - occ_prob) * 2;
+        double free_prob = (0.5 - occ_prob) * 2;
         free_count += free_prob;
 
         if(prev_occ_prob > 0.5)
         {
             last_entry_residue = 0;
             last_entry_cnt = 0;
-            last_exit_residue /= last_exit_cnt;
+            double old_exit_residue_avg = old_exit_residue / old_exit_cnt;
+            double current_exit_residue_avg = last_exit_residue / last_exit_cnt;
+
+            if(current_exit_residue_avg > old_exit_residue_avg)
+            {
+                last_exit_residue = current_exit_residue_avg;
+                old_exit_residue = 0.0;
+                old_exit_cnt = 0.0;
+            }
+            else {
+                last_exit_residue = old_exit_residue_avg;
+            }
             last_transition = timeStamp;
         }
-
         last_entry_residue += free_prob;
-
+        ++last_entry_cnt;
+        old_entry_residue += free_prob;
+        ++old_entry_cnt;
         if(last_exit_residue > 0.0)
         {
             double next_exit_cnt = std::min(free_prob,last_exit_residue);
             exit += next_exit_cnt;
             last_exit_residue -= next_exit_cnt;
+            old_exit_residue -= next_exit_cnt;
         }
     }
     prev_occ_prob = occ_prob;

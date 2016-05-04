@@ -31,6 +31,8 @@ private:
     double last_transition;
     double last_exit_residue, last_entry_residue;
     unsigned last_exit_cnt, last_entry_cnt;
+    double old_exit_residue, old_entry_residue;
+    unsigned old_exit_cnt, old_entry_cnt;
 };
 
 #endif // PMAC_CELL_H
