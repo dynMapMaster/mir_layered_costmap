@@ -9,7 +9,7 @@ Pmac_cell::Pmac_cell()
     : occupied_count(DBL_MIN), free_count(DBL_MIN), entry(DBL_MIN), exit(DBL_MIN),
       prev_occ_prob(0.5), lastObservedTime(0.0), last_exit_cnt(DBL_MIN), last_entry_cnt(DBL_MIN),
       old_entry_cnt(DBL_MIN), old_exit_cnt(DBL_MIN), last_entry_residue(0.0), last_exit_residue(0.0),
-      old_exit_residue(0.0), old_entry_residue(0.0)
+      old_exit_residue(0.0), old_entry_residue(0.0), estimated_occupancy_prob(0.5)
 {
 }
 
@@ -144,29 +144,40 @@ void Pmac_cell::addProbability(double occ_prob, double timeStamp)
         entry = 1 + (entry-1) * FORGET_FACTOR;
     }
     */
+
+    // Update estimated occupancy probability
+
+    //correct
+    estimated_occupancy_prob += 2*std::abs(occ_prob - 0.5)*(occ_prob - estimated_occupancy_prob);
 }
 
 double Pmac_cell::getLambdaExit()
 {
-    return (exit + 1) / (occupied_count + 1); // a(2,1)
+    return exit / occupied_count; // a(2,1)
 }
 
 double Pmac_cell::getLambdaEntry()
 {
-    return (entry + 1) / (free_count + 1); // a(1,2)
+    return entry / free_count; // a(1,2)
 }
 
 double Pmac_cell::getLongTermOccupancyProb()
 {
-    double lambda_entry = (entry + 1) / (free_count + 1); // a(1,2)
-    double lambda_exit = (exit + 1) / (occupied_count + 1); // a(2,1)
+    double lambda_entry = entry / free_count; // a(1,2)
+    double lambda_exit = exit / occupied_count; // a(2,1)
     return 1.0 / (lambda_exit + lambda_entry) * lambda_entry;
 }
 
 double Pmac_cell::getProjectedOccupancyProbability(unsigned noOfProjections)
 {
-    double lambda_entry = (entry + 1) / (free_count + 1); // a(1,2)
-    double lambda_exit = (exit + 1) / (occupied_count + 1); // a(2,1)
+    //predict
+
+    double lambda_entry = entry / free_count; // a(1,2)
+    double lambda_exit = exit / occupied_count; // a(2,1)
+    for (int i = 0; i < noOfProjections; ++i) {
+        estimated_occupancy_prob *= ((1-lambda_exit) + lambda_entry);
+    }
+    return estimated_occupancy_prob;
 
     boost::numeric::ublas::matrix<double> marchovM(2,2);
     marchovM(0,0) = 1-lambda_exit;
@@ -235,58 +246,58 @@ void Pmac_cell::init(double initialOccupancy, double initialFree)
     if(initialOccupancy > initialFree)
     {
         //occupied_count += initialOccupancy;
-        occupied_count = 1;
-        prev_occ_prob = 1;
+        occupied_count = DBL_MIN;
+        prev_occ_prob = 0.5;
     }
     else
     {
         //free_count += initialFree;
-        free_count = 1;
-        prev_occ_prob = 0;
+        free_count = DBL_MIN;
+        prev_occ_prob = 0.5;
     }
 }
 
- double Pmac_cell::observationSum()
- {
-     return free_count + occupied_count;
- }
+double Pmac_cell::observationSum()
+{
+    return free_count + occupied_count;
+}
 
- double Pmac_cell::getLastObservationTime()
- {
+double Pmac_cell::getLastObservationTime()
+{
     return lastObservedTime;
- }
+}
 
- unsigned Pmac_cell::getMixingTime()
- {
-     double lambda_entry = (entry + 1) / (free_count + 1); // a(1,2)
-     double lambda_exit = (exit + 1) / (occupied_count + 1); // a(2,1)
+unsigned Pmac_cell::getMixingTime()
+{
+    double lambda_entry = entry / free_count; // a(1,2)
+    double lambda_exit = exit / occupied_count; // a(2,1)
 
-     return std::log(0.001*(lambda_entry/(lambda_entry+lambda_exit))) / (log(std::fabs(1-lambda_exit-lambda_entry)));
- }
+    return std::log(0.001*(lambda_entry/(lambda_entry+lambda_exit))) / (log(std::fabs(1-lambda_exit-lambda_entry)));
+}
 
- bool Pmac_cell::deserialize(const std::vector<double>& values)
- {
-     bool returnVal = false;
-     if(values.size() == 5)
-     {
-         occupied_count = values[0];
-         free_count = values[1];
-         entry = values[2];
-         exit = values[3];
-         prev_occ_prob = values[4];
-         lastObservedTime = 0;
-         returnVal = true;
-     }
-     return returnVal;
- }
+bool Pmac_cell::deserialize(const std::vector<double>& values)
+{
+    bool returnVal = false;
+    if(values.size() == 5)
+    {
+        occupied_count = values[0];
+        free_count = values[1];
+        entry = values[2];
+        exit = values[3];
+        prev_occ_prob = values[4];
+        lastObservedTime = 0;
+        returnVal = true;
+    }
+    return returnVal;
+}
 
- std::vector<double> Pmac_cell::serialize()
- {
-     std::vector<double> result(5);
-     result[0] = occupied_count;
-     result[1] = free_count;
-     result[2] = entry;
-     result[3] = exit;
-     result[4] = prev_occ_prob;
-     return result;
- }
+std::vector<double> Pmac_cell::serialize()
+{
+    std::vector<double> result(5);
+    result[0] = occupied_count;
+    result[1] = free_count;
+    result[2] = entry;
+    result[3] = exit;
+    result[4] = prev_occ_prob;
+    return result;
+}

@@ -62,26 +62,30 @@ void Pmac_learner::addObservationMap(Observation_interface* observation)
                             current_obs_number++;
                         }
                         cell->addProbability(occupancy_prob,t.toSec());
-                        /*
-                        if(x == 159 && y == 200)
+
+                        if(x == 35 && y == 339)
                         {
+                            std_msgs::Float32 msg;
+                            msg.data = (float)(occupancy_prob);
+                            currentErrorPub.publish(msg);
+                            /*
                             std_msgs::Float32 msg;
                             msg.data = cell->getLambdaEntry();
                             lambda_entry_pub.publish(msg);
                             msg.data = cell->getLambdaExit();
-                            lambda_exit_pub.publish(msg);
+                            lambda_exit_pub.publish(msg);                          
+                            */
                         }
-                        */
                     }
                 }
             }
         }
 
         if(current_obs_number > 0 )
-        {
+        {           
             std_msgs::Float32 msg;
             msg.data = (float)(current_sse / current_obs_number);
-            currentErrorPub.publish(msg);
+            currentErrorPub.publish(msg);            
         }
         observation->resetEditLimits();
     }
@@ -105,8 +109,8 @@ double Pmac_learner::getOccupancyPrabability(int x, int y)
         if(steps == 0)
             steps = 1;
 
-        ROS_INFO_THROTTLE(1,"Steps projcted: %i     ",steps);
-        steps = 1;
+        //ROS_INFO_THROTTLE(1,"Steps projcted: %i     ",steps);
+        //steps = 1;
         double occupancy_prob = cell->getProjectedOccupancyProbability(steps);
         /*
         double occupancy_prob = 0;
