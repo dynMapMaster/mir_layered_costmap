@@ -6,19 +6,20 @@ using namespace std;
 
 Fremen_cell::Fremen_cell()
     : components(_NUM_PERIODICITIES), gain(0.5), prev_measurement(0.5),
-      first_time(-1), last_time(-1), measurements(0), order(5), periods(_NUM_PERIODICITIES),
+      first_time(-1), last_time(-1), measurements(0), order(2), periods(_NUM_PERIODICITIES),
       freq_elements(order)
 {
     // linear spread periodicies
-    double step_size = _NUM_PERIODICITIES*30/(_NUM_PERIODICITIES+1);
+    /*
+    double step_size = _NUM_PERIODICITIES*60/(_NUM_PERIODICITIES+1);
     for (int i = 0; i < periods.size(); ++i) {
         periods[i] = step_size*(i+1);
     }
-    /*
-    for (int i = 0; i < periods.size(); ++i) {
-        periods[i] = (_NUM_PERIODICITIES*30)/(i+1);
-    }
     */
+    for (int i = 0; i < periods.size(); ++i) {
+        periods[i] = (_NUM_PERIODICITIES*100)/(i+1);
+    }
+
 }
 
 bool fremenSort(Fremen_cell::Freq_element e1, Fremen_cell::Freq_element e2)
@@ -31,7 +32,7 @@ Fremen_cell::~Fremen_cell()
 
 }
 
-int Fremen_cell::update(unsigned char order)
+void Fremen_cell::update()
 {
     /*
     if(gain == 0.0 || measurements == 0)
@@ -43,14 +44,14 @@ int Fremen_cell::update(unsigned char order)
     if(!components.empty())
     {
         vector<Freq_element> freq(_NUM_PERIODICITIES);
-        uint64_t duration = last_time - first_time;
+        //uint64_t duration = last_time - first_time;
         for (int i = 0; i < _NUM_PERIODICITIES; ++i) {
             double re = components[i].real_states - components[i].real_balance;
             double im = components[i].imag_states - components[i].imag_balance;
-            if(periods[i] <= duration)
+            //if(periods[i] <= duration)
                 freq[i].amplitude = sqrt(re*re+im*im)/measurements;
-            else
-                freq[i].amplitude = 0.0;
+            //else
+            //    freq[i].amplitude = 0.0;
             if(freq[i].amplitude < _AMPLITUDE_THRESHOLD)
                 freq[i].amplitude = 0.0;
             freq[i].phase = atan2(im,re);
@@ -70,12 +71,11 @@ int Fremen_cell::update(unsigned char order)
             freq_elements[i].period = periods[i];
         }
     }
-    return 0;
 }
 
 double Fremen_cell::estimate(double time)
 {
-    update(order);
+    update();
     double estimate = gain;
     for (int i = 0; i < order; ++i) {
         estimate += 2*freq_elements[i].amplitude*cos(time/freq_elements[i].period*2*M_PI-freq_elements[i].phase);
@@ -97,8 +97,8 @@ double Fremen_cell::estimate(double time)
 
 void Fremen_cell::addProbability(double occ_prob, double time)
 {    
-    if(measurements == 0) first_time = time;
-    last_time = time;
+    //if(measurements == 0) first_time = time;
+    //last_time = time;
     /*
     if(occ_prob > 0.5)
         occ_prob = 1.0;
@@ -106,18 +106,8 @@ void Fremen_cell::addProbability(double occ_prob, double time)
         occ_prob = 0.0;
         */
     prev_measurement = occ_prob;
-    double old_gain = gain;
-    double new_gain = occ_prob;
 
-    gain = (gain*measurements+new_gain) / (measurements + 1);
-
-    if(old_gain > 0) {
-        for(int i=0; i<_NUM_PERIODICITIES; i++)
-        {
-            components[i].real_balance = gain*components[i].real_balance / old_gain;
-            components[i].imag_balance = gain*components[i].imag_balance / old_gain;
-        }
-    }
+    gain = (gain*measurements+occ_prob) / (measurements + 1);
 
     // recalculate spectral components
     for (int i = 0; i < _NUM_PERIODICITIES; ++i) {

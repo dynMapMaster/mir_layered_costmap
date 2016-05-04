@@ -31,8 +31,8 @@ public:
         double imag_balance;
     } Spectral_component;
 private:
-    constexpr static unsigned _NUM_PERIODICITIES = 24;
-    constexpr static double _SATURATION = 0.05; // minimum uncertainty when predicting
+    constexpr static unsigned _NUM_PERIODICITIES = 20;
+    constexpr static double _SATURATION = 0.0;//0.05; // minimum uncertainty when predicting
     constexpr static double _AMPLITUDE_THRESHOLD = 0.0;
 
     std::vector<double> periods;
@@ -43,7 +43,7 @@ private:
     double prev_measurement;
     int64_t first_time, last_time;
     double gain;
-    int update(unsigned char order);
+    void update();
     //bool fremenSort(Freq_element e1, Freq_element e2);
 };
 
