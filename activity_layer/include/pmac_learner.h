@@ -22,7 +22,8 @@ public:
     // Constants
     static constexpr uint64_t UPDATE_INTERVAL = 20e9;           // Time before new observations are accepted, in nanoseconds
     static constexpr double MIN_OBS_VALUE = 1;                 // Minimum sum of observations before cost is calculated
-    static constexpr unsigned char OBSTACLE_THRESHOLD = 200;    // Equal or above this is obstacles        
+    static constexpr unsigned char OBSTACLE_THRESHOLD = 192;    // Equal or above this is obstacles
+
     double getPredictScore();
 private:    
     Grid_structure<Pmac_cell> grid;

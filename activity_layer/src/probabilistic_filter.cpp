@@ -8,13 +8,10 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
     _laser_noise_var = laserStdDev * laserStdDev;
     _laser_noise_std_dev = laserStdDev;
 
-
     // Setup sensormodel lookup table
     _sensor_model.push_back(0.4055);
     _sensor_model_occupancy_goal_index = 0;
-
-
-    _angle_std_dev =  15 * M_PI/180.0;;
+    _angle_std_dev =  15 * M_PI/180.0;
 }
 
 Probabilistic_filter::~Probabilistic_filter()

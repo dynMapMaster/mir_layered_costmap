@@ -13,19 +13,25 @@ Pmac_learner::Pmac_learner(int sizeX=2, int sizeY =2, double resolution=2)
 
 bool Pmac_learner::getCellValue(int x, int y, unsigned char& cellValueOutput)
 {
-
     double occ_value = getOccupancyPrabability(x,y);
     if(occ_value >= 0)
     {
-        cellValueOutput = 255 * occ_value;
-
+        cellValueOutput = (OBSTACLE_THRESHOLD-1) * occ_value;
         translateOcc(cellValueOutput);
-
         return true;
     }
-    else
+    else if(occ_value == -1)
     {
         return false;
+    }
+    else if(Pmac_cell::STATIC_OCCUPIED_VALUE)
+    {
+        cellValueOutput = 255;
+        return true;
+    }
+    else {
+        ROS_ERROR("Unknown occupied value");
+        throw -1;
     }
 }
 
@@ -109,10 +115,6 @@ double Pmac_learner::getOccupancyPrabability(int x, int y)
         if(steps == 0)
             steps = 1;
 
-        //ROS_INFO_THROTTLE(1,"Steps projcted: %i     ",steps);
-        //steps = 1;
-        double occupancy_prob = cell->getProjectedOccupancyProbability(steps);
-        /*
         double occupancy_prob = 0;
 
         if(steps > 20 || (steps > 5 && steps > cell->getMixingTime()))
@@ -130,7 +132,6 @@ double Pmac_learner::getOccupancyPrabability(int x, int y)
         else if(occupancy_prob > 1) {
             occupancy_prob = 1;
         }
-        */
         return occupancy_prob;
     }
     else
@@ -164,10 +165,6 @@ void Pmac_learner::translateOcc(unsigned char& value)
     if(value == 95) // Avoid making critical regions
     {
         value = 96;
-    }
-    else if(value >= OBSTACLE_THRESHOLD)
-    {
-        value = 255;
     }
 }
 

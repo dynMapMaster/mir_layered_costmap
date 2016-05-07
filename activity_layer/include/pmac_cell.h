@@ -20,10 +20,12 @@ public:
 
     double getLambdaExit();
     double getLambdaEntry();
+    static constexpr int STATIC_OCCUPIED_VALUE = -2;
 private:
     static constexpr int NO_INTIAL_UPDATES = 100;
     static constexpr int MAX_NO_OF_OBS = 500;
-    static constexpr double FORGET_FACTOR = 500.0 / 501.0;
+    static constexpr double FORGET_FACTOR = 500.0 / 501.0;    
+    static constexpr double LAMBDA_EXIT_FOR_STATIC_OCCUPIED = 0.05;
     double occupied_count, free_count;
     double entry, exit;
     double prev_occ_prob;

@@ -92,31 +92,6 @@ void Pmac_cell::addProbability(double occ_prob, double timeStamp)
         }
     }
     prev_occ_prob = occ_prob;
-
-    /*
-    bool current_is_occupied = occ_prob > 0.5;
-    occ_prob = occ_prob > 0.5 ? 1 : 0; // pmac -> imac
-    double free_prob = (1 - occ_prob);
-    if(current_is_occupied)
-    {
-        occupied_count += occ_prob;
-        if(previous_is_occupied == false)
-        {
-            entry += (1 - prev_occ_prob);
-            last_transition = timeStamp;
-        }
-    }
-    else
-    {
-        free_count += free_prob;
-        if(previous_is_occupied)
-        {
-            exit += prev_occ_prob;
-            last_transition = timeStamp;
-        }
-    }
-    previous_is_occupied = current_is_occupied;
-    prev_occ_prob = occ_prob;
     /*
     // recency weightning
     if(current_is_occupied)
@@ -128,8 +103,8 @@ void Pmac_cell::addProbability(double occ_prob, double timeStamp)
             occupied_count = MAX_NO_OF_OBS;
         }
         // Adjust inactive state
-        free_count= 1 + (free_count-1) * FORGET_FACTOR;
-        exit = 1 + (exit-1) * FORGET_FACTOR;
+        free_count= DBL_MIN + (free_count-DBL_MIN) * FORGET_FACTOR;
+        exit = DBL_MIN + (exit-DBL_MIN) * FORGET_FACTOR;
     }
     else
     {
@@ -140,11 +115,10 @@ void Pmac_cell::addProbability(double occ_prob, double timeStamp)
             free_count = MAX_NO_OF_OBS;
         }
         // Adjust inactive state
-        occupied_count = 1 + (occupied_count-1) * FORGET_FACTOR;
-        entry = 1 + (entry-1) * FORGET_FACTOR;
+        occupied_count = DBL_MIN + (occupied_count-DBL_MIN) * FORGET_FACTOR;
+        entry = DBL_MIN + (entry-DBL_MIN) * FORGET_FACTOR;
     }
     */
-
     // Update estimated occupancy probability
 
     //correct
@@ -171,14 +145,22 @@ double Pmac_cell::getLongTermOccupancyProb()
 double Pmac_cell::getProjectedOccupancyProbability(unsigned noOfProjections)
 {
     //predict
-
     double lambda_entry = entry / free_count; // a(1,2)
     double lambda_exit = exit / occupied_count; // a(2,1)
-    for (int i = 0; i < noOfProjections; ++i) {
-        estimated_occupancy_prob *= ((1-lambda_exit) + lambda_entry);
+    double occupancy_prob;
+    if(lambda_exit < LAMBDA_EXIT_FOR_STATIC_OCCUPIED)
+    {
+        occupancy_prob = STATIC_OCCUPIED_VALUE;
     }
-    return estimated_occupancy_prob;
-
+    else
+    {
+        for (int i = 0; i < noOfProjections; ++i) {
+            estimated_occupancy_prob *= ((1-lambda_exit) + lambda_entry);
+        }
+        occupancy_prob = estimated_occupancy_prob;
+    }
+    return occupancy_prob;
+/*
     boost::numeric::ublas::matrix<double> marchovM(2,2);
     marchovM(0,0) = 1-lambda_exit;
     marchovM(0,1) = lambda_exit;
@@ -193,6 +175,7 @@ double Pmac_cell::getProjectedOccupancyProbability(unsigned noOfProjections)
         states = boost::numeric::ublas::prod(states, marchovM);
     }
     return states(0,0);
+    */
 }
 
 double Pmac_cell::getTemporalPrediction(int forward_steps)
