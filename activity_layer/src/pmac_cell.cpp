@@ -148,7 +148,7 @@ double Pmac_cell::getProjectedOccupancyProbability(unsigned noOfProjections)
     double lambda_entry = entry / free_count; // a(1,2)
     double lambda_exit = exit / occupied_count; // a(2,1)
     double occupancy_prob;
-    if(lambda_exit < LAMBDA_EXIT_FOR_STATIC_OCCUPIED)
+    if(lambda_exit < LAMBDA_EXIT_FOR_STATIC_OCCUPIED && occupied_count / free_count > OCC_FREE_RATION_FOR_STATIC_OCCUPIED)
     {
         occupancy_prob = STATIC_OCCUPIED_VALUE;
     }
@@ -228,8 +228,7 @@ void Pmac_cell::init(double initialOccupancy, double initialFree)
 {
     if(initialOccupancy > initialFree)
     {
-        //occupied_count += initialOccupancy;
-        occupied_count = DBL_MIN;
+        occupied_count += initialOccupancy;
         prev_occ_prob = 0.5;
     }
     else

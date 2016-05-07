@@ -25,7 +25,8 @@ private:
     static constexpr int NO_INTIAL_UPDATES = 100;
     static constexpr int MAX_NO_OF_OBS = 500;
     static constexpr double FORGET_FACTOR = 500.0 / 501.0;    
-    static constexpr double LAMBDA_EXIT_FOR_STATIC_OCCUPIED = 0.05;
+    static constexpr double LAMBDA_EXIT_FOR_STATIC_OCCUPIED = 0.15;
+    static constexpr double OCC_FREE_RATION_FOR_STATIC_OCCUPIED = 2;
     double occupied_count, free_count;
     double entry, exit;
     double prev_occ_prob;

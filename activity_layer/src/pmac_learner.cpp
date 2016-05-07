@@ -2,7 +2,8 @@
 #include "std_msgs/Float32.h"
 
 Pmac_learner::Pmac_learner(int sizeX=2, int sizeY =2, double resolution=2)
-    : grid(sizeX, sizeY, resolution), sse_score(0.0), scored_observations(0)
+    : grid(sizeX, sizeY, resolution), sse_score(0.0), scored_observations(0),
+      initial_occupancy(2), initial_free(2)
 {
     update_time = ros::Time::now().toNSec();
     ros::NodeHandle nh;
@@ -148,12 +149,12 @@ void Pmac_learner::initCell(int x, int y, Initial_values value)
     switch(value)
     {
         case Free:
-            grid.editCell(x,y)->init(0,1);
+            grid.editCell(x,y)->init(0,initial_free);
             break;
         case Unknown:
             break;
         case Obstacle:
-            grid.editCell(x,y)->init(1,0);
+            grid.editCell(x,y)->init(initial_occupancy,0);
             break;
         default:
             break;

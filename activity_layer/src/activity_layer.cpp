@@ -96,7 +96,7 @@ void ActivityLayer::onInitialize()
     std::stringstream ss(topics_string);
 
     // start observation map timer
-    _observation_map_timer = g_nh.createTimer(ros::Duration(30,0),&ActivityLayer::callback_observation_timer,this);
+    _observation_map_timer = g_nh.createTimer(ros::Duration(60,0),&ActivityLayer::callback_observation_timer,this);
     tracer_thread_running = false;
 
     std::string source;
