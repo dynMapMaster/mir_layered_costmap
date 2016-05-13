@@ -139,23 +139,33 @@ double Pmac_cell::getLongTermOccupancyProb()
 {
     double lambda_entry = entry / free_count; // a(1,2)
     double lambda_exit = exit / occupied_count; // a(2,1)
-    return 1.0 / (lambda_exit + lambda_entry) * lambda_entry;
+    double occupancy_prob;
+    if(lambda_exit < LAMBDA_EXIT_FOR_STATIC_OCCUPIED && occupied_count > free_count * OCC_FREE_RATION_FOR_STATIC_OCCUPIED)
+    {
+        occupancy_prob = STATIC_OCCUPIED_VALUE;
+    }
+    else
+    {
+        occupancy_prob = 1.0 / (lambda_exit + lambda_entry) * lambda_entry;
+    }
+    return occupancy_prob;
 }
 
 double Pmac_cell::getProjectedOccupancyProbability(unsigned noOfProjections)
 {
     //predict
     double lambda_entry = entry / free_count; // a(1,2)
-    double lambda_exit = exit / occupied_count; // a(2,1)
+    double lambda_exit = exit / occupied_count; // a(2,1)    
+
     double occupancy_prob;
-    if(lambda_exit < LAMBDA_EXIT_FOR_STATIC_OCCUPIED && occupied_count / free_count > OCC_FREE_RATION_FOR_STATIC_OCCUPIED)
+    if(lambda_exit < LAMBDA_EXIT_FOR_STATIC_OCCUPIED && occupied_count > free_count * OCC_FREE_RATION_FOR_STATIC_OCCUPIED)
     {
         occupancy_prob = STATIC_OCCUPIED_VALUE;
     }
     else
     {
         for (int i = 0; i < noOfProjections; ++i) {
-            estimated_occupancy_prob *= ((1-lambda_exit) + lambda_entry);
+            estimated_occupancy_prob = (estimated_occupancy_prob*(1-lambda_exit) + (1-estimated_occupancy_prob)*lambda_entry);
         }
         occupancy_prob = estimated_occupancy_prob;
     }
@@ -226,16 +236,16 @@ double Pmac_cell::getLastTransitionTime()
 
 void Pmac_cell::init(double initialOccupancy, double initialFree)
 {
+    prev_occ_prob = 0.5;
     if(initialOccupancy > initialFree)
     {
         occupied_count += initialOccupancy;
-        prev_occ_prob = 0.5;
+        exit = initialOccupancy/100;
     }
     else
     {
-        //free_count += initialFree;
-        free_count = DBL_MIN;
-        prev_occ_prob = 0.5;
+        free_count += initialFree;
+        entry = initialFree/100;
     }
 }
 

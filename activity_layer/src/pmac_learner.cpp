@@ -15,9 +15,27 @@ Pmac_learner::Pmac_learner(int sizeX=2, int sizeY =2, double resolution=2)
 bool Pmac_learner::getCellValue(int x, int y, unsigned char& cellValueOutput)
 {
     double occ_value = getOccupancyPrabability(x,y);
+    // For generating a AMCL map
+    /*
+    if(occ_value == -1)
+    {
+        return false;
+    }
+    else if(occ_value == Pmac_cell::STATIC_OCCUPIED_VALUE)
+    {
+        cellValueOutput = 100;
+        return true;
+    }
+    else if(occ_value >= 0)
+    {
+        cellValueOutput = 0;
+        return true;
+    }
+    */
+
     if(occ_value >= 0)
     {
-        cellValueOutput = (OBSTACLE_THRESHOLD-1) * occ_value;
+        cellValueOutput = (OBSTACLE_THRESHOLD-1-10) * occ_value + 10;
         translateOcc(cellValueOutput);
         return true;
     }
@@ -33,7 +51,7 @@ bool Pmac_learner::getCellValue(int x, int y, unsigned char& cellValueOutput)
     else {
         ROS_ERROR("Unknown occupied value");
         throw -1;
-    }
+    }    
 }
 
 double Pmac_learner::getPredictScore()
@@ -125,13 +143,6 @@ double Pmac_learner::getOccupancyPrabability(int x, int y)
         else
         {
            occupancy_prob = cell->getProjectedOccupancyProbability(steps);
-        }
-
-        if(occupancy_prob < 0) {
-            occupancy_prob = 0;
-        }
-        else if(occupancy_prob > 1) {
-            occupancy_prob = 1;
         }
         return occupancy_prob;
     }

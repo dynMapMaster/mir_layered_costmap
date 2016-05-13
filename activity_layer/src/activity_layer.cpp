@@ -192,6 +192,8 @@ void ActivityLayer::onInitialize()
           observation_notifiers_.back()->setTargetFrames(target_frames);
         }
     }
+    _xSize = DBL_MAX;
+    _ySize = DBL_MAX;
     matchSize();
 }
 
@@ -565,8 +567,7 @@ void ActivityLayer::matchSize()
                 Costmap_interpretator::Initial_values val = determineInitialValue(grid.data[y * grid.info.width + x]);
                 u_char learned_value;
                 _map_mutex.lock();
-                if(_map->getCellValue(x,y,learned_value) == false )
-                    _map->initCell(x,y,val);
+                _map->initCell(x,y,val);
                 _map_mutex.unlock();
             }
         }
