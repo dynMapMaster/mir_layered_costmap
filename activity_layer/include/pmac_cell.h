@@ -37,6 +37,9 @@ private:
     double old_exit_residue, old_entry_residue;
     unsigned old_exit_cnt, old_entry_cnt;
     double estimated_occupancy_prob;
+
+
+    int obsCnt;
 };
 
 #endif // PMAC_CELL_H

@@ -1,4 +1,4 @@
-#ifndef PMAC_LEARNER_H
+﻿#ifndef PMAC_LEARNER_H
 #define PMAC_LEARNER_H
 #include <pmac_cell.h>
 #include <grid_structure.h>
@@ -33,6 +33,7 @@ private:
     int scored_observations;
     ros::Publisher currentErrorPub;
     ros::Publisher lambda_entry_pub, lambda_exit_pub;
+    ros::Publisher scoreData_pub;
     // Parameters
     double initial_occupancy, initial_free;
 };

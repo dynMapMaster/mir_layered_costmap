@@ -10,6 +10,7 @@ Probabilistic_filter::Probabilistic_filter(int xDim, int yDim, double resolution
 
     // Setup sensormodel lookup table
     _sensor_model.push_back(0.4055);
+    //_sensor_model.push_back(2.1972);
     _sensor_model_occupancy_goal_index = 0;
     _angle_std_dev =  15 * M_PI/180.0;
 }

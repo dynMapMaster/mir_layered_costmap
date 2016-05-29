@@ -9,7 +9,7 @@ Pmac_cell::Pmac_cell()
     : occupied_count(DBL_MIN), free_count(DBL_MIN), entry(DBL_MIN), exit(DBL_MIN),
       prev_occ_prob(0.5), lastObservedTime(0.0), last_exit_cnt(DBL_MIN), last_entry_cnt(DBL_MIN),
       old_entry_cnt(DBL_MIN), old_exit_cnt(DBL_MIN), last_entry_residue(0.0), last_exit_residue(0.0),
-      old_exit_residue(0.0), old_entry_residue(0.0), estimated_occupancy_prob(0.5)
+      old_exit_residue(0.0), old_entry_residue(0.0), estimated_occupancy_prob(0.5), obsCnt(0)
 {
 }
 
@@ -122,7 +122,12 @@ void Pmac_cell::addProbability(double occ_prob, double timeStamp)
     // Update estimated occupancy probability
 
     //correct
-    estimated_occupancy_prob += 2*std::abs(occ_prob - 0.5)*(occ_prob - estimated_occupancy_prob);
+
+    if(obsCnt % 5 == 0){
+        estimated_occupancy_prob = prev_occ_prob;
+        //estimated_occupancy_prob += 2*std::abs(occ_prob - 0.5)*(occ_prob - estimated_occupancy_prob);
+    }
+    obsCnt++; // TEST TEST TEST TEST
 }
 
 double Pmac_cell::getLambdaExit()
@@ -137,6 +142,7 @@ double Pmac_cell::getLambdaEntry()
 
 double Pmac_cell::getLongTermOccupancyProb()
 {
+    return estimated_occupancy_prob; // OBS OBS OBS TEST TEST TEST -----------------------------------------------------------
     double lambda_entry = entry / free_count; // a(1,2)
     double lambda_exit = exit / occupied_count; // a(2,1)
     double occupancy_prob;
@@ -153,6 +159,7 @@ double Pmac_cell::getLongTermOccupancyProb()
 
 double Pmac_cell::getProjectedOccupancyProbability(unsigned noOfProjections)
 {
+    return estimated_occupancy_prob; // OBS OBS OBS TEST TEST TEST -----------------------------------------------------------
     //predict
     double lambda_entry = entry / free_count; // a(1,2)
     double lambda_exit = exit / occupied_count; // a(2,1)    
@@ -236,6 +243,7 @@ double Pmac_cell::getLastTransitionTime()
 
 void Pmac_cell::init(double initialOccupancy, double initialFree)
 {
+    return; // TEST TEST TEST
     prev_occ_prob = 0.5;
     if(initialOccupancy > initialFree)
     {
