@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 #endif
     ros::init(argc, argv, "dynamic_obstacle");
     ros::NodeHandle n("~");
-    ros::Publisher object_pose_pub = n.advertise<geometry_msgs::PoseStamped>("/objectpose",10);
+    ros::Publisher object_pose_pub = n.advertise<geometry_msgs::PoseStamped>("/objectpose",100);
     std::vector<Waypoint> waypoints;
     {
         string obstacle_name;
@@ -77,12 +77,14 @@ int main(int argc, char** argv)
         {
             // exit event
             waypoint_i = 1;
+            waypoints[waypoint_i].pose.header.stamp = ros::Time::now();
             object_pose_pub.publish(waypoints[waypoint_i].pose);
         }
         else if (waypoint_i == 1 && number < lambda_entry)
         {
             // entry event
             waypoint_i = 0;
+            waypoints[waypoint_i].pose.header.stamp = ros::Time::now();
             object_pose_pub.publish(waypoints[waypoint_i].pose);
         }
 
