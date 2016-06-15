@@ -1,12 +1,18 @@
 #include "fremen_learner.h"
 #include <std_msgs/Float32.h>
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
+
 using namespace std;
+
 Fremen_learner::Fremen_learner(int sizeX=2, int sizeY =2, double resolution=2)
     : grid(sizeX, sizeY, resolution), scored_observations(0)
 {
     update_time = ros::Time::now().toNSec();
     ros::NodeHandle nh;
     currentErrorPub = nh.advertise<std_msgs::Float32>("current_map_error",10);
+    /* initialize random seed: */
+    srand (time(NULL));
 }
 
 bool Fremen_learner::getCellValue(int x, int y, unsigned char & cellValueOutput)
@@ -48,6 +54,7 @@ void Fremen_learner::addObservationMap(Observation_interface* observation)
                     double occupancy_prob = observation->getOccupancyPrabability(x,y);
                     if (occupancy_prob >= 0) {
                         double predicted_occupancy_prob = getOccupancyPrabability(x,y);
+                        // double predicted_occupancy_prob = double(rand()) / RAND_MAX > 0.5 ? 1 : 0; // for random predictions
                         Fremen_cell* cell = grid.editCell(x,y);
                         if((predicted_occupancy_prob > 0.5 || occupancy_prob > 0.5) && predicted_occupancy_prob >= 0){
                             sse_score += std::pow(occupancy_prob - predicted_occupancy_prob,2);
